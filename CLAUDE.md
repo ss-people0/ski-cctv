@@ -19,7 +19,7 @@ Vue 3 + Vite + TypeScript. 스키장 웹캠을 모아 보는 개인용 정적 �
 ## 구조
 
 - `src/data/cams.ts`: 웹캠 데이터와 타입. 주소는 여기서만 관리한다.
-- `src/data/sortResorts.ts`: `isPlayable`과 정렬 (재생 → 링크 → `investigate` → `pending`)
+- `src/data/sortResorts.ts`: `isPlayable`과 캠 정렬 (재생 → 링크 → `investigate` → `pending`). 스키장 순서는 `cams.ts` 순서를 따른다.
 - `src/playingCam.ts`: 재생 중인 카드 id. 모든 카드가 공유한다.
 - `src/components/CamCard.vue`: type·status별 카드, 크게 보기(Popover API)
 - `src/components/HlsPlayer.vue`: hls.js 재생, 시간 제한, 스트림 정리

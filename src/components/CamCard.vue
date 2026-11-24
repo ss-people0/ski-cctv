@@ -91,7 +91,7 @@ async function stop(failed: boolean) {
         <button v-if="isLarge" class="close" type="button" @click="screen?.hidePopover()">✕ 닫기</button>
       </div>
     </div>
-    <h3>{{ cam.name }}</h3>
+    <h4>{{ cam.name }}</h4>
     <div class="actions">
       <button v-if="canEnlarge" class="enlarge" type="button" @click="enlarge">
         <span class="for-pc">팝업으로 보기</span><span class="for-mobile">큰 화면 보기</span><span class="sr-only"> ({{ title }})</span>
@@ -102,20 +102,27 @@ async function stop(failed: boolean) {
 </template>
 
 <style scoped>
-.card { position: relative; padding: 12px; border: 1px solid #8886; border-radius: 12px; }
-.card h3 { margin: 12px 0 4px; font-size: 1.1rem; }
+.card { position: relative; padding: 12px; border-radius: 20px; background: var(--surface); box-shadow: 0 4px 16px #1d4f7014; }
+.card h4 { margin: 12px 4px 10px; font-size: 1.05rem; letter-spacing: -0.02em; }
 .slot { aspect-ratio: 16 / 9; }
-.screen { position: relative; inset: auto; display: grid; place-items: center; box-sizing: border-box; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: hidden; border-radius: 8px; background: #000; color: #eee; }
+.screen { position: relative; inset: auto; display: grid; place-items: center; box-sizing: border-box; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: hidden; border-radius: 16px; background: linear-gradient(160deg, var(--ice-light), #c4deee); color: var(--blue-dark); font-weight: 600; }
 .screen :deep(video), .screen iframe, .play { width: 100%; height: 100%; border: 0; }
+.screen :deep(video), .screen iframe { background: #000; }
 .play { background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.play:hover, .popup:hover { background: #ffffff66; }
+.play:focus-visible, .popup:focus-visible { outline-offset: -4px; border-radius: 16px; }
 .popup { display: grid; place-items: center; width: 100%; height: 100%; color: inherit; text-decoration: none; }
-.error { position: absolute; inset: auto 8px 8px; margin: 0; text-align: center; pointer-events: none; }
-.close { position: absolute; top: 8px; right: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: #000c; color: #fff; font: inherit; cursor: pointer; }
-.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.enlarge { min-height: 44px; padding: 0 14px; font: inherit; cursor: pointer; }
+.error { position: absolute; inset: auto 8px 8px; margin: 0; padding: 6px 10px; border-radius: 12px; background: #fff; color: #9a1f1f; font-size: 0.85rem; text-align: center; pointer-events: none; }
+.close { position: absolute; top: 10px; right: 10px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: #fff; color: var(--blue-dark); font: inherit; font-weight: 700; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.enlarge, .actions a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; font: inherit; font-size: 0.9rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+.enlarge { background: var(--blue); color: #fff; }
+.enlarge:hover { background: var(--blue-dark); }
+.actions a { background: var(--muted-surface); color: var(--blue-dark); }
+.actions a:hover { background: #e3f1fa; }
 .for-mobile { display: none; }
 .screen:popover-open { position: fixed; inset: 0; width: min(92vw, calc(88dvh * 16 / 9)); height: auto; aspect-ratio: 16 / 9; margin: auto; }
-.screen::backdrop { background: #000b; }
+.screen::backdrop { background: #0b1c2acc; }
 @media (max-width: 767px), (pointer: coarse) {
   .for-pc { display: none; }
   .for-mobile { display: inline; }

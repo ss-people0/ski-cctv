@@ -1,14 +1,68 @@
-:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #000; color: #f2f2f2; }
+:root {
+  color-scheme: light;
+  --ice: #dceaf4;
+  --ice-light: #eef6fb;
+  --surface: #fff;
+  --muted-surface: #f3f6f8;
+  --line: #dfe8ee;
+  --blue: #2c6c95;
+  --blue-dark: #1d4f70;
+  --text: #14202a;
+  --muted: #566572;
+  background: var(--ice);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
 :root:has(.screen:popover-open) { overflow: hidden; }
 body { margin: 0; }
-main { max-width: 1200px; margin: 0 auto; padding: 16px; }
-.resort { margin-bottom: 12px; border: 1px solid #333; border-radius: 12px; background: #141414; }
-.resort summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 18px 16px; border-radius: 12px; cursor: pointer; list-style: none; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+main { box-sizing: border-box; max-width: 1120px; margin: 24px auto; padding: 24px; border-radius: 32px; background: var(--surface); }
+
+.hero { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; box-sizing: border-box; min-height: 300px; overflow: hidden; padding: 32px 28px; border-radius: 24px; background: linear-gradient(110deg, var(--blue-dark), var(--blue) 45%, #8fc1dd); color: #fff; }
+.hero > :not(.rider) { position: relative; }
+.hero p { margin: 0; }
+.hero h1 { margin: 4px 0 18px; font-size: clamp(1.8rem, 6vw, 2.6rem); letter-spacing: -0.03em; }
+.rider { position: absolute; top: 0; right: 0; width: 62%; height: 100%; object-fit: cover; object-position: 50% 18%; mask-image: linear-gradient(to right, transparent, #000 55%); }
+.badge { display: inline-block; padding: 10px 18px; border-radius: 999px; background: #fff; color: var(--blue-dark); font-weight: 700; font-size: 0.9rem; }
+
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 28px 0 14px; }
+.toolbar h2 { margin: 0; font-size: 1.4rem; letter-spacing: -0.02em; }
+
+.dropdown { appearance: none; min-height: 46px; padding: 0 44px 0 20px; border: 1px solid #b9d6e8; border-radius: 999px; background: #e3f1fa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' fill='none' stroke='%231d4f70' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1.5 1.5 5.5 5.5 5.5-5.5'/%3E%3C/svg%3E") no-repeat right 18px center; color: var(--blue-dark); font: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; }
+/* 지원하는 브라우저에서는 목록까지 꾸미고, 나머지는 기기 기본 목록을 쓴다. */
+@supports (appearance: base-select) {
+  .dropdown, .dropdown::picker(select) { appearance: base-select; }
+  .dropdown { display: inline-flex; align-items: center; }
+  .dropdown::picker-icon { display: none; }
+  .dropdown::picker(select) { position-area: block-end span-inline-start; min-width: 220px; margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: 0 16px 40px #1d4f7033; }
+  .dropdown option { min-height: 44px; padding: 0 14px; border-radius: 14px; color: var(--text); font-weight: 500; }
+  .dropdown option:hover, .dropdown option:focus-visible { background: var(--muted-surface); }
+  .dropdown option:checked { background: var(--blue); color: #fff; font-weight: 700; }
+  .dropdown option::checkmark { order: 1; margin-left: auto; }
+}
+
+.resort { margin-bottom: 12px; border-radius: 24px; background: var(--muted-surface); }
+.resort summary { display: flex; align-items: center; gap: 12px; padding: 14px 16px 14px 20px; border-radius: 24px; cursor: pointer; list-style: none; }
 .resort summary::-webkit-details-marker { display: none; }
-.resort summary::after { content: '▾'; color: #aaa; }
-.resort[open] summary::after { content: '▴'; }
-.resort summary:hover { background: #222; }
-.resort h2 { margin: 0; font-size: 1.2rem; }
-.region, .count { color: #aaa; font-size: 0.9rem; }
-.count { margin-left: auto; }
-.cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 16px; padding: 4px 16px 16px; }
+.names { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.symbol { order: 2; box-sizing: border-box; width: 56px; height: 44px; padding: 5px; border-radius: 14px; background: #fff; object-fit: contain; }
+.resort summary::after { content: ''; width: 8px; height: 8px; margin: 0 4px 4px; border: solid var(--blue-dark); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.resort[open] summary::after { margin: 4px 4px 0; transform: rotate(225deg); }
+.resort summary:hover { background: #e9f0f5; }
+.resort h3 { margin: 0; font-size: 1.15rem; letter-spacing: -0.02em; }
+.region { color: var(--muted); font-size: 0.9rem; }
+.count { flex: none; margin-left: auto; padding: 6px 14px; border: 1px solid #c5deed; border-radius: 999px; background: #e3f1fa; color: var(--blue-dark); font-size: 0.85rem; font-weight: 700; }
+.cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: 14px; padding: 4px 16px 16px; }
+
+@media (max-width: 767px) {
+  main { margin: 10px; padding: 14px; border-radius: 28px; }
+  .hero { padding: 26px 22px; }
+  .hero { min-height: 220px; }
+  .rider { mask-image: linear-gradient(to right, transparent 15%, #000 80%); }
+  .names { flex-direction: column; }
+  .resort summary { gap: 10px; padding: 12px 12px 12px 16px; }
+  .cams { padding: 2px 10px 10px; }
+}
+
+.credit { margin-top: 20px; color: var(--muted); font-size: 0.8rem; }
+.credit a { color: inherit; }

@@ -8,7 +8,7 @@ const cam = (id: string, status: Cam['status'], type: 'hls' | 'link' = 'hls'): C
     : { id, name: id, status, type, url: null }
 const resort = (id: string, cams: Cam[]): Resort => ({ id, name: id, region: '', officialPage: '', cams })
 
-test('orders resorts and cams as playable, link, investigate, pending', () => {
+test('keeps the resort order and puts playable cams first', () => {
   const input = [
     resort('pending', [cam('p', 'pending', 'link')]),
     resort('link', [cam('l', 'active', 'link')]),
@@ -18,9 +18,9 @@ test('orders resorts and cams as playable, link, investigate, pending', () => {
 
   const sorted = sortResorts(input)
 
-  expect(sorted.map((r) => r.id)).toEqual(['mixed', 'playable', 'link', 'pending'])
-  expect(sorted[0].cams.map((c) => c.id)).toEqual(['live', 'broken'])
-  expect(input[0].id).toBe('pending')
+  expect(sorted.map((r) => r.id)).toEqual(['pending', 'link', 'mixed', 'playable'])
+  expect(sorted[2].cams.map((c) => c.id)).toEqual(['live', 'broken'])
+  expect(input[2].cams[0].id).toBe('broken')
 })
 
 describe('isPlayable on an https page', () => {
