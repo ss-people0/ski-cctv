@@ -141,12 +141,13 @@ describe('CamCard', () => {
     const card = mount(CamCard, { props: { resort, cam: hlsCam }, attachTo: document.body })
     await card.get('button').trigger('click')
     await flushPromises()
-    card.get('a').element.focus()
+    const outside = document.body.appendChild(document.createElement('button'))
+    outside.focus()
 
     await vi.advanceTimersByTimeAsync(15_000)
 
-    expect(document.activeElement).toBe(card.get('a').element)
-    card.unmount()
+    expect(document.activeElement).toBe(outside)
+    outside.remove()
   })
 
   test('link cam with its own url opens that url', () => {
@@ -211,13 +212,34 @@ describe('CamCard', () => {
     expect(card.find('video').exists()).toBe(true)
   })
 
-  test('enlarging a playing cam does not restart the stream', async () => {
+  test('playing replaces the name and buttons with the video, and ending brings them back', async () => {
     const card = mount(CamCard, { props: { resort, cam: hlsCam } })
+    expect(card.get('.info').text()).toContain('베이스')
+    expect(card.get('.info').findAll('button, a')).toHaveLength(3)
+    expect(card.get<HTMLElement>('.slot').element.style.display).toBe('none')
+
+    await card.get('.play').trigger('click')
+    expect(card.find('.info').exists()).toBe(false)
+    expect(card.get<HTMLElement>('.slot').element.style.display).toBe('')
+
+    await card.get('video').trigger('loadedmetadata')
+    await vi.advanceTimersByTimeAsync(15_000)
+    expect(card.find('.info').exists()).toBe(true)
+    expect(card.get<HTMLElement>('.slot').element.style.display).toBe('none')
+  })
+
+  test('close button on an inline youtube video returns to the buttons', async () => {
+    const card = mount(CamCard, {
+      props: { resort, cam: { ...base, type: 'youtube', videoId: 'abc' } },
+      attachTo: document.body,
+    })
     await card.get('.play').trigger('click')
 
-    await card.get('.enlarge').trigger('click')
+    await card.get('.close').trigger('click')
+    await flushPromises()
 
-    expect(hls.loadSource).toHaveBeenCalledOnce()
+    expect(card.find('iframe').exists()).toBe(false)
+    expect(document.activeElement).toBe(card.get('.play').element)
   })
 
   test('popover stays open with a replay button after the limit', async () => {
@@ -228,7 +250,7 @@ describe('CamCard', () => {
     await vi.advanceTimersByTimeAsync(15_000)
 
     expect(hidePopover).not.toHaveBeenCalled()
-    expect(card.get('.screen').find('.play').exists()).toBe(true)
+    expect(card.get('.screen').find('.replay').exists()).toBe(true)
   })
 
   test('close button hides the popover', async () => {

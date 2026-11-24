@@ -23,6 +23,9 @@ export interface Resort {
 const PLAY_LIMIT_SEC = 15;
 // 하이원 공식 팝업은 30초 뒤 닫힌다.
 const HIGH1_PLAY_LIMIT_SEC = 30;
+// 강촌 공식 페이지와 open-ski-data에 공개된 서명 토큰(2027-10-30 만료). 막히면 링크로 되돌린다.
+const GANGCHON_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRoIjoiL21haW4uc3RyZWFtIiwiZXhwIjoxODI0ODcyNDAwfQ.ZQxQ30C3ZxdlaA88LHJTN1dhdMhxxjPUAEI1ymZnB1g';
 
 // 화면에는 이 순서대로 나온다.
 export const resorts: readonly Resort[] = [
@@ -32,11 +35,15 @@ export const resorts: readonly Resort[] = [
     name: '모나용평',
     region: '강원 평창',
     officialPage: 'https://www.yongpyong.co.kr/kor/guide/realTimeNews/ypResortWebcam.do',
+    note: 'cam09·03·07은 공식 웹캠 페이지에 없고 SkiWatch(open-ski-data)에서 확인한 주소다(2026-11-24). 언제든 막힐 수 있다.',
     cams: [
       { id: 'yongpyong-cam08', name: '베이스전경 / 레드 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam08/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'yongpyong-cam10', name: '핑크 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam10/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'yongpyong-cam11', name: '옐로우 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam11/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'yongpyong-cam04', name: '메가그린 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam04/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam09', name: '골드 베이스', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam09/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam03', name: '골드 정상', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam03/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam07', name: '레인보우 베이스', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam07/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'yongpyong-cam01', name: '발왕산 氣 스카이워크', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam01/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'yongpyong-cam02', name: '발왕산 천년주목숲길', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam02/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'yongpyong-cam05', name: '모나용평 진입로', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam05/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
@@ -49,11 +56,11 @@ export const resorts: readonly Resort[] = [
     name: '지산리조트',
     region: '경기 이천',
     officialPage: 'https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp',
-    note: '아직 오픈 전이라 주소 미공개. 카메라 목록만 확정 — 오픈 후 url 채우고 type/status 갱신. UI에서는 "오픈 준비 중" 카드로 표시.',
+    note: 'jisan1~3 스트림(livecity)은 신호가 들어와 재생한다(2026-11-24, CORS *). 공식 버튼은 아직 "26/27시즌에 뵙겠습니다"로 막혀 있다. 블루·실버는 아직 신호가 없어 오픈 준비 중.',
     cams: [
-      { id: 'jisan-lemon',  name: '레몬 탑승장',            type: 'link', status: 'pending', url: null },
-      { id: 'jisan-orange', name: '오렌지/뉴오렌지 탑승장', type: 'link', status: 'pending', url: null },
-      { id: 'jisan-5-6',    name: '5번/6번 슬로프',         type: 'link', status: 'pending', url: null },
+      { id: 'jisan-lemon',  name: '레몬 탑승장',            type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan1.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'jisan-orange', name: '오렌지/뉴오렌지 탑승장', type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan2.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'jisan-5-6',    name: '5번/6번 슬로프',         type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan3.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'jisan-blue',   name: '블루 탑승장',            type: 'link', status: 'pending', url: null },
       { id: 'jisan-silver', name: '실버 탑승장',            type: 'link', status: 'pending', url: null },
     ],
@@ -123,9 +130,14 @@ export const resorts: readonly Resort[] = [
     name: '엘리시안강촌',
     region: '강원 춘천',
     officialPage: 'https://www.elysian.co.kr/about-gangchon/ski#guide-to-using-slopes',
-    note: 'HLS지만 공식 API가 발급하는 서명 토큰이 필요해 링크로 처리.',
+    note: 'HLS에 공식이 발급한 서명 토큰이 필요. 토큰은 공식 페이지와 open-ski-data에 공개돼 있고 2027-10-30까지 유효하다(2026-11-24 확인). 만료/교체되면 재생이 끊기니 GANGCHON_TOKEN을 갱신한다.',
     cams: [
-      { id: 'gangchon-official', name: '공식 웹캠 페이지', type: 'link', status: 'active', url: 'https://www.elysian.co.kr/about-gangchon/ski#guide-to-using-slopes' },
+      { id: 'gangchon-webcam01', name: '챌린지하우스 광장', type: 'hls', status: 'active', url: `https://webcam01.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'gangchon-webcam02', name: '페가수스 슬로프', type: 'hls', status: 'active', url: `https://webcam02.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'gangchon-webcam03', name: '디어 슬로프', type: 'hls', status: 'active', url: `https://webcam03.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'gangchon-webcam04', name: '래빗 슬로프', type: 'hls', status: 'active', url: `https://webcam04.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'gangchon-webcam05', name: '드래곤 슬로프', type: 'hls', status: 'active', url: `https://webcam05.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'gangchon-webcam06', name: '알프하우스 광장', type: 'hls', status: 'active', url: `https://webcam06.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
     ],
   },
 ];

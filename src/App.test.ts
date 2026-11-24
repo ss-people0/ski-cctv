@@ -22,9 +22,9 @@ test('shows every resort collapsed in one exclusive group', () => {
 test('summary tells how many cams can be played', () => {
   const summaries = mount(App).findAll('summary').map((s) => s.text())
 
-  expect(summaries.find((s) => s.includes('모나용평'))).toContain('영상 7개')
-  expect(summaries.find((s) => s.includes('지산리조트'))).toContain('오픈 준비 중')
-  expect(summaries.find((s) => s.includes('엘리시안강촌'))).toContain('새 창으로 보기')
+  expect(summaries.find((s) => s.includes('모나용평'))).toContain('영상 10개')
+  expect(summaries.find((s) => s.includes('지산리조트'))).toContain('영상 3개')
+  expect(summaries.find((s) => s.includes('엘리시안강촌'))).toContain('영상 6개')
 })
 
 test('collapsing a resort stops only its own video', async () => {
