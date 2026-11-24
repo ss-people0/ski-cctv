@@ -23,6 +23,11 @@ async function play() {
   screen.value?.querySelector<HTMLElement>('video, iframe')?.focus()
 }
 
+// 하이원 공식 팝업과 같은 크기다.
+function openPopup(url: string) {
+  window.open(url, '_blank', 'popup,noopener,noreferrer,width=680,height=550')
+}
+
 function enlarge() {
   screen.value?.showPopover()
   if (!isPlaying.value) play()
@@ -72,6 +77,15 @@ async function stop(failed: boolean) {
         </button>
         <span v-else-if="cam.status === 'pending'">오픈 준비 중</span>
         <span v-else-if="cam.status === 'investigate'">지금은 영상이 나오지 않아요</span>
+        <a
+          v-else-if="cam.type === 'hls' && cam.popupUrl"
+          class="popup"
+          :href="cam.popupUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="`${title} 영상 보기, 새 창`"
+          @click.prevent="openPopup(cam.popupUrl)"
+        >▶ 영상 보기 (새 창)</a>
         <span v-else>공식 페이지에서 볼 수 있어요</span>
         <p v-if="hasError" class="error" role="alert">지금은 영상을 볼 수 없어요. 잠시 후 다시 눌러 주세요.</p>
         <button v-if="isLarge" class="close" type="button" @click="screen?.hidePopover()">✕ 닫기</button>
@@ -94,6 +108,7 @@ async function stop(failed: boolean) {
 .screen { position: relative; inset: auto; display: grid; place-items: center; box-sizing: border-box; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: hidden; border-radius: 8px; background: #111; color: #eee; }
 .screen :deep(video), .screen iframe, .play { width: 100%; height: 100%; border: 0; }
 .play { background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.popup { display: grid; place-items: center; width: 100%; height: 100%; color: inherit; text-decoration: none; }
 .error { position: absolute; inset: auto 8px 8px; margin: 0; text-align: center; pointer-events: none; }
 .close { position: absolute; top: 8px; right: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: #000c; color: #fff; font: inherit; cursor: pointer; }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }

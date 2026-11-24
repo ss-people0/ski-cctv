@@ -245,6 +245,29 @@ describe('CamCard', () => {
 
     expect(card.find('.enlarge').exists()).toBe(false)
   })
+
+  test('http stream on an https page opens the official popup in a new window', async () => {
+    vi.stubGlobal('location', { protocol: 'https:' })
+    const open = vi.spyOn(window, 'open').mockReturnValue(null)
+    const popupUrl = 'http://example.com/popup?ch=1'
+    const cam: Cam = { ...hlsCam, url: 'http://example.com/a.m3u8', popupUrl }
+    const card = mount(CamCard, { props: { resort, cam } })
+
+    await card.get('.popup').trigger('click')
+
+    expect(card.get('.popup').attributes('href')).toBe(popupUrl)
+    expect(open).toHaveBeenCalledWith(popupUrl, '_blank', expect.stringContaining('noopener'))
+    expect(card.find('.play').exists()).toBe(false)
+    vi.unstubAllGlobals()
+  })
+
+  test('http stream on an http page plays inline without the popup link', () => {
+    const cam: Cam = { ...hlsCam, url: 'http://example.com/a.m3u8', popupUrl: 'http://example.com/popup' }
+    const card = mount(CamCard, { props: { resort, cam } })
+
+    expect(card.find('.play').exists()).toBe(true)
+    expect(card.find('.popup').exists()).toBe(false)
+  })
 })
 
 test('cam ids are unique', () => {
