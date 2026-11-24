@@ -122,7 +122,7 @@ export const resorts: readonly Resort[] = [
     cams: [
       { id: 'phoenix-bulsae', name: '불새마루', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/ht_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'phoenix-penguin', name: '펭귄', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-hawk', name: '호크/스패로우', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_02_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-hawk', name: '호크/스패로우', type: 'hls', status: 'pending', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_02_02.m3u8', playLimitSec: PLAY_LIMIT_SEC }, // 2026-11-25 세그먼트 404라 보류, 복구되면 active
       { id: 'phoenix-snowvillage', name: '스노우 빌리지', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'phoenix-dodo', name: '도도', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/sp_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'phoenix-montblanc', name: '몽블랑 광장', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/mb_03_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
