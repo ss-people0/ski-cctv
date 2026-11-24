@@ -112,6 +112,24 @@ export const resorts: readonly Resort[] = [
     ],
   },
 
+  // ───────────────────────── 휘닉스 평창 ─────────────────────────
+  {
+    id: 'phoenix',
+    name: '휘닉스 평창',
+    region: '강원 평창',
+    officialPage: 'https://phoenixhnr.co.kr/page/pyeongchang/guide/operation/sketchMovie',
+    note: 'HLS(streaming.phoenixhnr.co.kr), CORS *. 주소는 사용자가 준 목록(2026-11-24, 7개 모두 신호 확인). 임시 심볼(눈송이) 사용 — 공식 로고로 교체 필요.',
+    cams: [
+      { id: 'phoenix-bulsae', name: '불새마루', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/ht_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-penguin', name: '펭귄', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-hawk', name: '호크/스패로우', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_02_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-snowvillage', name: '스노우 빌리지', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-dodo', name: '도도', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/sp_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-montblanc', name: '몽블랑 광장', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/mb_03_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-base', name: '베이스', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_02_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+    ],
+  },
+
   // ───────────────────────── 알펜시아 ─────────────────────────
   {
     id: 'alpensia',
@@ -138,24 +156,6 @@ export const resorts: readonly Resort[] = [
       { id: 'gangchon-webcam04', name: '래빗 슬로프', type: 'hls', status: 'active', url: `https://webcam04.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
       { id: 'gangchon-webcam05', name: '드래곤 슬로프', type: 'hls', status: 'active', url: `https://webcam05.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
       { id: 'gangchon-webcam06', name: '알프하우스 광장', type: 'hls', status: 'active', url: `https://webcam06.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },
-    ],
-  },
-
-  // ───────────────────────── 휘닉스 평창 ─────────────────────────
-  {
-    id: 'phoenix',
-    name: '휘닉스 평창',
-    region: '강원 평창',
-    officialPage: 'https://phoenixhnr.co.kr/page/pyeongchang/guide/operation/sketchMovie',
-    note: 'HLS(streaming.phoenixhnr.co.kr), CORS *. 주소는 사용자가 준 목록(2026-11-24, 7개 모두 신호 확인). 임시 심볼(눈송이) 사용 — 공식 로고로 교체 필요.',
-    cams: [
-      { id: 'phoenix-bulsae', name: '불새마루', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/ht_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-penguin', name: '펭귄', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-hawk', name: '호크/스패로우', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_02_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-snowvillage', name: '스노우 빌리지', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-dodo', name: '도도', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/sp_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-montblanc', name: '몽블랑 광장', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/mb_03_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-base', name: '베이스', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_02_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
     ],
   },
 ];
