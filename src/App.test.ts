@@ -83,7 +83,7 @@ test('dropdown has a label and lists every resort', () => {
 test('resorts appear in the order the user chose', () => {
   const names = mount(App).findAll('summary h3').map((h) => h.text())
 
-  expect(names).toEqual(['모나용평', '지산리조트', '웰리힐리파크', '하이원리조트', '알펜시아', '엘리시안강촌'])
+  expect(names).toEqual(['모나용평', '지산리조트', '웰리힐리파크', '하이원리조트', '알펜시아', '엘리시안강촌', '휘닉스 평창'])
 })
 
 test('every resort has a symbol file', () => {
