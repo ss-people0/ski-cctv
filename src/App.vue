@@ -54,19 +54,20 @@ function onToggle(event: Event, resort: Resort) {
       @toggle.self="onToggle($event, resort)"
     >
       <summary>
-        <div class="names">
-          <h3>{{ resort.name }}</h3>
-          <span class="region">{{ resort.region }}</span>
-        </div>
         <a
-          class="webcam-link"
+          class="symbol-link"
           :href="resort.officialPage"
           target="_blank"
           rel="noopener noreferrer"
           :aria-label="`${resort.name} 공식 웹캠 바로가기, 새 창`"
           @click.stop
-        >웹캠 바로가기</a>
-        <img class="symbol" :src="`symbols/${resort.id}.png`" alt="" />
+        >
+          <img class="symbol" :src="`symbols/${resort.id}.png`" alt="" />
+        </a>
+        <div class="names">
+          <h3>{{ resort.name }}</h3>
+          <span class="region">{{ resort.region }}</span>
+        </div>
       </summary>
       <div class="cams">
         <CamCard v-for="cam in resort.cams" :key="cam.id" :resort="resort" :cam="cam" />

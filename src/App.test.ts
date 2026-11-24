@@ -19,12 +19,12 @@ test('shows every resort collapsed in one exclusive group', () => {
   expect(new Set(panels.map((p) => p.attributes('name'))).size).toBe(1)
 })
 
-test('each summary links to the resort official webcam page in a new tab', () => {
-  const links = mount(App).findAll('summary a.webcam-link')
+test('each resort symbol links to its official webcam page in a new tab', () => {
+  const links = mount(App).findAll('summary a.symbol-link')
 
   expect(links).toHaveLength(resorts.length)
   const yongpyong = links.find((a) => a.attributes('aria-label')?.includes('모나용평'))!
-  expect(yongpyong.text()).toBe('웹캠 바로가기')
+  expect(yongpyong.find('img.symbol').exists()).toBe(true)
   expect(yongpyong.attributes('href')).toBe(
     resorts.find((r) => r.id === 'yongpyong')!.officialPage,
   )
