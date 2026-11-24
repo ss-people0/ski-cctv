@@ -1,5 +1,14 @@
-:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #000; color: #f2f2f2; }
+:root:has(.screen:popover-open) { overflow: hidden; }
 body { margin: 0; }
 main { max-width: 1200px; margin: 0 auto; padding: 16px; }
-.cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 16px; }
-:root:has(.screen:popover-open) { overflow: hidden; }
+.resort { margin-bottom: 12px; border: 1px solid #333; border-radius: 12px; background: #141414; }
+.resort summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 18px 16px; border-radius: 12px; cursor: pointer; list-style: none; }
+.resort summary::-webkit-details-marker { display: none; }
+.resort summary::after { content: '▾'; color: #aaa; }
+.resort[open] summary::after { content: '▴'; }
+.resort summary:hover { background: #222; }
+.resort h2 { margin: 0; font-size: 1.2rem; }
+.region, .count { color: #aaa; font-size: 0.9rem; }
+.count { margin-left: auto; }
+.cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 16px; padding: 4px 16px 16px; }

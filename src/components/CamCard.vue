@@ -105,7 +105,7 @@ async function stop(failed: boolean) {
 .card { position: relative; padding: 12px; border: 1px solid #8886; border-radius: 12px; }
 .card h3 { margin: 12px 0 4px; font-size: 1.1rem; }
 .slot { aspect-ratio: 16 / 9; }
-.screen { position: relative; inset: auto; display: grid; place-items: center; box-sizing: border-box; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: hidden; border-radius: 8px; background: #111; color: #eee; }
+.screen { position: relative; inset: auto; display: grid; place-items: center; box-sizing: border-box; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; overflow: hidden; border-radius: 8px; background: #000; color: #eee; }
 .screen :deep(video), .screen iframe, .play { width: 100%; height: 100%; border: 0; }
 .play { background: transparent; color: inherit; font: inherit; cursor: pointer; }
 .popup { display: grid; place-items: center; width: 100%; height: 100%; color: inherit; text-decoration: none; }
