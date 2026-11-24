@@ -36,4 +36,8 @@ npm run build
 
 ## 주의
 
-개인용입니다. 공개 배포 전에는 리조트별 임베드 약관을 확인해야 합니다. `https`로 배포하면 하이원은 재생되지 않습니다.
+개인용입니다. 공개 배포 전에는 리조트별 임베드 약관을 확인해야 합니다. `https`에서는 하이원이 링크 카드로 바뀝니다.
+
+## 배포
+
+`main`에 푸시하면 GitHub Actions가 테스트하고 GitHub Pages에 올립니다. 처음 한 번 **Settings → Pages → Source**를 **GitHub Actions**로 바꿔야 합니다.

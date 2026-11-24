@@ -1,6 +1,6 @@
-import { expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import type { Cam, Resort } from './cams'
-import { sortResorts } from './sortResorts'
+import { isPlayable, sortResorts } from './sortResorts'
 
 const cam = (id: string, status: Cam['status'], type: 'hls' | 'link' = 'hls'): Cam =>
   type === 'hls'
@@ -21,4 +21,18 @@ test('orders resorts and cams as playable, link, investigate, pending', () => {
   expect(sorted.map((r) => r.id)).toEqual(['mixed', 'playable', 'link', 'pending'])
   expect(sorted[0].cams.map((c) => c.id)).toEqual(['live', 'broken'])
   expect(input[0].id).toBe('pending')
+})
+
+describe('isPlayable on an https page', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  test('blocks http streams but keeps https streams', () => {
+    const httpCam: Cam = { id: 'h', name: 'h', status: 'active', type: 'hls', url: 'http://example.com/a.m3u8', playLimitSec: 15 }
+    expect(isPlayable(httpCam)).toBe(true)
+
+    vi.stubGlobal('location', { protocol: 'https:' })
+
+    expect(isPlayable(httpCam)).toBe(false)
+    expect(isPlayable(cam('s', 'active'))).toBe(true)
+  })
 })

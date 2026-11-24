@@ -48,7 +48,7 @@ export const resorts: readonly Resort[] = [
     name: '하이원리조트',
     region: '강원 정선',
     officialPage: 'https://www.high1.com/ski/slopeView.do?key=748&mode=p',
-    note: 'HLS가 http+IP 주소라 앱을 http로 열 때만 재생된다. https로 배포하면 링크로 되돌린다.',
+    note: 'HLS가 http+IP 주소라 앱을 http로 열 때만 재생된다. https에서는 자동으로 링크 카드가 된다.',
     cams: [
       { id: 'high1-ch1',  name: '제우스 2번 슬로프 입구', type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch1.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC },
       { id: 'high1-ch2',  name: '헤라 2번 슬로프 입구',   type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch2.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC },
