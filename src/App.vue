@@ -16,12 +16,6 @@ const visibleResorts = computed(() =>
 
 const isPlayingIn = (resort: Resort) => resort.cams.some((cam) => cam.id === playingCamId.value)
 
-function summaryText(resort: Resort) {
-  const playableCount = resort.cams.filter(isPlayable).length
-  if (playableCount > 0) return `영상 ${playableCount}개`
-  return resort.cams.every((cam) => cam.status === 'pending') ? '오픈 준비 중' : '새 창으로 보기'
-}
-
 // 화면에서 사라진 스키장의 영상이 계속 재생되지 않게 한다.
 function onSelect() {
   if (!visibleResorts.value.some(isPlayingIn)) playingCamId.value = null
@@ -64,7 +58,14 @@ function onToggle(event: Event, resort: Resort) {
           <h3>{{ resort.name }}</h3>
           <span class="region">{{ resort.region }}</span>
         </div>
-        <span class="count">{{ summaryText(resort) }}</span>
+        <a
+          class="webcam-link"
+          :href="resort.officialPage"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="`${resort.name} 공식 웹캠 바로가기, 새 창`"
+          @click.stop
+        >웹캠 바로가기</a>
         <img class="symbol" :src="`symbols/${resort.id}.png`" alt="" />
       </summary>
       <div class="cams">

@@ -19,12 +19,17 @@ test('shows every resort collapsed in one exclusive group', () => {
   expect(new Set(panels.map((p) => p.attributes('name'))).size).toBe(1)
 })
 
-test('summary tells how many cams can be played', () => {
-  const summaries = mount(App).findAll('summary').map((s) => s.text())
+test('each summary links to the resort official webcam page in a new tab', () => {
+  const links = mount(App).findAll('summary a.webcam-link')
 
-  expect(summaries.find((s) => s.includes('모나용평'))).toContain('영상 10개')
-  expect(summaries.find((s) => s.includes('지산리조트'))).toContain('영상 3개')
-  expect(summaries.find((s) => s.includes('엘리시안강촌'))).toContain('영상 6개')
+  expect(links).toHaveLength(resorts.length)
+  const yongpyong = links.find((a) => a.attributes('aria-label')?.includes('모나용평'))!
+  expect(yongpyong.text()).toBe('웹캠 바로가기')
+  expect(yongpyong.attributes('href')).toBe(
+    resorts.find((r) => r.id === 'yongpyong')!.officialPage,
+  )
+  expect(yongpyong.attributes('target')).toBe('_blank')
+  expect(yongpyong.attributes('rel')).toContain('noopener')
 })
 
 test('collapsing a resort stops only its own video', async () => {

@@ -28,23 +28,12 @@ const resort: Resort = { id: 'r', name: '리조트', region: '강원', officialP
 const base = { id: 'r-base', name: '베이스', status: 'active' } as const
 const hlsCam: Cam = { ...base, type: 'hls', url: 'https://example.com/a.m3u8', playLimitSec: 15 }
 
-// jsdom에는 Popover API가 없다.
-const toggleTo = (newState: string) =>
-  function (this: HTMLElement) {
-    this.dispatchEvent(Object.assign(new Event('toggle'), { newState }))
-  }
-const showPopover = vi.fn(toggleTo('open'))
-const hidePopover = vi.fn(toggleTo('closed'))
-Object.assign(HTMLElement.prototype, { showPopover, hidePopover })
-
 enableAutoUnmount(afterEach)
 
 beforeEach(() => {
   vi.useFakeTimers()
   vi.clearAllMocks()
   playingCamId.value = null
-  showPopover.mockImplementation(toggleTo('open'))
-  hidePopover.mockImplementation(toggleTo('closed'))
   vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {})
 })
 afterEach(() => {
@@ -53,12 +42,12 @@ afterEach(() => {
 })
 
 describe('CamCard', () => {
-  test('link cam shows only the official page link', () => {
+  test('link cam shows a status message and no player or link', () => {
     const card = mount(CamCard, { props: { resort, cam: { ...base, type: 'link', url: null } } })
 
     expect(card.find('button').exists()).toBe(false)
-    expect(card.get('a').attributes('href')).toBe('https://example.com/cam')
-    expect(card.get('a').attributes('rel')).toContain('noopener')
+    expect(card.find('a').exists()).toBe(false)
+    expect(card.text()).toContain('공식 페이지에서 볼 수 있어요')
   })
 
   test('youtube cam embeds the video only after click', async () => {
@@ -150,11 +139,6 @@ describe('CamCard', () => {
     outside.remove()
   })
 
-  test('link cam with its own url opens that url', () => {
-    const card = mount(CamCard, { props: { resort, cam: { ...base, type: 'link', url: 'http://example.com/ch1' } } })
-
-    expect(card.get('a').attributes('href')).toBe('http://example.com/ch1')
-  })
 
   test('pending cam shows the preparing message without a player', () => {
     const card = mount(CamCard, { props: { resort, cam: { ...hlsCam, status: 'pending' } } })
@@ -163,12 +147,12 @@ describe('CamCard', () => {
     expect(card.find('button').exists()).toBe(false)
   })
 
-  test('investigate cam falls back to the official page link', () => {
+  test('investigate cam shows a status message and no player', () => {
     const card = mount(CamCard, { props: { resort, cam: { ...hlsCam, status: 'investigate' } } })
     expect(card.text()).toContain('지금은 영상이 나오지 않아요')
 
     expect(card.find('button').exists()).toBe(false)
-    expect(card.get('a').attributes('href')).toBe('https://example.com/cam')
+    expect(card.find('a').exists()).toBe(false)
   })
 
   test('playing another cam stops the previous one', async () => {
@@ -203,19 +187,10 @@ describe('CamCard', () => {
     expect(first.find('[role="alert"]').exists()).toBe(false)
   })
 
-  test('enlarge opens the popover and starts playing', async () => {
-    const card = mount(CamCard, { props: { resort, cam: hlsCam } })
-
-    await card.get('.enlarge').trigger('click')
-
-    expect(showPopover).toHaveBeenCalledOnce()
-    expect(card.find('video').exists()).toBe(true)
-  })
-
   test('playing replaces the name and buttons with the video, and ending brings them back', async () => {
     const card = mount(CamCard, { props: { resort, cam: hlsCam } })
     expect(card.get('.info').text()).toContain('베이스')
-    expect(card.get('.info').findAll('button, a')).toHaveLength(3)
+    expect(card.get('.info').findAll('button, a')).toHaveLength(1)
     expect(card.get<HTMLElement>('.slot').element.style.display).toBe('none')
 
     await card.get('.play').trigger('click')
@@ -242,31 +217,6 @@ describe('CamCard', () => {
     expect(document.activeElement).toBe(card.get('.play').element)
   })
 
-  test('popover stays open with a replay button after the limit', async () => {
-    const card = mount(CamCard, { props: { resort, cam: hlsCam } })
-    await card.get('.enlarge').trigger('click')
-    await card.get('video').trigger('loadedmetadata')
-
-    await vi.advanceTimersByTimeAsync(15_000)
-
-    expect(hidePopover).not.toHaveBeenCalled()
-    expect(card.get('.screen').find('.replay').exists()).toBe(true)
-  })
-
-  test('close button hides the popover', async () => {
-    const card = mount(CamCard, { props: { resort, cam: hlsCam } })
-    await card.get('.enlarge').trigger('click')
-
-    await card.get('.close').trigger('click')
-
-    expect(hidePopover).toHaveBeenCalledOnce()
-  })
-
-  test('cams that cannot play have no enlarge button', () => {
-    const card = mount(CamCard, { props: { resort, cam: { ...base, type: 'link', url: null } } })
-
-    expect(card.find('.enlarge').exists()).toBe(false)
-  })
 
   test('http stream on an https page opens the official popup in a new window', async () => {
     vi.stubGlobal('location', { protocol: 'https:' })

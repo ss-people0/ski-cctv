@@ -51,7 +51,8 @@ main { box-sizing: border-box; max-width: 1120px; margin: 24px auto; padding: 24
 .resort summary:hover { background: #e9f0f5; }
 .resort h3 { margin: 0; font-size: 1.15rem; letter-spacing: -0.02em; }
 .region { color: var(--muted); font-size: 0.9rem; }
-.count { flex: none; margin-left: auto; padding: 6px 14px; border: 1px solid #c5deed; border-radius: 999px; background: #e3f1fa; color: var(--blue-dark); font-size: 0.85rem; font-weight: 700; }
+.webcam-link { flex: none; margin-left: auto; display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border: 1px solid #c5deed; border-radius: 999px; background: #e3f1fa; color: var(--blue-dark); font-size: 0.85rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.webcam-link:hover { background: #cfe6f4; }
 .cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); align-items: start; gap: 12px; padding: 4px 16px 16px; }
 
 @media (max-width: 767px) {
