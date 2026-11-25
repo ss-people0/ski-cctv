@@ -10,6 +10,7 @@ import {
   todayKst,
   type ResortSlopeStatus,
 } from './data/slopeStatus'
+import { fetchWeather, type Weather } from './data/weather'
 import { playingCamId } from './playingCam'
 
 const sortedResorts = sortResorts(resorts)
@@ -30,14 +31,23 @@ onMounted(async () => {
 const selectedId = shallowRef<string | null>(null)
 const currentResort = computed(() => sortedResorts.find((resort) => resort.id === selectedId.value) ?? null)
 
+// 스키장을 열 때마다 그 위치의 현재 날씨를 실시간으로 받아온다(Open-Meteo).
+const weather = shallowRef<Weather | null>(null)
+
 // 화면을 옮길 때는 재생 중인 영상을 멈춘다(보이지 않는 채 재생 방지).
-function openResort(id: string) {
+async function openResort(id: string) {
   playingCamId.value = null
   selectedId.value = id
+  weather.value = null
+  const resort = sortedResorts.find((r) => r.id === id)
+  if (!resort?.coord) return
+  const result = await fetchWeather(resort.coord.lat, resort.coord.lon)
+  if (selectedId.value === id) weather.value = result // 늦게 온 응답이 다른 스키장에 안 뜨게
 }
 function goBack() {
   playingCamId.value = null
   selectedId.value = null
+  weather.value = null
 }
 
 // "033-330-3126~7, 033-330-6373"처럼 여러 번호가 있으면 첫 번호로 전화를 건다.
@@ -88,6 +98,7 @@ function cardSub(id: string, region: string): string {
         >
           <img class="symbol" :src="`symbols/${currentResort.id}.png`" alt="" />
         </a>
+        <span v-if="weather" class="weather-chip" :title="weather.label">{{ weather.icon }} {{ weather.temp }}°</span>
       </div>
       <div class="detail-head">
         <h2>{{ currentResort.name }}</h2>
@@ -126,7 +137,8 @@ function cardSub(id: string, region: string): string {
     </section>
 
     <footer class="credit">
-      배경은 직접 그린 일러스트입니다. 심볼은 각 리조트의 상표이며, 이 페이지는 리조트와 관련이 없는 개인 페이지입니다.
+      날씨: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · 배경은 직접 그린 일러스트입니다.
+      심볼은 각 리조트의 상표이며, 이 페이지는 리조트와 관련이 없는 개인 페이지입니다.
     </footer>
   </main>
 </template>

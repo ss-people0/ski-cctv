@@ -2,9 +2,9 @@ name: Collect slope status
 
 on:
   schedule:
-    # 매일 아침 10시(KST). 아침에 봐도 당일 데이터가 보이도록. 개장(9시) 직후라 그날 열린 슬로프가 잡힌다.
-    # GitHub cron은 UTC라 01:00 UTC = 10:00 KST, 5~15분 늦을 수 있음
-    - cron: "0 1 * * *"
+    # 매일 09:00 / 10:00 / 16:00(KST)에 수집. GitHub cron은 UTC라 9시간을 뺀다.
+    # 00:00 UTC=09:00 KST(개장), 01:00=10:00(오전), 07:00=16:00(오후·마감 전). 5~15분 늦을 수 있음.
+    - cron: "0 0,1,7 * * *"
   workflow_dispatch:
 
 concurrency:

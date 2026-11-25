@@ -39,6 +39,7 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 .back:hover { background: #fff; }
 .symbol-link { position: absolute; top: 16px; right: 16px; z-index: 2; display: inline-flex; border-radius: 14px; box-shadow: 0 4px 12px rgba(70, 55, 130, 0.18); }
 .symbol { box-sizing: border-box; width: 54px; height: 42px; padding: 5px; border-radius: 13px; background: #fff; object-fit: contain; }
+.weather-chip { position: absolute; bottom: 16px; left: 16px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 999px; background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(6px); color: var(--text); font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 12px rgba(70, 55, 130, 0.12); }
 
 .detail-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 14px 6px 6px; }
 .detail-head h2 { margin: 0; font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; }

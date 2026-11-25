@@ -16,6 +16,7 @@ export interface Resort {
   region: string;
   officialPage: string;
   note?: string;
+  coord?: { lat: number; lon: number }; // 날씨 조회용 스키장 위치
   emergency?: { label: string; tels: string[] }[]; // 사고 시 스키장 내 연락처(라벨당 번호 1개 이상)
   cams: Cam[];
 }
@@ -36,6 +37,7 @@ export const resorts: readonly Resort[] = [
     name: '모나용평',
     region: '강원 평창',
     officialPage: 'https://www.yongpyong.co.kr/kor/guide/realTimeNews/ypResortWebcam.do',
+    coord: { lat: 37.6459, lon: 128.6815 }, // 평창 대관령면
     emergency: [
       { label: '본부', tels: ['033-330-7362'] },
       { label: '상황실', tels: ['033-330-8253'] },
@@ -62,6 +64,7 @@ export const resorts: readonly Resort[] = [
     name: '지산리조트',
     region: '경기 이천',
     officialPage: 'https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp',
+    coord: { lat: 37.2566, lon: 127.3607 }, // 이천 마장면
     emergency: [{ label: '응급후송', tels: ['031-644-1570'] }],
     note: 'jisan1~3 스트림(livecity)은 신호가 들어와 재생한다(2026-11-24, CORS *). 공식 버튼은 아직 "26/27시즌에 뵙겠습니다"로 막혀 있다. 블루·실버는 아직 신호가 없어 오픈 준비 중.',
     cams: [
@@ -79,6 +82,7 @@ export const resorts: readonly Resort[] = [
     name: '웰리힐리파크',
     region: '강원 횡성',
     officialPage: 'https://www.wellihillipark.com/home/customer/webcam',
+    coord: { lat: 37.5066, lon: 128.2707 }, // 횡성 둔내면
     emergency: [{ label: '패트롤실', tels: ['033-340-3696'] }],
     note: 'HLS(Wowza), CORS * (2026-11-24 확인). cam05는 404라 investigate. cam01은 목록에 없음.',
     cams: [
@@ -97,6 +101,7 @@ export const resorts: readonly Resort[] = [
     name: '하이원리조트',
     region: '강원 정선',
     officialPage: 'https://www.high1.com/ski/slopeView.do?key=748&mode=p',
+    coord: { lat: 37.2096, lon: 128.8257 }, // 정선 고한읍
     emergency: [{ label: '패트롤', tels: ['033-590-7119'] }],
     note: 'HLS가 http+IP 주소라 앱을 http로 열 때만 재생된다. https에서는 공식 팝업(popupUrl)을 새 창으로 연다.',
     cams: [
@@ -127,6 +132,7 @@ export const resorts: readonly Resort[] = [
     name: '휘닉스 평창',
     region: '강원 평창',
     officialPage: 'https://phoenixhnr.co.kr/page/pyeongchang/guide/operation/sketchMovie',
+    coord: { lat: 37.5847, lon: 128.3233 }, // 평창 봉평면
     emergency: [{ label: '패트롤', tels: ['033-330-3126', '033-330-3127', '033-330-6373'] }],
     note: 'HLS(streaming.phoenixhnr.co.kr), CORS *. 주소는 사용자가 준 목록(2026-11-24, 7개 모두 신호 확인). 심볼은 공식 파비콘(P 마크).',
     cams: [
@@ -146,6 +152,7 @@ export const resorts: readonly Resort[] = [
     name: '알펜시아',
     region: '강원 평창',
     officialPage: 'https://www.alpensia.com/guide/web-cam.do',
+    coord: { lat: 37.6565, lon: 128.6815 }, // 평창 대관령면
     emergency: [{ label: '패트롤 상황실', tels: ['033-339-0305'] }],
     note: '방송이 새로 시작되면 videoId가 바뀔 수 있다. 채널: UCrmFQpznvkrLQSjJG1wGdGg',
     cams: [
@@ -159,6 +166,7 @@ export const resorts: readonly Resort[] = [
     name: '엘리시안강촌',
     region: '강원 춘천',
     officialPage: 'https://www.elysian.co.kr/about-gangchon/ski#guide-to-using-slopes',
+    coord: { lat: 37.8139, lon: 127.6386 }, // 춘천 남산면
     emergency: [{ label: '패트롤', tels: ['033-260-2000'] }],
     note: 'HLS에 공식이 발급한 서명 토큰이 필요. 토큰은 공식 페이지와 open-ski-data에 공개돼 있고 2027-10-30까지 유효하다(2026-11-24 확인). 만료/교체되면 재생이 끊기니 GANGCHON_TOKEN을 갱신한다.',
     cams: [
