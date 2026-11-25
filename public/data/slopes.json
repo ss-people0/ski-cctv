@@ -1,0 +1,703 @@
+{
+ "generatedAt": "2026-11-25T17:37:31+09:00",
+ "timezone": "Asia/Seoul",
+ "resorts": [
+  {
+   "id": "yongpyong",
+   "name": "모나용평",
+   "sourceUrl": "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do",
+   "fetchedAt": "2026-11-25T17:37:31+09:00",
+   "sourceDate": "2026-11-25",
+   "status": "ok",
+   "hours": [
+    {
+     "label": "주간",
+     "value": "08:30~16:30"
+    },
+    {
+     "label": "정설",
+     "value": "16:30~18:00"
+    },
+    {
+     "label": "야간",
+     "value": "19:00~23:00"
+    }
+   ],
+   "slopes": [
+    {
+     "name": "옐로우",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴옐로우",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "메가그린",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "핑크",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레인보우파라다이스",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레드파라다이스",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레드골드브릿지",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "실버파라다이스",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "골드환타스틱",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "골드밸리",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레인보우4",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴레드",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴골드",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레인보우1",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레인보우2",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레인보우3",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레드",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "실버",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    }
+   ],
+   "lifts": [],
+   "note": null,
+   "error": null,
+   "httpStatus": 200,
+   "nightOpen": false
+  },
+  {
+   "id": "high1",
+   "name": "하이원리조트",
+   "sourceUrl": "https://www.high1.com/ski/slopeView.do?key=748&mode=p",
+   "fetchedAt": "2026-11-25T17:37:32+09:00",
+   "sourceDate": null,
+   "status": "ok",
+   "hours": [
+    {
+     "label": "주간",
+     "value": "09:00~16:00"
+    },
+    {
+     "label": "정설",
+     "value": "16:00~18:00"
+    },
+    {
+     "label": "야간",
+     "value": "18:00~22:00"
+    }
+   ],
+   "slopes": [
+    {
+     "name": "제우스Ⅰ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "제우스Ⅱ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "제우스Ⅲ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "제우스Ⅲ-1",
+     "day": "OPEN",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "빅토리아Ⅰ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "빅토리아Ⅱ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "빅토리아Ⅲ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "최상급"
+    },
+    {
+     "name": "헤라Ⅰ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "중급"
+    },
+    {
+     "name": "헤라Ⅱ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "중상급"
+    },
+    {
+     "name": "헤라Ⅲ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아폴로Ⅰ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아폴로Ⅱ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아폴로Ⅲ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아폴로Ⅳ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아폴로Ⅴ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "최상급"
+    },
+    {
+     "name": "아폴로Ⅵ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아테나Ⅱ",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "중급"
+    },
+    {
+     "name": "아테나Ⅲ",
+     "day": "OPEN",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "아테나Ⅲ-1",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급"
+    }
+   ],
+   "lifts": [
+    {
+     "name": "주피터(JUPITER)",
+     "day": "OPEN",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "제우스(ZEUS)",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "빅토리아(VICTORIA)",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급(제우스 1) 상급(빅토1,2,3)"
+    },
+    {
+     "name": "헤라(HERA)",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급/중급/상급"
+    },
+    {
+     "name": "아폴로(APOLLO)",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "상급"
+    },
+    {
+     "name": "아테나(ATHENA)",
+     "day": "CLOSE",
+     "night": "CLOSE",
+     "level": "초급/중급"
+    },
+    {
+     "name": "운탄고도케이블카(구.곤돌라)",
+     "day": "OPEN",
+     "night": "CLOSE",
+     "level": "초급"
+    },
+    {
+     "name": "마운틴(MOUNTAIN)",
+     "day": "OPEN",
+     "night": "CLOSE",
+     "level": "마운틴허브 중간터미널 중/상급 하이원 탑 초/상급"
+    },
+    {
+     "name": "팰리스(PALACE)",
+     "day": "OPEN",
+     "night": "CLOSE",
+     "level": "초급/중급/상급"
+    }
+   ],
+   "note": "운영시간은 공식 이용요금 안내 기준(고정). 슬로프·리프트 OPEN/CLOSE는 실시간.",
+   "error": null,
+   "httpStatus": [
+    200,
+    200
+   ],
+   "nightOpen": false
+  },
+  {
+   "id": "jisan",
+   "name": "지산리조트",
+   "sourceUrl": "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
+   "fetchedAt": "2026-11-25T17:37:32+09:00",
+   "sourceDate": "2026-03-01",
+   "status": "ok",
+   "hours": [
+    {
+     "label": "운영시간",
+     "value": "09:00~17:00"
+    },
+    {
+     "label": "운영시간",
+     "value": "18:30~24:00"
+    },
+    {
+     "label": "운영시간",
+     "value": "24:00~02:00"
+    }
+   ],
+   "slopes": [
+    {
+     "name": "1-1",
+     "slot": "주간",
+     "state": "OPEN"
+    },
+    {
+     "name": "1",
+     "slot": "주간",
+     "state": "OPEN"
+    },
+    {
+     "name": "2",
+     "slot": "주간",
+     "state": "OPEN"
+    },
+    {
+     "name": "뉴 오렌지",
+     "slot": "주간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "3(어린이 전용)",
+     "slot": "주간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "5",
+     "slot": "주간",
+     "state": "OPEN"
+    },
+    {
+     "name": "6",
+     "slot": "주간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "7",
+     "slot": "주간",
+     "state": "OPEN"
+    },
+    {
+     "name": "1-1",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "1",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "2",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "뉴 오렌지",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "3(어린이 전용)",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "5",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "6",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "7",
+     "slot": "야간",
+     "state": "CLOSE"
+    },
+    {
+     "name": "1-1",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "1",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "2",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "뉴 오렌지",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "3(어린이 전용)",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "5",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "6",
+     "slot": "심야",
+     "state": "CLOSE"
+    },
+    {
+     "name": "7",
+     "slot": "심야",
+     "state": "CLOSE"
+    }
+   ],
+   "lifts": [],
+   "note": "안내 기준일: 2026년 3월 1일 슬로프 운영안내",
+   "error": null,
+   "httpStatus": 200
+  },
+  {
+   "id": "phoenix",
+   "name": "휘닉스 평창",
+   "sourceUrl": "https://www.phoenixhnr.co.kr/api/snowpark/slope",
+   "fetchedAt": "2026-11-25T17:37:32+09:00",
+   "sourceDate": null,
+   "status": "ok",
+   "hours": [
+    {
+     "label": "주간",
+     "value": "09:00~16:00"
+    },
+    {
+     "label": "정설",
+     "value": "16:00~18:00"
+    },
+    {
+     "label": "야간",
+     "value": "18:00~22:00"
+    }
+   ],
+   "slopes": [
+    {
+     "name": "스패로우",
+     "slot": null,
+     "level": "초급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "펭귄",
+     "slot": null,
+     "level": "초급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "도도(강습전용)",
+     "slot": "주간",
+     "level": "초급",
+     "state": "OPEN",
+     "hours": "09:00-16:00"
+    },
+    {
+     "name": "키위",
+     "slot": null,
+     "level": "중급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "파노라마",
+     "slot": null,
+     "level": "중급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "호크",
+     "slot": "주간",
+     "level": "중급",
+     "state": "OPEN",
+     "hours": "09:00-16:00"
+    },
+    {
+     "name": "밸리",
+     "slot": null,
+     "level": "중상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "듀크",
+     "slot": null,
+     "level": "중상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "슬로프스타일(SS/SBS)",
+     "slot": null,
+     "level": "중상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "챔피온",
+     "slot": null,
+     "level": "상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "환타지",
+     "slot": null,
+     "level": "상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "디지",
+     "slot": null,
+     "level": "최상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "모글(MO)",
+     "slot": null,
+     "level": "최상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "파라다이스",
+     "slot": null,
+     "level": "최상급",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "익스트림 파크(킥커 존)",
+     "slot": null,
+     "level": "파크",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "익스트림 파크(파크 존)",
+     "slot": null,
+     "level": "파크",
+     "state": "CLOSE",
+     "hours": null
+    },
+    {
+     "name": "하프파이프(HP)",
+     "slot": null,
+     "level": "파크",
+     "state": "CLOSE",
+     "hours": null
+    }
+   ],
+   "lifts": [],
+   "note": "응답에 기준 날짜 필드가 없음 → 조회 시각(fetchedAt) 표시",
+   "error": null,
+   "httpStatus": 200,
+   "nightOpen": false
+  },
+  {
+   "id": "gangchon",
+   "name": "엘리시안 강촌",
+   "sourceUrl": "https://api.elysian.co.kr/api/v1/resort-Intro/slope-list",
+   "fetchedAt": "2026-11-25T17:37:32+09:00",
+   "sourceDate": "2026-11-25",
+   "status": "partial",
+   "hours": [],
+   "slopes": [],
+   "lifts": [],
+   "note": "응답 data가 빈 배열 — '전부 CLOSE'가 아니라 '26/27 정보 미입력'",
+   "error": null,
+   "httpStatus": 200
+  },
+  {
+   "id": "alpensia",
+   "name": "알펜시아",
+   "sourceUrl": "https://www.alpensia.com/ski/slope-now.do",
+   "fetchedAt": "2026-11-25T17:37:33+09:00",
+   "sourceDate": "2026-03-03",
+   "status": "stale",
+   "hours": [],
+   "slopes": [
+    {
+     "name": "알파",
+     "주간": "CLOSE",
+     "주간Range": "2025-12-04~2026-03-02",
+     "야간": "CLOSE",
+     "야간Range": "2025-12-20~2026-02-17"
+    },
+    {
+     "name": "브라보",
+     "주간": "CLOSE",
+     "주간Range": "2026-02-24~2026-03-02",
+     "야간": "CLOSE",
+     "야간Range": "2026-02-06~2026-02-17"
+    },
+    {
+     "name": "찰리",
+     "주간": "CLOSE",
+     "주간Range": "2026-02-24~2026-03-02",
+     "야간": "CLOSE",
+     "야간Range": "2026-02-06~2026-02-17"
+    },
+    {
+     "name": "델타",
+     "주간": "CLOSE",
+     "주간Range": "2026-02-24~2026-03-02",
+     "야간": "CLOSE",
+     "야간Range": "2024-02-12~2024-02-12"
+    },
+    {
+     "name": "에코",
+     "주간": "CLOSE",
+     "주간Range": "2026-02-24~2026-02-28",
+     "야간": "CLOSE",
+     "야간Range": "2026-02-04~2026-02-04"
+    },
+    {
+     "name": "폭스트롯",
+     "주간": "CLOSE",
+     "주간Range": "2021-12-01~2021-12-31",
+     "야간": "CLOSE",
+     "야간Range": "2021-12-01~2023-01-02"
+    },
+    {
+     "name": "눈썰매장",
+     "주간": "CLOSE",
+     "주간Range": "2026-03-04~2026-03-08",
+     "야간": "CLOSE",
+     "야간Range": "2023-01-14~2023-02-18"
+    }
+   ],
+   "lifts": [],
+   "note": "사이트 값이 2026-03-03 갱신 이후 그대로 — 지난 시즌 값일 수 있음",
+   "error": null,
+   "httpStatus": 200,
+   "lastUpdate": [
+    "2026-03-03 11:18:44.0"
+   ]
+  }
+ ]
+}

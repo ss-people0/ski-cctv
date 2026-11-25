@@ -1,31 +1,46 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, shallowRef } from 'vue'
 import CamCard from './components/CamCard.vue'
-import { resorts, type Resort } from './data/cams'
+import { resorts } from './data/cams'
 import { isPlayable, sortResorts } from './data/sortResorts'
+import {
+  formatSlopeBadge,
+  loadSlopeStatus,
+  todayKst,
+  type ResortSlopeStatus,
+} from './data/slopeStatus'
 import { playingCamId } from './playingCam'
 
-const ALL = 'all'
 const sortedResorts = sortResorts(resorts)
 const playableTotal = resorts.flatMap((resort) => resort.cams).filter(isPlayable).length
 
-const selectedId = ref(ALL)
-const visibleResorts = computed(() =>
-  sortedResorts.filter((resort) => selectedId.value === ALL || resort.id === selectedId.value),
-)
+const slopeStatus = shallowRef<Map<string, ResortSlopeStatus>>(new Map())
+const slopeBadges = computed(() => {
+  const today = todayKst()
+  return new Map(
+    resorts.map((resort) => [resort.id, formatSlopeBadge(slopeStatus.value.get(resort.id), today)]),
+  )
+})
+onMounted(async () => {
+  slopeStatus.value = await loadSlopeStatus(import.meta.env.BASE_URL)
+})
 
-const isPlayingIn = (resort: Resort) => resort.cams.some((cam) => cam.id === playingCamId.value)
+// null = 스키장 목록 화면, 값이 있으면 그 스키장 상세 화면
+const selectedId = shallowRef<string | null>(null)
+const currentResort = computed(() => sortedResorts.find((resort) => resort.id === selectedId.value) ?? null)
 
-// 화면에서 사라진 스키장의 영상이 계속 재생되지 않게 한다.
-function onSelect() {
-  if (!visibleResorts.value.some(isPlayingIn)) playingCamId.value = null
+// 화면을 옮길 때는 재생 중인 영상을 멈춘다(보이지 않는 채 재생 방지).
+function openResort(id: string) {
+  playingCamId.value = null
+  selectedId.value = id
+}
+function goBack() {
+  playingCamId.value = null
+  selectedId.value = null
 }
 
-// 접힌 스키장의 영상이 보이지 않는 채로 계속 재생되지 않게 한다.
-function onToggle(event: Event, resort: Resort) {
-  const isOpen = (event.currentTarget as HTMLDetailsElement).open
-  if (!isOpen && isPlayingIn(resort)) playingCamId.value = null
-}
+// "033-330-3126~7, 033-330-6373"처럼 여러 번호가 있으면 첫 번호로 전화를 건다.
+const firstTel = (tel: string) => tel.match(/[\d-]+/)?.[0] ?? tel
 </script>
 
 <template>
@@ -37,42 +52,62 @@ function onToggle(event: Event, resort: Resort) {
       <span class="badge">바로 볼 수 있는 영상 {{ playableTotal }}개</span>
     </header>
 
-    <div class="toolbar">
-      <h2>스키장</h2>
-      <select v-model="selectedId" class="dropdown" aria-label="스키장 선택" @change="onSelect">
-        <option :value="ALL">전체 스키장</option>
-        <option v-for="resort in sortedResorts" :key="resort.id" :value="resort.id">{{ resort.name }}</option>
-      </select>
-    </div>
+    <nav v-if="!currentResort" class="resort-list" aria-label="스키장 목록">
+      <button
+        v-for="resort in sortedResorts"
+        :key="resort.id"
+        type="button"
+        class="resort-row"
+        @click="openResort(resort.id)"
+      >
+        <img class="symbol" :src="`symbols/${resort.id}.png`" alt="" />
+        <span class="resort-name">{{ resort.name }}</span>
+        <span class="chevron" aria-hidden="true">›</span>
+      </button>
+    </nav>
 
-    <details
-      v-for="resort in visibleResorts"
-      :key="resort.id"
-      class="resort"
-      name="resort"
-      :open="resort.id === selectedId"
-      @toggle.self="onToggle($event, resort)"
-    >
-      <summary>
+    <section v-if="currentResort" class="resort-detail">
+      <button type="button" class="back" @click="goBack">← 스키장 목록</button>
+      <div class="detail-head">
         <a
           class="symbol-link"
-          :href="resort.officialPage"
+          :href="currentResort.officialPage"
           target="_blank"
           rel="noopener noreferrer"
-          :aria-label="`${resort.name} 공식 웹캠 바로가기, 새 창`"
-          @click.stop
+          :aria-label="`${currentResort.name} 공식 웹캠 바로가기, 새 창`"
         >
-          <img class="symbol" :src="`symbols/${resort.id}.png`" alt="" />
+          <img class="symbol" :src="`symbols/${currentResort.id}.png`" alt="" />
         </a>
         <div class="names">
-          <h3>{{ resort.name }}</h3>
-          <span class="region">{{ resort.region }}</span>
+          <h2>{{ currentResort.name }}</h2>
+          <span class="region">{{ currentResort.region }}</span>
         </div>
-      </summary>
-      <div class="cams">
-        <CamCard v-for="cam in resort.cams" :key="cam.id" :resort="resort" :cam="cam" />
       </div>
-    </details>
+      <div class="slope-info" :class="{ empty: !slopeBadges.get(currentResort.id) }">
+        <template v-if="slopeBadges.get(currentResort.id)">
+          <span class="slope-summary">{{ slopeBadges.get(currentResort.id)!.summary }}</span>
+          <span
+            v-for="hour in slopeBadges.get(currentResort.id)!.hours"
+            :key="hour.label"
+            class="slope-hour"
+            :class="{ off: hour.off }"
+          >{{ hour.label }} {{ hour.value }}<template v-if="hour.off"> · 현재 미운영</template></span>
+        </template>
+        <span v-else>아직 오픈 현황 정보가 없어요.</span>
+      </div>
+      <div v-if="currentResort.emergency?.length" class="emergency">
+        <span class="emergency-title">🚨 사고 시 연락처</span>
+        <div v-for="contact in currentResort.emergency" :key="contact.label" class="emergency-row">
+          <span class="e-label">{{ contact.label }}</span>
+          <span class="e-tels">
+            <a v-for="tel in contact.tels" :key="tel" class="e-tel" :href="`tel:${firstTel(tel)}`">{{ tel }}</a>
+          </span>
+        </div>
+      </div>
+      <div class="cams">
+        <CamCard v-for="cam in currentResort.cams" :key="cam.id" :resort="currentResort" :cam="cam" />
+      </div>
+    </section>
 
     <footer class="credit">
       사진: <a href="https://commons.wikimedia.org/wiki/File:Ariane_Lavigne_FIS_World_Cup_Parallel_Slalom_Jauerling_2012b.jpg" target="_blank" rel="noopener noreferrer">Christian Jansky</a>,

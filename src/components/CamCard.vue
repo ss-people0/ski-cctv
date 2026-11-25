@@ -9,12 +9,14 @@ const props = defineProps<{ resort: Resort; cam: Cam }>()
 
 const isPlaying = computed(() => playingCamId.value === props.cam.id)
 const hasError = ref(false)
+const ended = ref(false) // 미리보기 시간이 다 돼서 끝난 상태
 const card = ref<HTMLElement>()
 const screen = ref<HTMLElement>()
 const title = computed(() => `${props.resort.name} ${props.cam.name}`)
 
 async function play() {
   hasError.value = false
+  ended.value = false
   playingCamId.value = props.cam.id
   await nextTick()
   screen.value?.querySelector<HTMLElement>('video, iframe')?.focus()
@@ -25,11 +27,12 @@ function openPopup(url: string) {
   window.open(url, '_blank', 'popup,noopener,noreferrer,width=680,height=550')
 }
 
-async function stop(failed: boolean) {
+async function stop(outcome: 'ended' | 'error' | 'closed') {
   if (!isPlaying.value) return // 이미 꺼진 카드의 늦은 이벤트가 다른 영상을 끄지 않게 한다.
   const hadFocus = screen.value?.contains(document.activeElement)
   playingCamId.value = null
-  hasError.value = failed
+  hasError.value = outcome === 'error'
+  ended.value = outcome === 'ended'
   await nextTick()
   if (hadFocus) card.value?.querySelector<HTMLElement>('.play')?.focus()
 }
@@ -37,12 +40,13 @@ async function stop(failed: boolean) {
 
 <template>
   <article ref="card" class="card">
+    <h4>{{ cam.name }}</h4>
     <div v-if="!isPlaying" class="info">
-      <h4>{{ cam.name }}</h4>
       <p v-if="hasError" class="error" role="alert">지금은 영상을 볼 수 없어요. 잠시 후 다시 눌러 주세요.</p>
+      <p v-else-if="ended" class="done">{{ cam.type === 'hls' ? cam.playLimitSec : 0 }}초 미리보기가 끝났어요.</p>
       <div class="actions">
         <button v-if="isPlayable(cam)" class="play" type="button" :aria-label="`${title} 재생`" @click="play">
-          ▶ 재생<span v-if="cam.type === 'hls'">&nbsp;({{ cam.playLimitSec }}초)</span>
+          {{ ended ? '▶ 다시 보기' : '▶ 재생' }}<span v-if="cam.type === 'hls'">&nbsp;({{ cam.playLimitSec }}초)</span>
         </button>
         <span v-else-if="cam.status === 'pending'" class="status">오픈 준비 중</span>
         <span v-else-if="cam.status === 'investigate'" class="status">지금은 영상이 나오지 않아요</span>
@@ -66,8 +70,8 @@ async function stop(failed: boolean) {
             :url="cam.url"
             :play-limit-sec="cam.playLimitSec"
             :label="title"
-            @end="stop(false)"
-            @error="stop(true)"
+            @end="stop('ended')"
+            @error="stop('error')"
           />
           <iframe
             v-else-if="cam.type === 'youtube'"
@@ -77,7 +81,7 @@ async function stop(failed: boolean) {
             referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen
           />
-          <button class="close" type="button" :aria-label="`${title} 닫기`" @click="stop(false)">✕</button>
+          <button class="close" type="button" :aria-label="`${title} 닫기`" @click="stop('closed')">✕</button>
         </template>
       </div>
     </div>
@@ -98,5 +102,6 @@ async function stop(failed: boolean) {
 .actions .play, .actions .popup { background: var(--blue); color: #fff; }
 .actions .play:hover, .actions .popup:hover { background: var(--blue-dark); }
 .error { margin: 0 0 8px; padding: 6px 10px; border-radius: 12px; background: #fff; color: #9a1f1f; font-size: 0.85rem; text-align: center; }
+.done { margin: 0 0 8px; padding: 6px 10px; border-radius: 12px; background: var(--ice-light); color: var(--blue-dark); font-size: 0.85rem; text-align: center; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>

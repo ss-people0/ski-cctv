@@ -11,86 +11,98 @@ beforeEach(() => {
   playingCamId.value = null
 })
 
-test('shows every resort collapsed in one exclusive group', () => {
-  const panels = mount(App).findAll('details')
+const ORDER = ['모나용평', '지산리조트', '웰리힐리파크', '하이원리조트', '휘닉스 평창', '알펜시아', '엘리시안강촌']
 
-  expect(panels).toHaveLength(resorts.length)
-  expect(panels.every((p) => !p.element.open)).toBe(true)
-  expect(new Set(panels.map((p) => p.attributes('name'))).size).toBe(1)
+test('the main screen lists every resort as a symbol + name row, in the chosen order', () => {
+  const app = mount(App)
+  const rows = app.findAll('.resort-row')
+
+  expect(rows).toHaveLength(resorts.length)
+  expect(rows.map((r) => r.get('.resort-name').text())).toEqual(ORDER)
+  expect(app.find('.resort-detail').exists()).toBe(false)
+  expect(app.find('.cams').exists()).toBe(false) // 목록에서는 CCTV를 깔지 않는다
 })
 
-test('each resort symbol links to its official webcam page in a new tab', () => {
-  const links = mount(App).findAll('summary a.symbol-link')
+test('every resort row shows a symbol that exists on disk', () => {
+  const rows = mount(App).findAll('.resort-row')
 
-  expect(links).toHaveLength(resorts.length)
-  const yongpyong = links.find((a) => a.attributes('aria-label')?.includes('모나용평'))!
-  expect(yongpyong.find('img.symbol').exists()).toBe(true)
-  expect(yongpyong.attributes('href')).toBe(
-    resorts.find((r) => r.id === 'yongpyong')!.officialPage,
-  )
-  expect(yongpyong.attributes('target')).toBe('_blank')
-  expect(yongpyong.attributes('rel')).toContain('noopener')
+  rows.forEach((row) => {
+    const src = row.get('img.symbol').attributes('src')!
+    expect(existsSync(`public/${src}`), src).toBe(true)
+  })
 })
 
-test('collapsing a resort stops only its own video', async () => {
-  const panels = mount(App).findAll('details')
-  const yongpyong = panels.find((p) => p.text().includes('모나용평'))!
-  const other = panels.find((p) => p.text().includes('지산리조트'))!
-  playingCamId.value = 'yongpyong-cam08-test'
-  await other.trigger('toggle')
-  expect(playingCamId.value).toBe('yongpyong-cam08-test')
-
-  playingCamId.value = resorts.find((r) => r.id === 'yongpyong')!.cams[0].id
-  await yongpyong.trigger('toggle')
-
-  expect(playingCamId.value).toBeNull()
-})
-
-test('choosing a resort in the dropdown shows only that resort, expanded', async () => {
+test('clicking a resort opens only its detail: name, slope info, cams, and a back button', async () => {
   const app = mount(App)
 
-  await app.get('select').setValue('yongpyong')
+  await app.findAll('.resort-row')[0].trigger('click') // 모나용평
 
-  const panels = app.findAll('details')
-  expect(panels).toHaveLength(1)
-  expect(panels[0].text()).toContain('모나용평')
-  expect(panels[0].element.open).toBe(true)
-
-  await app.get('select').setValue('all')
-  expect(app.findAll('details')).toHaveLength(resorts.length)
-  expect(app.findAll('details').every((p) => !p.element.open)).toBe(true)
+  expect(app.find('.resort-list').exists()).toBe(false)
+  const detail = app.get('.resort-detail')
+  expect(detail.get('h2').text()).toBe('모나용평')
+  expect(detail.find('.back').exists()).toBe(true)
+  expect(detail.find('.slope-info').exists()).toBe(true)
+  const yongpyong = resorts.find((r) => r.id === 'yongpyong')!
+  expect(detail.findAll('.card')).toHaveLength(yongpyong.cams.length)
 })
 
-test('choosing a resort stops a video playing in another resort only', async () => {
-  const app = mount(App, { global: { stubs: { CamCard: true } } }) // jsdom에서는 재생기가 오류로 스스로 꺼진다.
-  const yongpyongCam = resorts.find((r) => r.id === 'yongpyong')!.cams[0].id
-  playingCamId.value = yongpyongCam
+test('the detail symbol links to the official page in a new tab', async () => {
+  const app = mount(App)
 
-  await app.get('select').setValue('yongpyong')
-  expect(playingCamId.value).toBe(yongpyongCam)
+  await app.findAll('.resort-row')[0].trigger('click')
 
-  await app.get('select').setValue('high1')
+  const link = app.get('.resort-detail a.symbol-link')
+  expect(link.attributes('href')).toBe(resorts.find((r) => r.id === 'yongpyong')!.officialPage)
+  expect(link.attributes('target')).toBe('_blank')
+  expect(link.attributes('rel')).toContain('noopener')
+  expect(link.find('img.symbol').exists()).toBe(true)
+})
+
+test('the back button returns to the list', async () => {
+  const app = mount(App)
+  await app.findAll('.resort-row')[1].trigger('click')
+
+  await app.get('.back').trigger('click')
+
+  expect(app.find('.resort-detail').exists()).toBe(false)
+  expect(app.findAll('.resort-row')).toHaveLength(resorts.length)
+})
+
+test('navigating stops any cam that was playing', async () => {
+  const app = mount(App, { global: { stubs: { CamCard: true } } })
+
+  playingCamId.value = 'yongpyong-cam08'
+  await app.findAll('.resort-row')[3].trigger('click') // 다른 스키장으로 이동
+  expect(playingCamId.value).toBeNull()
+
+  playingCamId.value = 'anything'
+  await app.get('.back').trigger('click')
   expect(playingCamId.value).toBeNull()
 })
 
-test('dropdown has a label and lists every resort', () => {
-  const select = mount(App).get('select')
+test('detail shows a placeholder when slope data is unavailable', async () => {
+  const app = mount(App, { global: { stubs: { CamCard: true } } }) // jsdom엔 fetch가 없어 슬로프 데이터가 비어 있다
 
-  expect(select.attributes('aria-label')).toBe('스키장 선택')
-  expect(select.findAll('option')).toHaveLength(resorts.length + 1)
+  await app.findAll('.resort-row')[0].trigger('click')
+
+  const info = app.get('.slope-info')
+  expect(info.classes()).toContain('empty')
+  expect(info.text()).toContain('정보가 없어요')
 })
 
-test('resorts appear in the order the user chose', () => {
-  const names = mount(App).findAll('summary h3').map((h) => h.text())
+test('detail shows the resort emergency contact as a tap-to-call link', async () => {
+  const app = mount(App, { global: { stubs: { CamCard: true } } })
 
-  expect(names).toEqual(['모나용평', '지산리조트', '웰리힐리파크', '하이원리조트', '휘닉스 평창', '알펜시아', '엘리시안강촌'])
-})
+  await app.findAll('.resort-row')[0].trigger('click') // 모나용평
 
-test('every resort has a symbol file', () => {
-  const sources = mount(App).findAll('summary img').map((img) => img.attributes('src')!)
-
-  expect(sources).toHaveLength(resorts.length)
-  sources.forEach((src) => expect(existsSync(`public/${src}`), src).toBe(true))
+  const emergency = app.get('.emergency')
+  expect(emergency.text()).toContain('사고 시 연락처')
+  const yongpyong = resorts.find((r) => r.id === 'yongpyong')!
+  const rows = emergency.findAll('.emergency-row')
+  expect(rows).toHaveLength(yongpyong.emergency!.length)
+  const firstTel = yongpyong.emergency![0].tels[0]
+  expect(rows[0].text()).toContain(firstTel)
+  expect(rows[0].get('.e-tel').attributes('href')).toBe(`tel:${firstTel}`)
 })
 
 test('hero photo credits its author and license', () => {

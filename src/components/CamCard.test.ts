@@ -187,19 +187,24 @@ describe('CamCard', () => {
     expect(first.find('[role="alert"]').exists()).toBe(false)
   })
 
-  test('playing replaces the name and buttons with the video, and ending brings them back', async () => {
+  test('keeps the cam name visible while playing and prompts a replay after it ends', async () => {
     const card = mount(CamCard, { props: { resort, cam: hlsCam } })
-    expect(card.get('.info').text()).toContain('베이스')
+    expect(card.get('h4').text()).toContain('베이스')
     expect(card.get('.info').findAll('button, a')).toHaveLength(1)
     expect(card.get<HTMLElement>('.slot').element.style.display).toBe('none')
 
     await card.get('.play').trigger('click')
-    expect(card.find('.info').exists()).toBe(false)
+    expect(card.find('.info').exists()).toBe(false) // 버튼 묶음만 숨고
+    expect(card.get('h4').text()).toContain('베이스') // 이름은 계속 보인다
     expect(card.get<HTMLElement>('.slot').element.style.display).toBe('')
 
     await card.get('video').trigger('loadedmetadata')
+    expect(card.text()).toContain('미리보기') // 재생 중 카운트다운 뱃지
     await vi.advanceTimersByTimeAsync(15_000)
+
     expect(card.find('.info').exists()).toBe(true)
+    expect(card.text()).toContain('끝났어요')
+    expect(card.get('.play').text()).toContain('다시 보기')
     expect(card.get<HTMLElement>('.slot').element.style.display).toBe('none')
   })
 
