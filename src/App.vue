@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import CamCard from './components/CamCard.vue'
 import MountainScene from './components/MountainScene.vue'
 import { resorts } from './data/cams'
@@ -27,6 +27,25 @@ onMounted(async () => {
   slopeStatus.value = await loadSlopeStatus(import.meta.env.BASE_URL)
 })
 
+// 목록 카드에 보여줄 스키장별 현재 날씨(한 번에 받아둔다).
+const cardWeather = shallowRef<Map<string, Weather>>(new Map())
+onMounted(async () => {
+  const entries = await Promise.all(
+    sortedResorts.map(
+      async (r) => [r.id, r.coord ? await fetchWeather(r.coord.lat, r.coord.lon) : null] as const,
+    ),
+  )
+  cardWeather.value = new Map(entries.filter((e): e is [string, Weather] => e[1] !== null))
+})
+
+// 상세 화면에서 스크롤을 내리면 상단 고정 헤더(뒤로가기)를 보여준다.
+const scrolled = shallowRef(false)
+const onScroll = () => {
+  scrolled.value = window.scrollY > 150
+}
+onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
+
 // null = 스키장 목록 화면, 값이 있으면 그 스키장 상세 화면
 const selectedId = shallowRef<string | null>(null)
 const currentResort = computed(() => sortedResorts.find((resort) => resort.id === selectedId.value) ?? null)
@@ -39,6 +58,8 @@ async function openResort(id: string) {
   playingCamId.value = null
   selectedId.value = id
   weather.value = null
+  scrolled.value = false
+  window.scrollTo({ top: 0 })
   const resort = sortedResorts.find((r) => r.id === id)
   if (!resort?.coord) return
   const result = await fetchWeather(resort.coord.lat, resort.coord.lon)
@@ -48,6 +69,8 @@ function goBack() {
   playingCamId.value = null
   selectedId.value = null
   weather.value = null
+  scrolled.value = false
+  window.scrollTo({ top: 0 })
 }
 
 // "033-330-3126~7, 033-330-6373"처럼 여러 번호가 있으면 첫 번호로 전화를 건다.
@@ -79,13 +102,22 @@ function cardSub(id: string, region: string): string {
       >
         <span class="row-art"><MountainScene :tint="tintOf(resort.id)" /></span>
         <span class="row-label">
-          <span class="resort-name">{{ resort.name }}</span>
-          <span class="row-sub">{{ cardSub(resort.id, resort.region) }}</span>
+          <span class="row-text">
+            <span class="resort-name">{{ resort.name }}</span>
+            <span class="row-sub">{{ cardSub(resort.id, resort.region) }}</span>
+          </span>
+          <span v-if="cardWeather.get(resort.id)" class="card-weather"
+            >{{ cardWeather.get(resort.id)!.icon }} {{ cardWeather.get(resort.id)!.temp }}°</span
+          >
         </span>
       </button>
     </nav>
 
     <section v-if="currentResort" class="resort-detail">
+      <header class="detail-topbar" :class="{ show: scrolled }">
+        <button type="button" class="topbar-back" aria-label="스키장 목록으로" @click="goBack">←</button>
+        <span class="topbar-name">{{ currentResort.name }}</span>
+      </header>
       <div class="detail-hero">
         <MountainScene :tint="tintOf(currentResort.id)" />
         <button type="button" class="back" aria-label="스키장 목록으로" @click="goBack">←</button>
