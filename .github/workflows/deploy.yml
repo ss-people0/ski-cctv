@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # 슬로프 수집 워크플로가 데이터를 커밋해도, 자동 토큰 커밋은 push 트리거를 안 울린다.
+  # 그래서 수집이 끝나면 여기서 이어받아 배포한다.
+  workflow_run:
+    workflows: ["Collect slope status"]
+    types: [completed]
 
 concurrency:
   group: pages
@@ -12,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 수집 워크플로가 성공했을 때만(실패/취소면 배포 안 함). push·수동 실행은 항상.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
     steps:
