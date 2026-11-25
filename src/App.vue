@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, shallowRef } from 'vue'
 import CamCard from './components/CamCard.vue'
+import MountainScene from './components/MountainScene.vue'
 import { resorts } from './data/cams'
 import { isPlayable, sortResorts } from './data/sortResorts'
 import {
@@ -42,7 +43,8 @@ function goBack() {
 // "033-330-3126~7, 033-330-6373"처럼 여러 번호가 있으면 첫 번호로 전화를 건다.
 const firstTel = (tel: string) => tel.match(/[\d-]+/)?.[0] ?? tel
 
-const photo = (id: string) => `${import.meta.env.BASE_URL}photos/${id}.jpg`
+// 스키장마다 다른 색조의 산 일러스트를 쓰기 위한 번호.
+const tintOf = (id: string) => sortedResorts.findIndex((resort) => resort.id === id)
 // 목록 카드의 작은 설명: 슬로프 현황이 있으면 그걸, 없으면 지역을 보여준다.
 function cardSub(id: string, region: string): string {
   return slopeBadges.value.get(id)?.summary ?? region
@@ -63,9 +65,9 @@ function cardSub(id: string, region: string): string {
         :key="resort.id"
         type="button"
         class="resort-row"
-        :style="{ backgroundImage: `url(${photo(resort.id)})` }"
         @click="openResort(resort.id)"
       >
+        <span class="row-art"><MountainScene :tint="tintOf(resort.id)" /></span>
         <span class="row-label">
           <span class="resort-name">{{ resort.name }}</span>
           <span class="row-sub">{{ cardSub(resort.id, resort.region) }}</span>
@@ -74,7 +76,8 @@ function cardSub(id: string, region: string): string {
     </nav>
 
     <section v-if="currentResort" class="resort-detail">
-      <div class="detail-hero" :style="{ backgroundImage: `url(${photo(currentResort.id)})` }">
+      <div class="detail-hero">
+        <MountainScene :tint="tintOf(currentResort.id)" />
         <button type="button" class="back" aria-label="스키장 목록으로" @click="goBack">←</button>
         <a
           class="symbol-link"
@@ -85,10 +88,10 @@ function cardSub(id: string, region: string): string {
         >
           <img class="symbol" :src="`symbols/${currentResort.id}.png`" alt="" />
         </a>
-        <div class="hero-label">
-          <h2>{{ currentResort.name }}</h2>
-          <span class="region">{{ currentResort.region }}</span>
-        </div>
+      </div>
+      <div class="detail-head">
+        <h2>{{ currentResort.name }}</h2>
+        <span class="region">{{ currentResort.region }}</span>
       </div>
 
       <div class="detail-body">
@@ -123,8 +126,7 @@ function cardSub(id: string, region: string): string {
     </section>
 
     <footer class="credit">
-      슬로프 사진: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a> (CC0, 크기 변경) — 실제 해당 스키장이 아닐 수 있습니다.
-      심볼은 각 리조트의 상표이며, 이 페이지는 리조트와 관련이 없는 개인 페이지입니다.
+      배경은 직접 그린 일러스트입니다. 심볼은 각 리조트의 상표이며, 이 페이지는 리조트와 관련이 없는 개인 페이지입니다.
     </footer>
   </main>
 </template>

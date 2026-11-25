@@ -23,11 +23,13 @@ test('the main screen lists every resort as a symbol + name row, in the chosen o
   expect(app.find('.cams').exists()).toBe(false) // 목록에서는 CCTV를 깔지 않는다
 })
 
-test('every resort has a background photo and a symbol on disk', () => {
+test('every resort has a symbol file and renders a mountain illustration', () => {
+  const app = mount(App)
+
   resorts.forEach((resort) => {
-    expect(existsSync(`public/photos/${resort.id}.jpg`), `photo ${resort.id}`).toBe(true)
     expect(existsSync(`public/symbols/${resort.id}.png`), `symbol ${resort.id}`).toBe(true)
   })
+  expect(app.findAll('.row-art svg')).toHaveLength(resorts.length)
 })
 
 test('clicking a resort opens only its detail: name, slope info, cams, and a back button', async () => {
@@ -103,9 +105,8 @@ test('detail shows the resort emergency contact as a tap-to-call link', async ()
   expect(rows[0].get('.e-tel').attributes('href')).toBe(`tel:${firstTel}`)
 })
 
-test('credits the slope photo source and license', () => {
+test('footer notes this is an unaffiliated personal page', () => {
   const credit = mount(App).get('.credit')
 
-  expect(credit.text()).toContain('Wikimedia Commons')
-  expect(credit.text()).toContain('CC0')
+  expect(credit.text()).toContain('개인 페이지')
 })
