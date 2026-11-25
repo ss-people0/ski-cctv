@@ -23,12 +23,10 @@ test('the main screen lists every resort as a symbol + name row, in the chosen o
   expect(app.find('.cams').exists()).toBe(false) // 목록에서는 CCTV를 깔지 않는다
 })
 
-test('every resort row shows a symbol that exists on disk', () => {
-  const rows = mount(App).findAll('.resort-row')
-
-  rows.forEach((row) => {
-    const src = row.get('img.symbol').attributes('src')!
-    expect(existsSync(`public/${src}`), src).toBe(true)
+test('every resort has a background photo and a symbol on disk', () => {
+  resorts.forEach((resort) => {
+    expect(existsSync(`public/photos/${resort.id}.jpg`), `photo ${resort.id}`).toBe(true)
+    expect(existsSync(`public/symbols/${resort.id}.png`), `symbol ${resort.id}`).toBe(true)
   })
 })
 
@@ -105,9 +103,9 @@ test('detail shows the resort emergency contact as a tap-to-call link', async ()
   expect(rows[0].get('.e-tel').attributes('href')).toBe(`tel:${firstTel}`)
 })
 
-test('hero photo credits its author and license', () => {
+test('credits the slope photo source and license', () => {
   const credit = mount(App).get('.credit')
 
-  expect(credit.text()).toContain('Christian Jansky')
-  expect(credit.text()).toContain('CC BY-SA 3.0')
+  expect(credit.text()).toContain('Wikimedia Commons')
+  expect(credit.text()).toContain('CC0')
 })

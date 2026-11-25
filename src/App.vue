@@ -41,34 +41,41 @@ function goBack() {
 
 // "033-330-3126~7, 033-330-6373"처럼 여러 번호가 있으면 첫 번호로 전화를 건다.
 const firstTel = (tel: string) => tel.match(/[\d-]+/)?.[0] ?? tel
+
+const photo = (id: string) => `${import.meta.env.BASE_URL}photos/${id}.jpg`
+// 목록 카드의 작은 설명: 슬로프 현황이 있으면 그걸, 없으면 지역을 보여준다.
+function cardSub(id: string, region: string): string {
+  return slopeBadges.value.get(id)?.summary ?? region
+}
 </script>
 
 <template>
   <main>
-    <header class="hero">
-      <img class="rider" src="/hero.jpg" alt="" />
-      <p>지금 슬로프는 어떨까?</p>
-      <h1>스키장 CCTV</h1>
-      <span class="badge">바로 볼 수 있는 영상 {{ playableTotal }}개</span>
+    <header class="topbar">
+      <span class="brand">스키장 CCTV</span>
+      <span class="count">바로 볼 수 있는 영상 {{ playableTotal }}개</span>
     </header>
 
     <nav v-if="!currentResort" class="resort-list" aria-label="스키장 목록">
+      <p class="lead">지금 슬로프는 어떨까</p>
       <button
         v-for="resort in sortedResorts"
         :key="resort.id"
         type="button"
         class="resort-row"
+        :style="{ backgroundImage: `url(${photo(resort.id)})` }"
         @click="openResort(resort.id)"
       >
-        <img class="symbol" :src="`symbols/${resort.id}.png`" alt="" />
-        <span class="resort-name">{{ resort.name }}</span>
-        <span class="chevron" aria-hidden="true">›</span>
+        <span class="row-label">
+          <span class="resort-name">{{ resort.name }}</span>
+          <span class="row-sub">{{ cardSub(resort.id, resort.region) }}</span>
+        </span>
       </button>
     </nav>
 
     <section v-if="currentResort" class="resort-detail">
-      <button type="button" class="back" @click="goBack">← 스키장 목록</button>
-      <div class="detail-head">
+      <div class="detail-hero" :style="{ backgroundImage: `url(${photo(currentResort.id)})` }">
+        <button type="button" class="back" aria-label="스키장 목록으로" @click="goBack">←</button>
         <a
           class="symbol-link"
           :href="currentResort.officialPage"
@@ -78,40 +85,45 @@ const firstTel = (tel: string) => tel.match(/[\d-]+/)?.[0] ?? tel
         >
           <img class="symbol" :src="`symbols/${currentResort.id}.png`" alt="" />
         </a>
-        <div class="names">
+        <div class="hero-label">
           <h2>{{ currentResort.name }}</h2>
           <span class="region">{{ currentResort.region }}</span>
         </div>
       </div>
-      <div class="slope-info" :class="{ empty: !slopeBadges.get(currentResort.id) }">
-        <template v-if="slopeBadges.get(currentResort.id)">
-          <span class="slope-summary">{{ slopeBadges.get(currentResort.id)!.summary }}</span>
-          <span
-            v-for="hour in slopeBadges.get(currentResort.id)!.hours"
-            :key="hour.label"
-            class="slope-hour"
-            :class="{ off: hour.off }"
-          >{{ hour.label }} {{ hour.value }}<template v-if="hour.off"> · 현재 미운영</template></span>
-        </template>
-        <span v-else>아직 오픈 현황 정보가 없어요.</span>
-      </div>
-      <div v-if="currentResort.emergency?.length" class="emergency">
-        <span class="emergency-title">🚨 사고 시 연락처</span>
-        <div v-for="contact in currentResort.emergency" :key="contact.label" class="emergency-row">
-          <span class="e-label">{{ contact.label }}</span>
-          <span class="e-tels">
-            <a v-for="tel in contact.tels" :key="tel" class="e-tel" :href="`tel:${firstTel(tel)}`">{{ tel }}</a>
-          </span>
+
+      <div class="detail-body">
+        <div class="slope-info" :class="{ empty: !slopeBadges.get(currentResort.id) }">
+          <template v-if="slopeBadges.get(currentResort.id)">
+            <span class="slope-summary">{{ slopeBadges.get(currentResort.id)!.summary }}</span>
+            <span
+              v-for="hour in slopeBadges.get(currentResort.id)!.hours"
+              :key="hour.label"
+              class="slope-hour"
+              :class="{ off: hour.off }"
+            >{{ hour.label }} {{ hour.value }}<template v-if="hour.off"> · 현재 미운영</template></span>
+          </template>
+          <span v-else>아직 오픈 현황 정보가 없어요.</span>
         </div>
-      </div>
-      <div class="cams">
-        <CamCard v-for="cam in currentResort.cams" :key="cam.id" :resort="currentResort" :cam="cam" />
+
+        <div v-if="currentResort.emergency?.length" class="emergency">
+          <span class="emergency-title">🚨 사고 시 연락처</span>
+          <div v-for="contact in currentResort.emergency" :key="contact.label" class="emergency-row">
+            <span class="e-label">{{ contact.label }}</span>
+            <span class="e-tels">
+              <a v-for="tel in contact.tels" :key="tel" class="e-tel" :href="`tel:${firstTel(tel)}`">{{ tel }}</a>
+            </span>
+          </div>
+        </div>
+
+        <h3 class="cams-title">라이브 캠</h3>
+        <div class="cams">
+          <CamCard v-for="cam in currentResort.cams" :key="cam.id" :resort="currentResort" :cam="cam" />
+        </div>
       </div>
     </section>
 
     <footer class="credit">
-      사진: <a href="https://commons.wikimedia.org/wiki/File:Ariane_Lavigne_FIS_World_Cup_Parallel_Slalom_Jauerling_2012b.jpg" target="_blank" rel="noopener noreferrer">Christian Jansky</a>,
-      <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a> (크기 변경, 일부만 표시).
+      슬로프 사진: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a> (CC0, 크기 변경) — 실제 해당 스키장이 아닐 수 있습니다.
       심볼은 각 리조트의 상표이며, 이 페이지는 리조트와 관련이 없는 개인 페이지입니다.
     </footer>
   </main>
