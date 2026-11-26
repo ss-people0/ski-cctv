@@ -37,3 +37,4 @@ CLAUDE.local.md
 
 # 참고용 화면 캡처 (공개하지 않음)
 /*.png
+__pycache__/

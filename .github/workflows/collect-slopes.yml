@@ -2,9 +2,11 @@ name: Collect slope status
 
 on:
   schedule:
-    # 매일 09:00 / 10:00 / 16:00(KST)에 수집. GitHub cron은 UTC라 9시간을 뺀다.
-    # 00:00 UTC=09:00 KST(개장), 01:00=10:00(오전), 07:00=16:00(오후·마감 전). 5~15분 늦을 수 있음.
-    - cron: "0 0,1,7 * * *"
+    # GitHub cron은 UTC(KST-9). 정각은 실행이 밀리거나 빠지기 쉬워 :17, :47을 쓴다.
+    # 휘팍 빼고 매시: 08:17~17:17 KST (23,0~8 UTC). 한두 번 빠져도 그날 값이 남게 한다.
+    - cron: "17 23,0-8 * * *"
+    # 휘팍만 하루 3회(robots.txt가 /api/ 금지 → 저빈도): 09:47 / 12:47 / 16:47 KST.
+    - cron: "47 0,3,7 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -23,7 +25,16 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: python3 scripts/collect_slopes.py --out public/data/slopes.json
+      # 수동 실행은 전체, 예약 실행은 위 두 cron에 따라 나눈다. 안 모은 곳은 기존 값 유지.
+      - env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          case "$SCHEDULE" in
+            "47 0,3,7 * * *") args="phoenix" ;;
+            "") args="" ;;
+            *) args="--exclude phoenix" ;;
+          esac
+          python3 scripts/collect_slopes.py $args --out public/data/slopes.json
         timeout-minutes: 3
       - name: Commit if changed
         run: |
@@ -31,4 +42,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data/slopes.json
           git diff --cached --quiet || git commit -m "chore: update slope status"
+          # 수집 중에 사람이 main에 올렸으면 그 위에 얹어서 push가 거절되지 않게 한다.
+          git pull --rebase
           git push

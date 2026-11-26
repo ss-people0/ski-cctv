@@ -482,14 +482,30 @@ RESORTS = {
 }
 
 
+def keep_uncollected(collected: list[dict[str, Any]], previous_path: str) -> list[dict[str, Any]]:
+    """이번에 안 모은 리조트(휘팍은 하루 3회만 모음)는 기존 파일 값을 남겨 화면에서 사라지지 않게 한다."""
+    try:
+        with open(previous_path, encoding="utf-8") as f:
+            previous = json.load(f).get("resorts", [])
+    except (OSError, ValueError) as e:
+        print(f"기존 파일을 못 읽어 새 값만 저장: {e}", file=sys.stderr)
+        return collected
+    ids = {r["id"] for r in collected}
+    kept = [r for r in previous if isinstance(r, dict) and r.get("id") not in ids]
+    order = list(RESORTS)
+    # 실행마다 모으는 곳이 달라도 파일 속 순서가 같게 유지한다.
+    return sorted(collected + kept, key=lambda r: order.index(r["id"]) if r["id"] in order else len(order))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="스키장 슬로프 현황 프로토타입 수집")
     ap.add_argument("resorts", nargs="*", help=f"수집할 리조트 id (기본: 웰리힐리 제외 전체) {list(RESORTS)}")
-    ap.add_argument("--out", help="결과 JSON 저장 경로 (없으면 표준출력)")
+    ap.add_argument("--out", help="결과 JSON 저장 경로 (없으면 표준출력). 이번에 안 모은 리조트는 기존 값 유지")
+    ap.add_argument("--exclude", nargs="*", default=[], help="이번에 뺄 리조트 id (예: phoenix)")
     ap.add_argument("--compact", action="store_true", help="한 줄 JSON")
     args = ap.parse_args()
 
-    ids = args.resorts or [k for k in RESORTS if k != "wellihilli"]
+    ids = [k for k in (args.resorts or [k for k in RESORTS if k != "wellihilli"]) if k not in args.exclude]
     result: dict[str, Any] = {
         "generatedAt": now_kst().isoformat(timespec="seconds"),
         "timezone": "Asia/Seoul",
@@ -508,6 +524,8 @@ def main() -> int:
             item["error"] = f"{type(e).__name__}: {e}"
             result["resorts"].append(item)
 
+    if args.out:
+        result["resorts"] = keep_uncollected(result["resorts"], args.out)
     text = json.dumps(result, ensure_ascii=False, indent=None if args.compact else 1)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
