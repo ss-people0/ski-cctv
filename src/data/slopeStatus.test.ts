@@ -191,9 +191,12 @@ test('upcoming slope shows as upcoming only while still closed (no duplicate whe
   const slopes = (state: string) => [{ name: '옐로우', level: '초급', day: state, night: 'CLOSE' }]
   expect(buildSlopeBoard(make({ slopes: slopes('CLOSE') }), TODAY, upcoming)?.groups[0].chips[0].status).toBe('upcoming')
   expect(buildSlopeBoard(make({ slopes: slopes('OPEN') }), TODAY, upcoming)?.groups[0].chips[0].status).toBe('open')
-  // 오픈 당일부터는 '예정'이 아니라 실제 상태(여기선 미개방)를 보여준다.
+  // 오픈 당일엔 실제로 열리기 전까지 칩은 '개방 예정'(문구는 당일에 빠짐), 다음 날부터는 실제 상태.
   const onTheDay = make({ sourceDate: '2026-11-26', slopes: slopes('CLOSE') })
-  expect(buildSlopeBoard(onTheDay, '2026-11-26', upcoming)?.groups[0].chips[0].status).toBe('closed')
+  expect(buildSlopeBoard(onTheDay, '2026-11-26', upcoming)?.groups[0].chips[0].status).toBe('upcoming')
+  expect(formatUpcoming(upcoming, '2026-11-26')).toEqual([])
+  const dayAfter = make({ sourceDate: '2026-11-27', slopes: slopes('CLOSE') })
+  expect(buildSlopeBoard(dayAfter, '2026-11-27', upcoming)?.groups[0].chips[0].status).toBe('closed')
 })
 
 test('last-season data (pre-season) shows the official list all closed, ignoring old states and old hours', () => {

@@ -172,7 +172,8 @@ export function buildSlopeBoard(
 
   const byName = new Map<string, SlopeRow[]>()
   for (const row of slopes) byName.set(row.name, [...(byName.get(row.name) ?? []), row])
-  const upcomingNames = new Set((upcoming ?? []).filter((u) => u.date > today).map((u) => u.name))
+  // 오픈 당일까지 '개방 예정'. 실제로 열리면 toChip이 개방을 먼저 보여준다.
+  const upcomingNames = new Set((upcoming ?? []).filter((u) => u.date >= today).map((u) => u.name))
 
   // 같은 난이도는 한 줄로 모은다(하이원은 공식 표가 구역 순이라 난이도가 섞여 나온다). 줄 안은 공식 표 순서.
   const byLevel = new Map<string, SlopeChip[]>()
