@@ -275,3 +275,13 @@ test('official slope catalog fills in when the live feed has no list yet (gangch
   const live = make({ sourceDate: TODAY, slopes: [{ name: '래빗', level: '초급', day: 'OPEN' }] })
   expect(buildSlopeBoard(live, TODAY, undefined, catalog)?.total).toBe(1)
 })
+
+test('yesterday data (before the morning collection) keeps the real state and shows its date, not "preseason"', () => {
+  // 2026-11-27 새벽: 용평 값이 11-26 기준이라 "올 시즌 오픈 전 + 전부 미개방"으로 잘못 보였다.
+  const yesterday = make({ sourceDate: '2026-11-24', slopes: [{ name: '핑크', day: 'OPEN' }, { name: '옐로우', day: 'CLOSE' }] })
+  const board = buildSlopeBoard(yesterday, TODAY)
+  expect(board?.preseason).toBe(false)
+  expect(board?.openCount).toBe(1)
+  expect(board?.asOf).toBe('2026-11-24')
+  expect(buildSlopeBoard(make({ sourceDate: TODAY, slopes: [{ name: 'a', day: 'OPEN' }] }), TODAY)?.asOf).toBeUndefined()
+})

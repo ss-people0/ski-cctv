@@ -25,6 +25,10 @@ const countText = computed(() => {
   if (!b) return ''
   return b.openCount === b.total ? '전 슬로프 개방' : `${b.openCount} / ${b.total}개 개방`
 })
+const asOfText = computed(() => {
+  const d = props.board?.asOf
+  return d ? `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일` : ''
+})
 const percent = computed(() => (props.board?.total ? (props.board.openCount / props.board.total) * 100 : 0))
 </script>
 
@@ -44,6 +48,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
       </button>
       <div class="progress" aria-hidden="true"><span :style="{ width: `${percent}%` }" /></div>
       <p v-if="board.preseason" class="preseason">올 시즌 오픈 전이에요. 공식 현황이 올라오면 자동으로 바뀌어요.</p>
+      <p v-else-if="board.asOf" class="preseason">{{ asOfText }} 기준이에요. 오늘 현황은 아침 8시쯤 바뀌어요.</p>
 
       <div v-show="!collapsed" id="slope-list" class="slope-list">
         <div v-for="group in board.groups" :key="group.level" class="level-row" :class="{ 'no-level': !group.level }">

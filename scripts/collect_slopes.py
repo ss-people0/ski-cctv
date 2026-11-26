@@ -529,6 +529,49 @@ def keep_uncollected(collected: list[dict[str, Any]], previous_path: str) -> lis
     return sorted(collected + kept, key=lambda r: order.index(r["id"]) if r["id"] in order else len(order))
 
 
+# 한 번 연 슬로프는 시즌 내내 열려 있다 → 시즌 중엔 사이트의 일시적 CLOSE·수집 실패로 화면이 흔들리지 않게 개방을 유지한다.
+# 3월부터는 슬로프가 하나씩 닫히므로 실시간 그대로. 야간은 요일마다 달라 실시간 그대로.
+STICKY_MONTHS = {11, 12, 1, 2}
+SAME_SEASON_DAYS = 7  # 화면(slopeStatus.ts)과 같은 기준: 이보다 오래된 기준일은 지난 시즌 값
+
+
+def _is_this_season(entry: dict[str, Any], today: dt.date) -> bool:
+    if entry.get("status") not in ("ok", "partial") or not entry.get("slopes"):
+        return False
+    source = entry.get("sourceDate")
+    return source is None or (today - dt.date.fromisoformat(source)).days <= SAME_SEASON_DAYS
+
+
+def _keep_day_open(row: dict[str, Any], prev_rows: dict[tuple, dict[str, Any]]) -> dict[str, Any]:
+    prev = prev_rows.get((row.get("name"), row.get("slot")))
+    if not prev:
+        return row
+    kept = {**row}
+    if prev.get("day") == "OPEN":
+        kept["day"] = "OPEN"
+    if prev.get("state") == "OPEN" and "야간" not in (row.get("slot") or ""):
+        kept["state"] = "OPEN"
+    return kept
+
+
+def stick_open(new: dict[str, Any], prev: dict[str, Any] | None, today: dt.date) -> dict[str, Any]:
+    """시즌 중(STICKY_MONTHS)엔 지난 수집에서 연 주간 슬로프를 개방으로 유지하고, 수집이 실패하면 지난 값을 그대로 둔다."""
+    if today.month not in STICKY_MONTHS or prev is None or not _is_this_season(prev, today):
+        return new
+    if new.get("status") in ("error", "skipped") or not new.get("slopes"):
+        return prev
+    prev_rows = {(r.get("name"), r.get("slot")): r for r in prev["slopes"]}
+    return {**new, "slopes": [_keep_day_open(r, prev_rows) for r in new["slopes"]]}
+
+
+def read_previous(path: str) -> dict[str, dict[str, Any]]:
+    try:
+        with open(path, encoding="utf-8") as f:
+            return {r["id"]: r for r in json.load(f).get("resorts", []) if isinstance(r, dict) and "id" in r}
+    except (OSError, ValueError):
+        return {}  # 없거나 깨졌으면 keep_uncollected가 이유를 출력한다
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="스키장 슬로프 현황 프로토타입 수집")
     ap.add_argument("resorts", nargs="*", help=f"수집할 리조트 id (기본: 웰리힐리 제외 전체) {list(RESORTS)}")
@@ -557,6 +600,9 @@ def main() -> int:
             result["resorts"].append(item)
 
     if args.out:
+        previous = read_previous(args.out)
+        today = today_kst()
+        result["resorts"] = [stick_open(r, previous.get(r["id"]), today) for r in result["resorts"]]
         result["resorts"] = keep_uncollected(result["resorts"], args.out)
     text = json.dumps(result, ensure_ascii=False, indent=None if args.compact else 1)
     if args.out:

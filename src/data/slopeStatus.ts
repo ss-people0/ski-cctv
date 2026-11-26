@@ -51,6 +51,12 @@ export interface SlopeSummary {
   hours: SlopeHourLine[] // 주간/정설/야간 — 화면에서 줄마다 하나씩 표시
 }
 
+// 기준일이 며칠 지난 정도(밤사이·아침 수집 전, 수집 누락)는 아직 같은 시즌 값이다. 그보다 오래되면 지난 시즌 값.
+const SAME_SEASON_DAYS = 7
+const DAY_MS = 24 * 60 * 60 * 1000
+const isLastSeason = (sourceDate: string, today: string): boolean =>
+  Date.parse(today) - Date.parse(sourceDate) > SAME_SEASON_DAYS * DAY_MS
+
 // 슬로프 현황. 보여 줄 게 없으면 null → 설명란에 안내 문구를 대신 띄운다.
 export function formatSlopeBadge(entry: ResortSlopeStatus | undefined, todayKst: string): SlopeSummary | null {
   if (!entry || entry.status === 'error' || entry.status === 'skipped') return null
@@ -58,7 +64,7 @@ export function formatSlopeBadge(entry: ResortSlopeStatus | undefined, todayKst:
   // 아직 올 시즌 오픈 예정일이 안 나온 곳(지난 시즌 값 그대로거나 데이터 비어 있음)은 당분간 숨긴다.
   // 리조트가 올 시즌 값을 올리면(status ok + 오늘 기준일) 자동으로 다시 표시된다.
   if (entry.status === 'stale') return null
-  if (entry.sourceDate !== null && entry.sourceDate !== todayKst) return null
+  if (entry.sourceDate !== null && isLastSeason(entry.sourceDate, todayKst)) return null
   if (entry.slopes.length === 0) return null
 
   const openNames = openNamesOf(entry.slopes)
@@ -121,6 +127,7 @@ export interface SlopeBoard {
   groups: LevelGroup[]
   hours: SlopeHourLine[]
   preseason: boolean // 사이트에 지난 시즌 값만 있음 → 올 시즌 오픈 전으로 보고 전부 미개방
+  asOf?: string // 오늘 값이 아니면 그 기준일(YYYY-MM-DD) → 화면에 "N월 N일 기준" 표시
 }
 
 const LEVEL_ORDER = ['초급', '초중급', '중급', '중상급', '상급', '최상급']
@@ -184,6 +191,7 @@ export function buildSlopeBoard(
     groups,
     hours: badge?.hours ?? [],
     preseason,
+    ...(!preseason && live?.sourceDate && live.sourceDate !== today ? { asOf: live.sourceDate } : {}),
   }
 }
 
