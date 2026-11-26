@@ -76,22 +76,23 @@ export const resorts: readonly Resort[] = [
     ],
   },
 
-  // ───────────────────────── 웰리힐리파크 ─────────────────────────
+  // ───────────────────────── 휘닉스 평창 ─────────────────────────
   {
-    id: 'wellihilli',
-    name: '웰리힐리파크',
-    region: '강원 횡성',
-    officialPage: 'https://www.wellihillipark.com/home/customer/webcam',
-    coord: { lat: 37.5066, lon: 128.2707 }, // 횡성 둔내면
-    emergency: [{ label: '패트롤실', tels: ['033-340-3696'] }],
-    note: 'HLS(Wowza), CORS * (2026-11-24 확인). cam05는 404라 investigate. cam01은 목록에 없음.',
+    id: 'phoenix',
+    name: '휘닉스 평창',
+    region: '강원 평창',
+    officialPage: 'https://phoenixhnr.co.kr/page/pyeongchang/guide/operation/sketchMovie',
+    coord: { lat: 37.5847, lon: 128.3233 }, // 평창 봉평면
+    emergency: [{ label: '패트롤', tels: ['033-330-3126', '033-330-3127', '033-330-6373'] }],
+    note: 'HLS(streaming.phoenixhnr.co.kr), CORS *. 주소는 사용자가 준 목록(2026-11-24, 7개 모두 신호 확인). 심볼은 공식 파비콘(P 마크).',
     cams: [
-      { id: 'wellihilli-d1',     name: 'D1',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam02.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'wellihilli-base',   name: '베이스 광장', type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam03.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'wellihilli-b2',     name: 'B2',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam04.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'wellihilli-top',    name: '정상광장',   type: 'hls', status: 'investigate', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam05.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'wellihilli-dplus',  name: 'D+',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam06.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'wellihilli-water',  name: '워터 플라넷', type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam07.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-bulsae', name: '불새마루', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/ht_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-penguin', name: '펭귄', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-hawk', name: '호크/스패로우', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_02_02.m3u8', playLimitSec: PLAY_LIMIT_SEC }, // 11-25 저녁~11-26 오후 끊겼다가 17:43 복구 확인
+      { id: 'phoenix-snowvillage', name: '스노우 빌리지', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-dodo', name: '도도', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/sp_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-montblanc', name: '몽블랑 광장', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/mb_03_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'phoenix-base', name: '베이스', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_02_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
     ],
   },
 
@@ -126,23 +127,22 @@ export const resorts: readonly Resort[] = [
     ],
   },
 
-  // ───────────────────────── 휘닉스 평창 ─────────────────────────
+  // ───────────────────────── 웰리힐리파크 ─────────────────────────
   {
-    id: 'phoenix',
-    name: '휘닉스 평창',
-    region: '강원 평창',
-    officialPage: 'https://phoenixhnr.co.kr/page/pyeongchang/guide/operation/sketchMovie',
-    coord: { lat: 37.5847, lon: 128.3233 }, // 평창 봉평면
-    emergency: [{ label: '패트롤', tels: ['033-330-3126', '033-330-3127', '033-330-6373'] }],
-    note: 'HLS(streaming.phoenixhnr.co.kr), CORS *. 주소는 사용자가 준 목록(2026-11-24, 7개 모두 신호 확인). 심볼은 공식 파비콘(P 마크).',
+    id: 'wellihilli',
+    name: '웰리힐리파크',
+    region: '강원 횡성',
+    officialPage: 'https://www.wellihillipark.com/home/customer/webcam',
+    coord: { lat: 37.5066, lon: 128.2707 }, // 횡성 둔내면
+    emergency: [{ label: '패트롤실', tels: ['033-340-3696'] }],
+    note: 'HLS(Wowza), CORS * (2026-11-24 확인). cam05는 404라 investigate. cam01은 목록에 없음.',
     cams: [
-      { id: 'phoenix-bulsae', name: '불새마루', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/ht_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-penguin', name: '펭귄', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-hawk', name: '호크/스패로우', type: 'hls', status: 'pending', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_02_02.m3u8', playLimitSec: PLAY_LIMIT_SEC }, // 2026-11-25 세그먼트 404라 보류, 복구되면 active
-      { id: 'phoenix-snowvillage', name: '스노우 빌리지', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/yh_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-dodo', name: '도도', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/sp_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-montblanc', name: '몽블랑 광장', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/mb_03_02.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'phoenix-base', name: '베이스', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_02_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'wellihilli-d1',     name: 'D1',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam02.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'wellihilli-base',   name: '베이스 광장', type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam03.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'wellihilli-b2',     name: 'B2',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam04.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'wellihilli-top',    name: '정상광장',   type: 'hls', status: 'investigate', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam05.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'wellihilli-dplus',  name: 'D+',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam06.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'wellihilli-water',  name: '워터 플라넷', type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam07.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
     ],
   },
 

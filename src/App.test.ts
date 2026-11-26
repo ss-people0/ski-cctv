@@ -11,7 +11,7 @@ beforeEach(() => {
   playingCamId.value = null
 })
 
-const ORDER = ['모나용평', '지산리조트', '웰리힐리파크', '하이원리조트', '휘닉스 평창', '알펜시아', '엘리시안강촌']
+const ORDER = ['모나용평', '지산리조트', '휘닉스 평창', '하이원리조트', '웰리힐리파크', '알펜시아', '엘리시안강촌']
 
 test('the main screen lists every resort as a symbol + name row, in the chosen order', () => {
   const app = mount(App)
@@ -23,13 +23,17 @@ test('the main screen lists every resort as a symbol + name row, in the chosen o
   expect(app.find('.cams').exists()).toBe(false) // 목록에서는 CCTV를 깔지 않는다
 })
 
-test('every resort has a symbol file and renders a mountain illustration', () => {
+test('every resort has a symbol file and renders its own illustration image', () => {
   const app = mount(App)
 
   resorts.forEach((resort) => {
     expect(existsSync(`public/symbols/${resort.id}.png`), `symbol ${resort.id}`).toBe(true)
+    expect(existsSync(`public/illustrations/${resort.id}.jpg`), `illustration ${resort.id}`).toBe(true)
   })
-  expect(app.findAll('.row-art svg')).toHaveLength(resorts.length)
+  // 스키장 순서는 데이터 순서 그대로다(sortResorts는 캠만 정렬).
+  expect(app.findAll('.row-art img').map((img) => img.attributes('src'))).toEqual(
+    resorts.map((resort) => `illustrations/${resort.id}.jpg`),
+  )
 })
 
 test('clicking a resort opens only its detail: name, slope info, cams, and a back button', async () => {

@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
+import { mixHex, type ResortTheme } from '../data/themes'
 
-// 스키장마다 다른 파스텔 색조로 그리는 설산 일러스트.
-const props = defineProps<{ tint: number }>()
+// 스키장 테마색 하나로 하늘·산 명암을 만들어 그리는 파스텔 설산 일러스트.
+const props = defineProps<{ theme: ResortTheme }>()
 
-type Palette = { sky: [string, string]; m: [string, string, string]; sun: string }
-const palettes: Palette[] = [
-  { sky: ['#ece4fb', '#fce7f0'], m: ['#cbb9f2', '#ab93e6', '#9174da'], sun: '#ffe1b0' }, // 라벤더
-  { sky: ['#e2eefb', '#eafaf3'], m: ['#bcd8f3', '#93bbe9', '#6f9bda'], sun: '#fff1b5' }, // 아침 블루
-  { sky: ['#fdeede', '#fde3ea'], m: ['#f3c9ad', '#eaa98f', '#d98f86'], sun: '#ffd79e' }, // 피치
-  { sky: ['#e3f6ee', '#eafaf6'], m: ['#b6e6cf', '#8fd1b4', '#6fc3a0'], sun: '#fdf0c0' }, // 민트
-  { sky: ['#e6e9fb', '#f0e9fb'], m: ['#c2c6f2', '#9fa6e6', '#8183d8'], sun: '#ffe3c0' }, // 페리윙클
-  { sky: ['#fce7ee', '#fdeede'], m: ['#f2c2d2', '#e69fb3', '#d98f9f'], sun: '#ffe0b8' }, // 로즈
-  { sky: ['#e0f2fb', '#eafaf7'], m: ['#b2ddf0', '#8fc6e6', '#6facd6'], sun: '#fff0b8' }, // 아쿠아
-]
-const p = computed(() => palettes[((props.tint % palettes.length) + palettes.length) % palettes.length])
+const WHITE = '#FFFFFF'
+const p = computed(() => {
+  const { background: bg, foreground: fg } = props.theme
+  return {
+    sky: [mixHex(bg, WHITE, 0.78), mixHex(bg, WHITE, 0.9)],
+    m: [mixHex(bg, WHITE, 0.3), bg, mixHex(bg, fg, 0.3)], // 뒤 → 앞으로 갈수록 진하게
+    sun: '#FFE6B8',
+  }
+})
 const uid = useId()
 </script>
 

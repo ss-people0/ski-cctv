@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import CamCard from './components/CamCard.vue'
-import MountainScene from './components/MountainScene.vue'
 import { resorts } from './data/cams'
 import { isPlayable, sortResorts } from './data/sortResorts'
 import {
@@ -10,6 +9,7 @@ import {
   todayKst,
   type ResortSlopeStatus,
 } from './data/slopeStatus'
+import { themeOf } from './data/themes'
 import { fetchWeather, type Weather } from './data/weather'
 import { playingCamId } from './playingCam'
 
@@ -76,12 +76,8 @@ function goBack() {
 // "033-330-3126~7, 033-330-6373"처럼 여러 번호가 있으면 첫 번호로 전화를 건다.
 const firstTel = (tel: string) => tel.match(/[\d-]+/)?.[0] ?? tel
 
-// 스키장마다 다른 색조의 산 일러스트를 쓰기 위한 번호.
-const tintOf = (id: string) => sortedResorts.findIndex((resort) => resort.id === id)
-// 목록 카드의 작은 설명: 슬로프 현황이 있으면 그걸, 없으면 지역을 보여준다.
-function cardSub(id: string, region: string): string {
-  return slopeBadges.value.get(id)?.summary ?? region
-}
+// 카드 이름 영역에 스키장 테마색(배경/글자)을 CSS 변수로 넘긴다.
+const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--theme-fg': themeOf(id).foreground })
 </script>
 
 <template>
@@ -100,11 +96,11 @@ function cardSub(id: string, region: string): string {
         class="resort-row"
         @click="openResort(resort.id)"
       >
-        <span class="row-art"><MountainScene :tint="tintOf(resort.id)" /></span>
-        <span class="row-label">
+        <span class="row-art"><img :src="`illustrations/${resort.id}.jpg`" alt="" loading="lazy" decoding="async" /></span>
+        <span class="row-label" :style="themeVars(resort.id)">
           <span class="row-text">
             <span class="resort-name">{{ resort.name }}</span>
-            <span class="row-sub">{{ cardSub(resort.id, resort.region) }}</span>
+            <span class="row-sub">{{ resort.region }}</span>
           </span>
           <span v-if="cardWeather.get(resort.id)" class="card-weather"
             >{{ cardWeather.get(resort.id)!.icon }} {{ cardWeather.get(resort.id)!.temp }}°</span
@@ -119,7 +115,7 @@ function cardSub(id: string, region: string): string {
         <span class="topbar-name">{{ currentResort.name }}</span>
       </header>
       <div class="detail-hero">
-        <MountainScene :tint="tintOf(currentResort.id)" />
+        <img class="hero-art" :src="`illustrations/${currentResort.id}.jpg`" alt="" />
         <button type="button" class="back" aria-label="스키장 목록으로" @click="goBack">←</button>
         <a
           class="symbol-link"
