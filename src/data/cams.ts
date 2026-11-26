@@ -70,13 +70,13 @@ export const resorts: readonly Resort[] = [
     officialPage: 'https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp',
     coord: { lat: 37.2566, lon: 127.3607 }, // 이천 마장면
     emergency: [{ label: '응급후송', tels: ['031-644-1570'] }],
-    note: 'jisan1~3 스트림(livecity)은 신호가 들어와 재생한다(2026-11-24, CORS *). 공식 버튼은 아직 "26/27시즌에 뵙겠습니다"로 막혀 있다. 블루·실버는 아직 신호가 없어 오픈 준비 중.',
+    note: 'jisan1~3 스트림(livecity)은 신호가 들어와 재생한다(2026-11-24, CORS *). 공식 버튼은 아직 "26/27시즌에 뵙겠습니다"로 막혀 있다. 블루·실버는 공식 페이지 cam_sel(4)/(5) 순서대로 jisan4·5(2026-11-26 신호·CORS * 확인).',
     cams: [
       { id: 'jisan-lemon',  name: '레몬 탑승장',            type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan1.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'jisan-orange', name: '오렌지/뉴오렌지 탑승장', type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan2.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'jisan-5-6',    name: '5번/6번 슬로프',         type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan3.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'jisan-blue',   name: '블루 탑승장',            type: 'link', status: 'pending', url: null },
-      { id: 'jisan-silver', name: '실버 탑승장',            type: 'link', status: 'pending', url: null },
+      { id: 'jisan-blue',   name: '블루 탑승장',            type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan4.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'jisan-silver', name: '실버 탑승장',            type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan5.m3u8', playLimitSec: PLAY_LIMIT_SEC },
     ],
   },
 
@@ -184,7 +184,7 @@ export const resorts: readonly Resort[] = [
     emergency: [{ label: '패트롤 상황실', tels: ['033-339-0305'] }],
     note: '방송이 새로 시작되면 videoId가 바뀔 수 있다. 채널: UCrmFQpznvkrLQSjJG1wGdGg',
     cams: [
-      { id: 'alpensia-live', name: '알펜시아 실시간', type: 'youtube', status: 'active', videoId: 'IBGo-_Y3-g4' },
+      { id: 'alpensia-live', name: '알펜시아 실시간', type: 'youtube', status: 'active', videoId: 'hU6FtSnVEyw' }, // 2026-11-24 11:11 UTC 시작한 방송(이전 IBGo-_Y3-g4는 종료)
     ],
   },
 
