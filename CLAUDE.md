@@ -10,7 +10,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 
 ## 명령
 
-- `npm test` — Vitest(jsdom). 현재 41개 통과.
+- `npm test` — Vitest(jsdom). 현재 61개 통과. 수집기 테스트: `python3 -m unittest discover scripts`.
 - `npm run build` — vue-tsc 타입체크 + vite 빌드.
 - `npm run dev -- --host --port 5199` — 휴대폰 확인용(같은 와이파이에서 `http://<맥 IP>:5199`).
 
@@ -33,7 +33,10 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - `src/data/sortResorts.ts` — `isPlayable`, 캠 정렬(재생→링크→investigate→pending). `isBlockedByHttps`(https에서 http 스트림 차단).
 - `src/data/slopeStatus.ts` — `slopes.json` 읽어 카드 배지로. `formatSlopeBadge`(→ `{summary, hours[]}` 또는 null), `loadSlopeStatus`, `todayKst`. stale/빈데이터/에러는 **숨김**(null).
 - `src/data/weather.ts` — **Open-Meteo**로 실시간 날씨. `fetchWeather(lat,lon)`, `weatherFrom(code,temp,isDay)`. 키 불필요, CORS 열림, 비상업 무료(출처표기 CC BY 4.0).
-- `src/components/MountainScene.vue` — 파스텔 설산 SVG 일러스트. `tint` prop(0~6 색조). `useId()`로 그라데이션 id 유니크.
+- `src/components/SlopeStatusCard.vue` — 상세 슬로프 운영 현황: 개방 수/전체·진행률 바·난이도별 칩(개방/미개방/개방 예정/정보 미확인)·범례·운영시간 3칸·오픈 예정 안내. **들어올 때마다 접힌 상태**(상태 기억 안 함).
+- `src/data/slopeStatus.ts` `buildSlopeBoard`(칩 데이터, 지난 시즌 값이면 preseason=전부 미개방, 목록 없으면 `slopeCatalog` 사용) · `formatUpcoming`(날짜만 표기, 당일·공식 현황 개방 시 자동 삭제) · `levelColor`.
+- `cams.ts` `upcoming`(손으로 넣는 오픈 예정, name '스키장'=스키장 개장) · `slopeCatalog`(공식 슬로프 안내에서 옮긴 목록: 강촌 맵, 웰리힐리 사용자 캡처).
+- `public/illustrations/{id}.jpg` — 사용자가 그린 스키장 일러스트(목록 2열 그리드·상세 상단). `MountainScene.vue`는 미사용(삭제 대기).
 - `src/components/CamCard.vue` — type·status별 카드. ▶재생(미리보기) 버튼, 재생 중 카운트다운/이름 유지, 끝나면 "다시 보기", ✕ 닫기. 하이원은 https에서 `.popup` 새 창 링크.
 - `src/components/HlsPlayer.vue` — hls.js 재생, `playLimitSec` 카운트다운 + 종료/오류 emit, 정리.
 - `src/playingCam.ts` — 재생 중 카드 id(전역, 한 번에 하나만).

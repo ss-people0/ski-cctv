@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { formatSlopeBadge, type ResortSlopeStatus } from './slopeStatus'
+import { buildSlopeBoard, formatSlopeBadge, formatUpcoming, levelColor, type ResortSlopeStatus } from './slopeStatus'
 
 const TODAY = '2026-11-25'
 
@@ -109,4 +109,169 @@ test('error and skipped hide the line entirely', () => {
   expect(formatSlopeBadge(make({ status: 'error' }), TODAY)).toBeNull()
   expect(formatSlopeBadge(make({ status: 'skipped' }), TODAY)).toBeNull()
   expect(formatSlopeBadge(undefined, TODAY)).toBeNull()
+})
+
+test('upcoming opening shows the absolute date (no D-day) and is removed from the opening day', () => {
+  const yellow = [{ name: '옐로우', date: '2026-11-27', time: '08:30' }]
+  // '내일/오늘/D-n'은 자정을 넘기면 헷갈리므로 날짜만 쓴다.
+  expect(formatUpcoming(yellow, '2026-11-26')).toEqual(['옐로우 11월 27일 08:30 오픈 예정'])
+  expect(formatUpcoming(yellow, '2026-11-27')).toEqual([]) // 오픈 당일부터 지운다
+  expect(formatUpcoming(undefined, '2026-11-26')).toEqual([])
+  // 공지에 시각이 없으면 날짜만(강촌).
+  expect(formatUpcoming([{ name: '스키장', date: '2026-11-28' }], '2026-11-26')).toEqual(['스키장 11월 28일 오픈 예정'])
+})
+
+test('upcoming line is removed early once the official feed shows it open', () => {
+  const today = '2026-11-26'
+  const yellow = [{ name: '옐로우', date: '2026-11-27', time: '08:30' }]
+  const resort = [{ name: '스키장', date: '2026-11-28' }]
+  const board = (rows: { name: string; day: string }[]) => buildSlopeBoard(make({ sourceDate: today, slopes: rows }), today)
+
+  // 슬로프 단위: 그 슬로프가 개방으로 잡히면 지운다.
+  expect(formatUpcoming(yellow, today, board([{ name: '옐로우', day: 'OPEN' }]))).toEqual([])
+  expect(formatUpcoming(yellow, today, board([{ name: '옐로우', day: 'CLOSE' }, { name: '핑크', day: 'OPEN' }]))).toHaveLength(1)
+  // 스키장 단위: 개방 슬로프가 하나라도 잡히면 지운다.
+  expect(formatUpcoming(resort, today, board([{ name: '래빗', day: 'OPEN' }]))).toEqual([])
+  expect(formatUpcoming(resort, today, board([{ name: '래빗', day: 'CLOSE' }]))).toHaveLength(1)
+  // 지난 시즌 값(개장 전)의 OPEN은 무시한다.
+  const lastSeason = buildSlopeBoard(make({ status: 'stale', sourceDate: '2026-03-03', slopes: [{ name: '래빗', day: 'OPEN' }] }), today)
+  expect(formatUpcoming(resort, today, lastSeason)).toHaveLength(1)
+})
+
+test('slope board groups every slope by official level in source order with status per slope', () => {
+  const board = buildSlopeBoard(
+    make({
+      sourceDate: TODAY,
+      hours: [{ label: '주간', value: '08:30~16:30' }],
+      slopes: [
+        { name: '옐로우', level: '초급', day: 'CLOSE', night: 'CLOSE' },
+        { name: '핑크', level: '초중급', day: 'OPEN', night: 'CLOSE' },
+        { name: '레드', level: '최상급', day: 'CLOSE', night: 'OPEN' },
+        { name: '실버', level: '최상급', day: null, night: null },
+      ],
+    }),
+    TODAY,
+  )
+  expect(board?.openCount).toBe(2)
+  expect(board?.total).toBe(4)
+  expect(board?.groups).toEqual([
+    { level: '초급', chips: [{ name: '옐로우', status: 'closed', nightOnly: false }] },
+    { level: '초중급', chips: [{ name: '핑크', status: 'open', nightOnly: false }] },
+    {
+      level: '최상급',
+      chips: [
+        { name: '레드', status: 'open', nightOnly: true },
+        { name: '실버', status: 'unknown', nightOnly: false }, // 상태값 없음 ≠ 미개방
+      ],
+    },
+  ])
+  expect(board?.hours).toEqual([{ label: '주간', value: '08:30~16:30', off: false }])
+})
+
+test('slope board merges day/night slot rows of the same slope (phoenix)', () => {
+  const board = buildSlopeBoard(
+    make({
+      slopes: [
+        { name: '호크', level: '중급', slot: '주간', state: 'CLOSE' },
+        { name: '호크', level: '중급', slot: '야간', state: 'OPEN' },
+        { name: '키위', level: '중급', state: 'CLOSE' },
+      ],
+    }),
+    TODAY,
+  )
+  expect(board?.total).toBe(2)
+  expect(board?.groups[0].chips).toEqual([
+    { name: '호크', status: 'open', nightOnly: true },
+    { name: '키위', status: 'closed', nightOnly: false },
+  ])
+})
+
+test('upcoming slope shows as upcoming only while still closed (no duplicate when already open)', () => {
+  const upcoming = [{ name: '옐로우', date: '2026-11-26', time: '08:30' }] // TODAY(11-25) 다음 날 오픈
+  const slopes = (state: string) => [{ name: '옐로우', level: '초급', day: state, night: 'CLOSE' }]
+  expect(buildSlopeBoard(make({ slopes: slopes('CLOSE') }), TODAY, upcoming)?.groups[0].chips[0].status).toBe('upcoming')
+  expect(buildSlopeBoard(make({ slopes: slopes('OPEN') }), TODAY, upcoming)?.groups[0].chips[0].status).toBe('open')
+  // 오픈 당일부터는 '예정'이 아니라 실제 상태(여기선 미개방)를 보여준다.
+  const onTheDay = make({ sourceDate: '2026-11-26', slopes: slopes('CLOSE') })
+  expect(buildSlopeBoard(onTheDay, '2026-11-26', upcoming)?.groups[0].chips[0].status).toBe('closed')
+})
+
+test('last-season data (pre-season) shows the official list all closed, ignoring old states and old hours', () => {
+  const lastSeason = make({
+    status: 'ok',
+    sourceDate: '2026-03-01', // 지산: 지난 시즌 마지막 안내가 그대로 걸려 있음
+    hours: [{ label: '운영시간', value: '09:00~17:00' }],
+    slopes: [
+      { name: '1', slot: '주간', state: 'OPEN' },
+      { name: '1', slot: '야간', state: 'CLOSE' },
+      { name: '2', slot: '주간', state: 'CLOSE' },
+    ],
+  })
+  const board = buildSlopeBoard(lastSeason, TODAY)
+  expect(board).toEqual({
+    openCount: 0,
+    total: 2,
+    preseason: true,
+    groups: [{ level: '', chips: [{ name: '1', status: 'closed', nightOnly: false }, { name: '2', status: 'closed', nightOnly: false }] }],
+    hours: [],
+  })
+  expect(buildSlopeBoard(make({ status: 'stale', sourceDate: '2026-03-03', slopes: [{ name: 'a', day: 'OPEN' }] }), TODAY)?.openCount).toBe(0)
+})
+
+test('slope board is hidden when there is no official slope list or the fetch failed', () => {
+  expect(buildSlopeBoard(undefined, TODAY)).toBeNull()
+  expect(buildSlopeBoard(make({ status: 'partial', sourceDate: TODAY, slopes: [] }), TODAY)).toBeNull() // 강촌: 빈 응답
+  expect(buildSlopeBoard(make({ status: 'error', slopes: [{ name: 'a', day: 'OPEN' }] }), TODAY)).toBeNull()
+})
+
+test('level colors follow the design guide and blend for in-between levels', () => {
+  expect(levelColor('초급')).toBe('#399165')
+  expect(levelColor('최상급')).toBe('#505160')
+  expect(levelColor('초중급')).toMatch(/^#[0-9A-F]{6}$/)
+  expect(levelColor('초중급')).not.toBe(levelColor('초급'))
+  expect(levelColor('알 수 없는 등급')).toBe('#64748B')
+})
+
+test('levels are grouped once each in difficulty order even when the official table interleaves them (high1)', () => {
+  const board = buildSlopeBoard(
+    make({
+      slopes: [
+        { name: '제우스Ⅰ', level: '초급', day: 'OPEN' },
+        { name: '빅토리아Ⅰ', level: '상급', day: 'CLOSE' },
+        { name: '헤라Ⅰ', level: '중급', day: 'CLOSE' },
+        { name: '아폴로Ⅵ', level: '상급', day: 'OPEN' },
+        { name: '익스트림', level: '파크', day: 'CLOSE' },
+        { name: '아테나Ⅲ', level: '초급', day: 'CLOSE' },
+      ],
+    }),
+    TODAY,
+  )
+  expect(board?.groups.map((g) => [g.level, g.chips.map((c) => c.name)])).toEqual([
+    ['초급', ['제우스Ⅰ', '아테나Ⅲ']],
+    ['중급', ['헤라Ⅰ']],
+    ['상급', ['빅토리아Ⅰ', '아폴로Ⅵ']],
+    ['파크', ['익스트림']], // 모르는 등급은 정해진 등급 뒤에, 처음 나온 순서대로
+  ])
+})
+
+test('official slope catalog fills in when the live feed has no list yet (gangchon pre-season)', () => {
+  const catalog = [
+    { name: '래빗', level: '초급' },
+    { name: '재규어', level: '최상급' },
+  ]
+  const empty = make({ status: 'partial', sourceDate: TODAY, slopes: [] })
+  expect(buildSlopeBoard(empty, TODAY, undefined, catalog)).toEqual({
+    openCount: 0,
+    total: 2,
+    preseason: true,
+    groups: [
+      { level: '초급', chips: [{ name: '래빗', status: 'closed', nightOnly: false }] },
+      { level: '최상급', chips: [{ name: '재규어', status: 'closed', nightOnly: false }] },
+    ],
+    hours: [],
+  })
+  expect(buildSlopeBoard(undefined, TODAY, undefined, catalog)?.total).toBe(2) // 수집 안 하는 곳도 목록은 보인다
+  // 실시간 목록이 들어오면 그걸 쓴다(카탈로그는 비어 있을 때만).
+  const live = make({ sourceDate: TODAY, slopes: [{ name: '래빗', level: '초급', day: 'OPEN' }] })
+  expect(buildSlopeBoard(live, TODAY, undefined, catalog)?.total).toBe(1)
 })

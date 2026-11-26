@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import CamCard from './components/CamCard.vue'
+import SlopeStatusCard from './components/SlopeStatusCard.vue'
 import { resorts } from './data/cams'
 import { isPlayable, sortResorts } from './data/sortResorts'
-import {
-  formatSlopeBadge,
-  loadSlopeStatus,
-  todayKst,
-  type ResortSlopeStatus,
-} from './data/slopeStatus'
+import { buildSlopeBoard, formatUpcoming, loadSlopeStatus, todayKst, type ResortSlopeStatus } from './data/slopeStatus'
 import { themeOf } from './data/themes'
 import { fetchWeather, type Weather } from './data/weather'
 import { playingCamId } from './playingCam'
@@ -17,12 +13,6 @@ const sortedResorts = sortResorts(resorts)
 const playableTotal = resorts.flatMap((resort) => resort.cams).filter(isPlayable).length
 
 const slopeStatus = shallowRef<Map<string, ResortSlopeStatus>>(new Map())
-const slopeBadges = computed(() => {
-  const today = todayKst()
-  return new Map(
-    resorts.map((resort) => [resort.id, formatSlopeBadge(slopeStatus.value.get(resort.id), today)]),
-  )
-})
 onMounted(async () => {
   slopeStatus.value = await loadSlopeStatus(import.meta.env.BASE_URL)
 })
@@ -49,6 +39,15 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 // null = 스키장 목록 화면, 값이 있으면 그 스키장 상세 화면
 const selectedId = shallowRef<string | null>(null)
 const currentResort = computed(() => sortedResorts.find((resort) => resort.id === selectedId.value) ?? null)
+
+// 상세 슬로프 현황과, 그 현황으로 걸러낸 오픈 예정 안내(이미 열렸거나 당일이 된 건 빠진다).
+const currentSlopes = computed(() => {
+  const resort = currentResort.value
+  if (!resort) return null
+  const today = todayKst()
+  const board = buildSlopeBoard(slopeStatus.value.get(resort.id), today, resort.upcoming, resort.slopeCatalog)
+  return { board, upcomingLines: formatUpcoming(resort.upcoming, today, board) }
+})
 
 // 스키장을 열 때마다 그 위치의 현재 날씨를 실시간으로 받아온다(Open-Meteo).
 const weather = shallowRef<Weather | null>(null)
@@ -134,18 +133,11 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
       </div>
 
       <div class="detail-body">
-        <div class="slope-info" :class="{ empty: !slopeBadges.get(currentResort.id) }">
-          <template v-if="slopeBadges.get(currentResort.id)">
-            <span class="slope-summary">{{ slopeBadges.get(currentResort.id)!.summary }}</span>
-            <span
-              v-for="hour in slopeBadges.get(currentResort.id)!.hours"
-              :key="hour.label"
-              class="slope-hour"
-              :class="{ off: hour.off }"
-            >{{ hour.label }} {{ hour.value }}<template v-if="hour.off"> · 현재 미운영</template></span>
-          </template>
-          <span v-else>아직 오픈 현황 정보가 없어요.</span>
-        </div>
+        <SlopeStatusCard
+          v-if="currentSlopes"
+          :board="currentSlopes.board"
+          :upcoming-lines="currentSlopes.upcomingLines"
+        />
 
         <div v-if="currentResort.emergency?.length" class="emergency">
           <span class="emergency-title">🚨 사고 시 연락처</span>

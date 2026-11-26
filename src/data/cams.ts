@@ -1,6 +1,7 @@
 // 스키장 웹캠 데이터
 // - 시즌마다 주소가 바뀌므로 코드가 아니라 이 파일만 고치면 되게 관리한다.
 // - status: 'active'(사용 중) | 'pending'(주소 미공개/오픈 전) | 'investigate'(방식 확인 필요)
+import type { CatalogSlope, UpcomingOpening } from './slopeStatus';
 
 export type CamStatus = 'active' | 'pending' | 'investigate';
 
@@ -18,6 +19,8 @@ export interface Resort {
   note?: string;
   coord?: { lat: number; lon: number }; // 날씨 조회용 스키장 위치
   emergency?: { label: string; tels: string[] }[]; // 사고 시 스키장 내 연락처(라벨당 번호 1개 이상)
+  upcoming?: UpcomingOpening[]; // 공지된 슬로프 오픈 예정(손으로 입력, 날짜 지나면 화면에서 자동으로 빠짐)
+  slopeCatalog?: CatalogSlope[]; // 공식 슬로프 안내에서 옮긴 전체 목록. 실시간 목록이 비어 있을 때만 화면에 쓴다
   cams: Cam[];
 }
 
@@ -43,6 +46,7 @@ export const resorts: readonly Resort[] = [
       { label: '상황실', tels: ['033-330-8253'] },
       { label: '레인보우', tels: ['033-330-7195'] },
     ],
+    upcoming: [{ name: '옐로우', date: '2026-11-27', time: '08:30' }], // 홈페이지 메인 이미지로만 공지(2026-11-26 사용자 전달)
     note: 'cam09·03·07은 공식 웹캠 페이지에 없고 SkiWatch(open-ski-data)에서 확인한 주소다(2026-11-24). 언제든 막힐 수 있다.',
     cams: [
       { id: 'yongpyong-cam08', name: '베이스전경 / 레드 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam08/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
@@ -135,6 +139,30 @@ export const resorts: readonly Resort[] = [
     officialPage: 'https://www.wellihillipark.com/home/customer/webcam',
     coord: { lat: 37.5066, lon: 128.2707 }, // 횡성 둔내면
     emergency: [{ label: '패트롤실', tels: ['033-340-3696'] }],
+    // 공식 공지 "26/27 WINTER SEASON OPEN 2026.12.4. FRI. 09:00"(사용자 휴대폰 캡처, 2026-11-26).
+    upcoming: [{ name: '스키장', date: '2026-12-04', time: '09:00' }],
+    // 공식 홈페이지 '슬로프안내' 표에서 옮김(사용자 휴대폰 캡처, 2026-11-26). 사이트가 자동 접근을 막아 수집 대상이 아니다.
+    slopeCatalog: [
+      { name: 'A1 펀파크', level: '최상급' },
+      { name: 'A2 비기너파크', level: '초급' },
+      { name: 'A3 펀슬로프', level: '초급' },
+      { name: 'B1 기문코스', level: '중급' },
+      { name: 'B2 중급 모글', level: '중급' },
+      { name: 'C1', level: '최상급' },
+      { name: 'C2', level: '최상급' },
+      { name: 'C3', level: '최상급' },
+      { name: 'C4', level: '상급' },
+      { name: 'C5', level: '상급' },
+      { name: 'D1', level: '초급' },
+      { name: 'D2 하프파이프', level: '최상급' },
+      { name: 'D3 상급 모글', level: '상급' },
+      { name: 'D+', level: '초급' },
+      { name: 'E1', level: '최상급' },
+      { name: 'E2 기문코스', level: '상급' },
+      { name: 'E3', level: '최상급' },
+      { name: 'S1', level: '중급' },
+      { name: 'S2', level: '초급' },
+    ],
     note: 'HLS(Wowza), CORS * (2026-11-24 확인). cam05는 404라 investigate. cam01은 목록에 없음.',
     cams: [
       { id: 'wellihilli-d1',     name: 'D1',        type: 'hls', status: 'active', url: 'https://live.wellihillipark.com/wellihillipark/_definst_/cam02.stream/playlist.m3u8', playLimitSec: PLAY_LIMIT_SEC },
@@ -168,6 +196,22 @@ export const resorts: readonly Resort[] = [
     officialPage: 'https://www.elysian.co.kr/about-gangchon/ski#guide-to-using-slopes',
     coord: { lat: 37.8139, lon: 127.6386 }, // 춘천 남산면
     emergency: [{ label: '패트롤', tels: ['033-260-2000'] }],
+    // 공식 스키장 소개 '슬로프 운영안내' 운영 기간 "2026년 11월 28일 ~"(2026-11-26 확인, 시각은 공지에 없음).
+    upcoming: [{ name: '스키장', date: '2026-11-28' }],
+    // 공식 스키장 소개 > 슬로프 맵의 난이도 필터(초급/중급/최상급)에서 옮김(2026-11-26). "전체 10면, 초·중급 8면"과 일치.
+    // 슬로프 현황 API가 26/27 시즌 값을 아직 비워 둬서, 값이 들어오기 전까지 이 목록을 전부 미개방으로 보여준다.
+    slopeCatalog: [
+      { name: '래빗', level: '초급' },
+      { name: '팬더', level: '초급' },
+      { name: '드래곤', level: '중급' },
+      { name: '퓨마', level: '중급' },
+      { name: '호스', level: '중급' },
+      { name: '디어', level: '중급' },
+      { name: '페가수스', level: '중급' },
+      { name: '제브라', level: '중급' },
+      { name: '재규어', level: '최상급' },
+      { name: '래퍼드', level: '최상급' },
+    ],
     note: 'HLS에 공식이 발급한 서명 토큰이 필요. 토큰은 공식 페이지와 open-ski-data에 공개돼 있고 2027-10-30까지 유효하다(2026-11-24 확인). 만료/교체되면 재생이 끊기니 GANGCHON_TOKEN을 갱신한다.',
     cams: [
       { id: 'gangchon-webcam01', name: '챌린지하우스 광장', type: 'hls', status: 'active', url: `https://webcam01.elysian.co.kr/main.stream/playlist.m3u8?token=${GANGCHON_TOKEN}`, playLimitSec: PLAY_LIMIT_SEC },

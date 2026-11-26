@@ -103,6 +103,33 @@ def base(resort_id: str, name: str, source_url: str) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ 1. 모나용평
+def parse_yongpyong_rows(body: str) -> list[dict[str, Any]]:
+    """용평 표 행 → [{name, level, day, night}]. 공식 표 순서와 난이도 이름을 그대로 쓴다.
+
+    - 난이도는 그룹 첫 행의 rowspan <th>에만 있어 다음 행들에 물려준다.
+    - 그룹 첫 행은 이름 칸 class가 "lineBold conLeft"라서 " conLeft"만 찾으면 3면(골드파라다이스·블루·
+      드래곤파크)을 놓친다(2026-11-26 발견) → class에 conLeft가 들어간 첫 <td>를 이름 칸으로 쓴다.
+    """
+    rows: list[dict[str, Any]] = []
+    level = None
+    for row in re.split(r"<tr[^>]*>", body)[1:]:
+        th = re.search(r"<th[^>]*>(.*?)</th>", row, re.S)
+        if th:
+            level = strip_tags(th.group(1)) or level
+        cell = re.search(r'<td class="[^"]*conLeft[^"]*">(.*?)</td>', row, re.S)
+        states = re.findall(r'<em class="ico (open|close)">(OPEN|CLOSE)</em>', row)
+        name = re.sub(r"^(OPEN|CLOSE)\s*", "", strip_tags(cell.group(1))).strip() if cell else ""
+        if not name or not states:
+            continue
+        rows.append({
+            "name": name,
+            "level": level,
+            "day": states[0][1],
+            "night": states[1][1] if len(states) > 1 else None,
+        })
+    return rows
+
+
 def yongpyong() -> dict[str, Any]:
     """SSR 표. 가장 깔끔한 케이스 — 표 제목에 서버가 만든 오늘 날짜가 찍힌다."""
     url = "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do"
@@ -122,22 +149,7 @@ def yongpyong() -> dict[str, Any]:
     start = html.find('id="slopeStatus"')
     body = html[start : html.find("</tbody>", start)] if start >= 0 else ""
 
-    for row in re.split(r"<tr>", body)[1:]:
-        # 슬로프명: <td class=" conLeft"> 안. 골드파라다이스·블루·드래곤파크 3면은 마크업이 달라
-        # 이름이 <a> 등으로 감싸여 오므로 태그를 걷어내고 첫 텍스트를 쓴다.
-        cell = re.search(r'<td class=" conLeft">(.*?)</td>', row, re.S)
-        if not cell:
-            continue
-        name = strip_tags(cell.group(1))
-        name = re.sub(r"^(OPEN|CLOSE)\s*", "", name).strip()
-        states = re.findall(r'<em class="ico (open|close)">(OPEN|CLOSE)</em>', row)
-        if not name or not states:
-            continue
-        out["slopes"].append({
-            "name": name,
-            "day": states[0][1],
-            "night": states[1][1] if len(states) > 1 else None,
-        })
+    out["slopes"] = parse_yongpyong_rows(body)
 
     # 주간은 사이트 실시간 값을 쓴다(성수기 09:00→08:30 자동 반영). 오전/오후 세분은 글랜스엔 과해서 뺀다.
     # "<li><strong>[주간] Daytime</strong> 08:30 ~ 16:30</li>"
@@ -403,6 +415,39 @@ def elysian() -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ 6. 알펜시아
+SLOT_KEY = {"주간": "day", "야간": "night"}  # 화면 공통 필드명
+
+
+def parse_alpensia_records(records: list[dict[str, Any]], today: str) -> list[dict[str, Any]]:
+    """내장 JSON → 슬로프별 {name, level, 주간/야간 OPEN·CLOSE(오픈~종료일 기준), day, night}.
+
+    "알파 - 난이도" 레코드가 공식 난이도다. 난이도가 "-"인 항목(눈썰매장)은 슬로프가 아니라 뺀다.
+    """
+    per: dict[str, dict[str, Any]] = {}
+    for r in records:
+        parts = [p.strip() for p in (r.get("ski700ConditionStatusTitle") or "").split(" - ")]
+        data = r.get("ski700ConditionStatusData")
+        if len(parts) == 2 and parts[1] == "난이도" and parts[0] != "구분":
+            per.setdefault(parts[0], {"slots": {}})["level"] = data
+        elif len(parts) == 3 and parts[2] in ("오픈일", "종료일"):
+            per.setdefault(parts[0], {"slots": {}})["slots"].setdefault(parts[1], {})[parts[2]] = data
+
+    slopes = []
+    for name, info in per.items():
+        if info.get("level") == "-":
+            continue
+        item: dict[str, Any] = {"name": name, "level": info.get("level")}
+        for slot, rng in info["slots"].items():
+            s, e = rng.get("오픈일"), rng.get("종료일")
+            item[slot] = "OPEN" if (s and e and s <= today <= e) else "CLOSE"
+            item[f"{slot}Range"] = f"{s}~{e}"
+        for slot, key in SLOT_KEY.items():
+            if slot in item:
+                item[key] = item[slot]
+        slopes.append(item)
+    return slopes
+
+
 def alpensia() -> dict[str, Any]:
     """HTML에 박힌 JSON(슬로프별 오픈일~종료일). 오늘 상태는 우리가 계산한다.
 
@@ -435,21 +480,8 @@ def alpensia() -> dict[str, Any]:
     out["lastUpdate"] = updates
     out["sourceDate"] = updates[-1][:10] if updates else None
 
-    per: dict[str, dict[str, dict[str, str]]] = {}
-    for r in records:
-        title = r.get("ski700ConditionStatusTitle") or ""
-        parts = [p.strip() for p in title.split(" - ")]
-        if len(parts) == 3 and parts[2] in ("오픈일", "종료일"):
-            per.setdefault(parts[0], {}).setdefault(parts[1], {})[parts[2]] = r.get("ski700ConditionStatusData")
-
     today = today_kst().isoformat()
-    for slope, slots in per.items():
-        item: dict[str, Any] = {"name": slope}
-        for slot, rng in slots.items():
-            s, e = rng.get("오픈일"), rng.get("종료일")
-            item[slot] = "OPEN" if (s and e and s <= today <= e) else "CLOSE"
-            item[f"{slot}Range"] = f"{s}~{e}"
-        out["slopes"].append(item)
+    out["slopes"] = parse_alpensia_records(records, today)
 
     if updates and updates[-1][:10] < today:
         out["status"] = "stale"
