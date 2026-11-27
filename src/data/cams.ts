@@ -267,7 +267,7 @@ export const resorts: readonly Resort[] = [
   // ───────────────────────── 무주덕유산리조트 ─────────────────────────
   {
     id: 'muju',
-    name: '무주덕유산리조트',
+    name: '무주 덕유산',
     region: '전북 무주',
     officialPage: 'https://www.mdysresort.com/',
     coord: { lat: 35.8931, lon: 127.7435 }, // 무주 설천면 심곡리
@@ -286,7 +286,7 @@ export const resorts: readonly Resort[] = [
   // ───────────────────────── 오투리조트 ─────────────────────────
   {
     id: 'o2',
-    name: '오투리조트',
+    name: '오투',
     region: '강원 태백',
     officialPage: 'https://o2resort.com/SKI/slopeOpen.jsp',
     coord: { lat: 37.1706, lon: 128.9475 }, // 태백 서학로
@@ -308,7 +308,7 @@ export const resorts: readonly Resort[] = [
   // ───────────────────────── 곤지암리조트 ─────────────────────────
   {
     id: 'konjiam',
-    name: '곤지암리조트',
+    name: '곤지암',
     region: '경기 광주',
     officialPage: 'https://m.konjiamresort.co.kr/ski/skiLift.dev',
     coord: { lat: 37.3372, lon: 127.2953 }, // 광주 도척면
