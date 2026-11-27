@@ -3,7 +3,7 @@ import { computed, shallowRef } from 'vue'
 import { levelColor, type ChipStatus, type SlopeBoard } from '../data/slopeStatus'
 
 // 상세 화면 슬로프 운영 현황: 개방 수·진행률 → 난이도별 칩(전체 하나의 토글로 접힘) → 범례 → 운영시간.
-const props = defineProps<{ board: SlopeBoard | null; upcomingLines: string[] }>()
+const props = defineProps<{ board: SlopeBoard | null; upcomingLines: string[]; nightLine?: string | null }>()
 
 // 색만으로 구분하지 않도록 칩마다 기호 + 숨김 글자를 붙인다.
 const STATUS: Record<ChipStatus, { icon: string; label: string }> = {
@@ -76,6 +76,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
       </dl>
     </template>
     <span v-else>아직 오픈 현황 정보가 없어요.</span>
+    <p v-if="nightLine" class="slope-upcoming night">🌙 {{ nightLine }}</p>
     <p v-for="line in upcomingLines" :key="line" class="slope-upcoming">🎿 {{ line }}</p>
   </div>
 </template>

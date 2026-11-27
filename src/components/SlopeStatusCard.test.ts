@@ -59,6 +59,14 @@ test('starts collapsed (count, bar and hours only); one toggle shows chips and l
   expect(again.get('button.slope-head').attributes('aria-expanded')).toBe('false')
 })
 
+test('shows the night operation start line with the moon when given', () => {
+  const card = mount(SlopeStatusCard, { props: { board, upcomingLines: [], nightLine: '야간 운영 12월 4일 시작' } })
+  expect(card.get('.slope-upcoming.night').text()).toContain('🌙')
+  expect(card.get('.slope-upcoming.night').text()).toContain('12월 4일 시작')
+  const plain = mount(SlopeStatusCard, { props: { board, upcomingLines: [] } })
+  expect(plain.find('.slope-upcoming.night').exists()).toBe(false)
+})
+
 test('without board data shows the placeholder and still shows upcoming lines', () => {
   const card = mount(SlopeStatusCard, { props: { board: null, upcomingLines: ['옐로우 11월 27일 08:30 오픈 예정'] } })
   expect(card.classes()).toContain('empty')

@@ -19,7 +19,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - **메인(목록):** **2열 그리드**(태블릿 이상 3열), 카드 간격 12px·모서리 18px. 카드 = 사용자가 그린 일러스트(16:9, `public/illustrations/{id}.jpg`) + 아래 **스키장 테마색** 영역에 이름·작은 날씨 칩·**지역만**(운영 슬로프 이름은 메인에서 뺌 — 사용자 요청).
 - **테마색:** `src/data/themes.ts`(사용자 가이드 `TalkFile_ski-resort-theme-guide.md.md` 기준 13곳, 글자색은 대비 4.5:1 넘게 조금 어둡게 조정, 강촌 id는 `gangchon`). 6곳(무주·비발디·곤지암·오크밸리·오투·에덴밸리)은 등록용 데이터만.
 - **상세(스키장 클릭):** 일러스트 배너(뒤로가기 ←, 로고, 날씨 칩) → 이름/지역 → **슬로프 운영 현황 카드**(`SlopeStatusCard.vue`) → **사고 시 연락처 카드** → **라이브 캠**.
-  - 슬로프 카드: "N / 전체개 개방"(전부면 "전 슬로프 개방") + 진행률 바 + 난이도별 칩(개방 ✓초록/미개방 –회색/개방 예정 ◷주황/정보 미확인 ?) + 범례 + 운영시간 가로 3칸 + 🎿 오픈 예정 안내. **들어올 때마다 접힘**(펼침 상태 기억 안 함 — 사용자 요청).
+  - 슬로프 카드: "N / 전체개 개방"(전부면 "전 슬로프 개방") + 진행률 바 + 난이도별 칩(개방 ✓초록/미개방 –회색/개방 예정 ◷주황/정보 미확인 ?) + 범례 + 운영시간 가로 3칸 + 🎿 오픈 예정 안내 + 🌙 야간 운영 시작 안내. **들어올 때마다 접힘**(펼침 상태 기억 안 함 — 사용자 요청).
   - 지난 시즌 값만 걸린 곳은 "올 시즌 오픈 전" 문구 + 전부 미개방(옛 운영시간 숨김).
 - **스크롤 고정 헤더:** 상세에서 150px 넘게 내리면 상단에 뒤로가기+스키장명이 고정(그라데이션 페이드로 자연스럽게). `scrolled` ref + window scroll 리스너.
 - 테마: 파스텔 라이트(라벤더), 글꼴은 시스템 산세리프(`--sans`). 색 토큰은 `style.css` `:root`. **다크 테마는 없음**(라이트 전용) — 헤더 심볼만 OS 다크 설정에서 채움형으로 바뀐다.
@@ -27,7 +27,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 ## 파일 구조
 
 - `src/data/cams.ts` — **웹캠·스키장 데이터와 타입. 주소/좌표/연락처는 여기서만 관리.**
-  - `Resort`: `id, name, region, officialPage, note?, coord?{lat,lon}, emergency?[{label,tels[]}], cams[]`
+  - `Resort`: `id, name, region, officialPage, note?, coord?{lat,lon}, emergency?[{label,tels[]}], upcoming?[{name,date,time?}], nightStart?{date}, cams[]`
   - `Cam` status: `active | pending | investigate`, type: `hls | youtube | link`
   - 순서: 용평 · 지산 · 휘팍 · 하이원 · 웰리힐리 · 알펜시아 · 강촌
   - `GANGCHON_TOKEN`(공개 서명 토큰, 2027-10-30 만료), `PLAY_LIMIT_SEC=15`, `HIGH1_PLAY_LIMIT_SEC=30`
@@ -35,8 +35,8 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - `src/data/slopeStatus.ts` — `slopes.json` 로드(`loadSlopeStatus`), `formatSlopeBadge`(오늘 값인지 판정 + 운영시간), `todayKst`.
 - `src/data/weather.ts` — **Open-Meteo**로 실시간 날씨. `fetchWeather(lat,lon)`, `weatherFrom(code,temp,isDay)`. 키 불필요, CORS 열림, 비상업 무료(출처표기 CC BY 4.0).
 - `src/components/SlopeStatusCard.vue` — 상세 슬로프 운영 현황: 개방 수/전체·진행률 바·난이도별 칩(개방/미개방/개방 예정/정보 미확인)·범례·운영시간 3칸·오픈 예정 안내. **들어올 때마다 접힌 상태**(상태 기억 안 함).
-- `src/data/slopeStatus.ts` `buildSlopeBoard`(칩 데이터, 지난 시즌 값이면 preseason=전부 미개방, 목록 없으면 `slopeCatalog` 사용) · `formatUpcoming`(날짜만 표기, 당일·공식 현황 개방 시 자동 삭제) · `levelColor`.
-- `cams.ts` `upcoming`(손으로 넣는 오픈 예정, name '스키장'=스키장 개장) · `slopeCatalog`(공식 슬로프 안내에서 옮긴 목록: 강촌 맵, 웰리힐리 사용자 캡처).
+- `src/data/slopeStatus.ts` `buildSlopeBoard`(칩 데이터, 지난 시즌 값이면 preseason=전부 미개방, 목록 없으면 `slopeCatalog` 사용) · `formatUpcoming`(날짜만 표기, 당일·공식 현황 개방 시 자동 삭제) · `formatNightStart`(야간 운영 시작일, 시작일·야간 개방 시 자동 삭제) · `levelColor`.
+- `cams.ts` `upcoming`(손으로 넣는 오픈 예정, name '스키장'=스키장 개장) · `nightStart`(손으로 넣는 야간 운영 시작일) · `slopeCatalog`(공식 슬로프 안내에서 옮긴 목록: 강촌 맵, 웰리힐리 사용자 캡처).
 - `public/illustrations/{id}.jpg` — 사용자가 그린 스키장 일러스트(목록 2열 그리드·상세 상단). `MountainScene.vue`는 미사용(삭제 대기).
 - `public/brand/` — 확정 브랜드 로고(확정 시안에서 원본 픽셀 그대로 분리, 바깥 배경만 투명). `logo-solid.png`(A안 채움형 심볼)·`logo-outline.png`(B안 윤곽선형 심볼)·`logo-solid-full.png`/`logo-outline-full.png`(심볼+Watch Your Ride). 헤더는 `-78.png`(26px 표시용 3배)를 라이트=윤곽선형, 다크(prefers-color-scheme)=채움형으로 씀. **새로 그리거나 재해석하지 말 것.**
 - `public/favicon-16/32/48.png`·`apple-touch-icon.png`·`icon-192.png`·`icon-512.png`·`icon-192-maskable.png`·`icon-512-maskable.png`·`icon-1024.png` — A안 심볼 아이콘(스노우 화이트 `#F8FAFC` 배경, 카빙 궤적 안전 여백). `public/manifest.json`이 192/512·maskable을 연결. **서비스 워커는 없다(오프라인 캐시 안 함).**
@@ -74,7 +74,8 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - **알펜시아** 6면 + 공식 난이도(내장 JSON "X - 난이도", `parse_alpensia_records`), 눈썰매장 제외. 지난 시즌(3/3) 값 → 전부 미개방.
 - **강촌** 실시간 API가 빈 배열 → `cams.ts` `slopeCatalog` 10면(공식 슬로프 맵 난이도 필터에서 옮김) 전부 미개방. API에 값이 들어오면 자동으로 실시간 사용.
 - **웰리힐리** 수집 불가(사이트가 자동 접근/개발자 도구 차단 — 우회하지 않기로). `slopeCatalog` 19면은 **사용자 휴대폰 캡처**(공식 '슬로프안내' 표). 개장 후에도 상태 자동 갱신 안 됨 → 개장 후 표시 방식 다시 정해야 함.
-- **오픈 예정(`cams.ts` `upcoming`)**: 용평 옐로우 11/27 08:30(홈페이지 메인 이미지 공지, 사용자 전달), 강촌 '스키장' 11/28(공식 운영기간, 시각 없음), 웰리힐리 '스키장' 12/4 09:00(공식 공지 포스터). 문구는 날짜만("옐로우 11월 27일 08:30 오픈 예정", D-n·내일 표기 안 함 — 사용자 요청). **당일이 되거나, 공식 현황에서 그 슬로프(또는 '스키장'이면 아무 슬로프)가 개방으로 잡히면 자동으로 사라짐.**
+- **오픈 예정(`cams.ts` `upcoming`)**: 용평 옐로우 11/27 08:30(홈페이지 메인 이미지 공지, 사용자 전달), 용평 레드 12/2(모나용평 인스타그램 공지, 2026-11-27 사용자 전달·시각 없음 — 공식 홈페이지 공지엔 아직 없음), 강촌 '스키장' 11/28(공식 운영기간, 시각 없음), 웰리힐리 '스키장' 12/4 09:00(공식 공지 포스터). 문구는 날짜만("옐로우 11월 27일 08:30 오픈 예정", D-n·내일 표기 안 함 — 사용자 요청). **당일이 되거나, 공식 현황에서 그 슬로프(또는 '스키장'이면 아무 슬로프)가 개방으로 잡히면 자동으로 사라짐.**
+- **야간 운영 시작(`cams.ts` `nightStart`)**: 휘닉스 12/4(공식 공지 14515, 2026-11-26: 야간 12/4~ 주중·주말, 정설 16:00~18:00). "야간 운영 12월 4일 시작" 한 줄로 표시, 시작일이 되거나 수집값 `nightOpen`이 true가 되면 자동으로 사라짐.
 - 지산·알펜시아는 공식 개장일 공지가 아직 없음(지산 '시즌 영업 일정' 달력 12월 중순까지 비어 있음, 알펜시아 공지사항 없음) → 공지 뜨면 `upcoming`에 한 줄 추가.
 - 운영시간/연락처 고정값: 용평·하이원·휘팍 hours는 `collect_slopes.py`의 각 함수에 하드코딩(공식 공지 기준). 하이원 패트롤 등 연락처는 `cams.ts` `emergency`.
 

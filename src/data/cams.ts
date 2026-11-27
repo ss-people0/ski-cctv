@@ -1,7 +1,7 @@
 // 스키장 웹캠 데이터
 // - 시즌마다 주소가 바뀌므로 코드가 아니라 이 파일만 고치면 되게 관리한다.
 // - status: 'active'(사용 중) | 'pending'(주소 미공개/오픈 전) | 'investigate'(방식 확인 필요)
-import type { CatalogSlope, UpcomingOpening } from './slopeStatus';
+import type { CatalogSlope, NightStart, UpcomingOpening } from './slopeStatus';
 
 export type CamStatus = 'active' | 'pending' | 'investigate';
 
@@ -20,6 +20,7 @@ export interface Resort {
   coord?: { lat: number; lon: number }; // 날씨 조회용 스키장 위치
   emergency?: { label: string; tels: string[] }[]; // 사고 시 스키장 내 연락처(라벨당 번호 1개 이상)
   upcoming?: UpcomingOpening[]; // 공지된 슬로프 오픈 예정(손으로 입력, 날짜 지나면 화면에서 자동으로 빠짐)
+  nightStart?: NightStart; // 공지된 야간 운영 시작일(손으로 입력, 시작일이 되면 화면에서 자동으로 빠짐)
   slopeCatalog?: CatalogSlope[]; // 공식 슬로프 안내에서 옮긴 전체 목록. 실시간 목록이 비어 있을 때만 화면에 쓴다
   cams: Cam[];
 }
@@ -46,7 +47,10 @@ export const resorts: readonly Resort[] = [
       { label: '상황실', tels: ['033-330-8253'] },
       { label: '레인보우', tels: ['033-330-7195'] },
     ],
-    upcoming: [{ name: '옐로우', date: '2026-11-27', time: '08:30' }], // 홈페이지 메인 이미지로만 공지(2026-11-26 사용자 전달)
+    upcoming: [
+      { name: '옐로우', date: '2026-11-27', time: '08:30' }, // 홈페이지 메인 이미지로만 공지(2026-11-26 사용자 전달)
+      { name: '레드', date: '2026-12-02' }, // 모나용평 인스타그램 공지(2026-11-27 사용자 전달, 시각은 공지에 없음)
+    ],
     note: 'cam09·03·07은 공식 웹캠 페이지에 없고 SkiWatch(open-ski-data)에서 확인한 주소다(2026-11-24). 언제든 막힐 수 있다.',
     cams: [
       { id: 'yongpyong-cam08', name: '베이스전경 / 레드 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam08/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
@@ -89,6 +93,7 @@ export const resorts: readonly Resort[] = [
     coord: { lat: 37.5847, lon: 128.3233 }, // 평창 봉평면
     emergency: [{ label: '패트롤', tels: ['033-330-3126', '033-330-3127', '033-330-6373'] }],
     note: 'HLS(streaming.phoenixhnr.co.kr), CORS *. 주소는 사용자가 준 목록(2026-11-24, 7개 모두 신호 확인). 심볼은 공식 파비콘(P 마크).',
+    nightStart: { date: '2026-12-04' }, // 공식 공지 14515(2026-11-26): 야간 운영 12/4~ 주중·주말, 정설 16:00~18:00
     cams: [
       { id: 'phoenix-bulsae', name: '불새마루', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/ht_01_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },
       { id: 'phoenix-penguin', name: '펭귄', type: 'hls', status: 'active', url: 'https://streaming.phoenixhnr.co.kr/hls/bc_01.m3u8', playLimitSec: PLAY_LIMIT_SEC },

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { buildSlopeBoard, formatSlopeBadge, formatUpcoming, levelColor, type ResortSlopeStatus } from './slopeStatus'
+import { buildSlopeBoard, formatNightStart, formatSlopeBadge, formatUpcoming, levelColor, type ResortSlopeStatus } from './slopeStatus'
 
 const TODAY = '2026-11-25'
 
@@ -136,6 +136,15 @@ test('upcoming line is removed early once the official feed shows it open', () =
   // 지난 시즌 값(개장 전)의 OPEN은 무시한다.
   const lastSeason = buildSlopeBoard(make({ status: 'stale', sourceDate: '2026-03-03', slopes: [{ name: '래빗', day: 'OPEN' }] }), today)
   expect(formatUpcoming(resort, today, lastSeason)).toHaveLength(1)
+})
+
+test('night operation start line shows the date, then disappears from that day or once night slopes open', () => {
+  const night = { date: '2026-12-04' }
+  expect(formatNightStart(night, '2026-11-27')).toBe('야간 운영 12월 4일 시작')
+  expect(formatNightStart(night, '2026-12-03')).toBe('야간 운영 12월 4일 시작')
+  expect(formatNightStart(night, '2026-12-04')).toBeNull() // 시작일부터는 안 띄운다
+  expect(formatNightStart(night, '2026-12-10', true)).toBeNull() // 공식 현황에서 야간이 열렸으면 바로 빠진다
+  expect(formatNightStart(undefined, '2026-11-27')).toBeNull()
 })
 
 test('slope board groups every slope by official level in source order with status per slope', () => {

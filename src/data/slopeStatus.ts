@@ -86,6 +86,11 @@ export interface UpcomingOpening {
 // 이 이름이면 슬로프 하나가 아니라 스키장 전체 개장 안내다.
 export const RESORT_OPENING = '스키장'
 
+// 야간 운영 시작일(공지). 슬로프 오픈과 달리 '야간'이라는 슬로프가 없으니 따로 둔다.
+export interface NightStart {
+  date: string // 시작일 YYYY-MM-DD (KST)
+}
+
 // 오픈 예정 안내 문구. 손으로 넣은 데이터를 안 지워도 화면에서 저절로 빠진다:
 // - 오픈 당일부터(date <= today)
 // - 그 전이라도 공식 현황(board)에서 그 슬로프가 개방으로 잡히면 / '스키장'은 개방 슬로프가 하나라도 잡히면
@@ -104,6 +109,12 @@ export function formatUpcoming(
       const when = `${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일${time ? ` ${time}` : ''}`
       return `${name} ${when} 오픈 예정`
     })
+}
+
+// 야간 운영 시작 안내. 시작일이 지나거나 공식 현황에서 야간이 열리면 저절로 빠진다.
+export function formatNightStart(start: NightStart | undefined, today: string, nightOpen?: boolean): string | null {
+  if (!start || start.date <= today || nightOpen) return null
+  return `야간 운영 ${Number(start.date.slice(5, 7))}월 ${Number(start.date.slice(8, 10))}일 시작`
 }
 
 // ───────── 상세 화면 슬로프 운영 현황(난이도별 칩) ─────────

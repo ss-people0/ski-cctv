@@ -4,7 +4,7 @@ import CamCard from './components/CamCard.vue'
 import SlopeStatusCard from './components/SlopeStatusCard.vue'
 import { resorts } from './data/cams'
 import { isPlayable, sortResorts } from './data/sortResorts'
-import { buildSlopeBoard, formatUpcoming, loadSlopeStatus, todayKst, type ResortSlopeStatus } from './data/slopeStatus'
+import { buildSlopeBoard, formatNightStart, formatUpcoming, loadSlopeStatus, todayKst, type ResortSlopeStatus } from './data/slopeStatus'
 import { themeOf } from './data/themes'
 import { fetchWeather, type Weather } from './data/weather'
 import { playingCamId } from './playingCam'
@@ -45,8 +45,13 @@ const currentSlopes = computed(() => {
   const resort = currentResort.value
   if (!resort) return null
   const today = todayKst()
-  const board = buildSlopeBoard(slopeStatus.value.get(resort.id), today, resort.upcoming, resort.slopeCatalog)
-  return { board, upcomingLines: formatUpcoming(resort.upcoming, today, board) }
+  const entry = slopeStatus.value.get(resort.id)
+  const board = buildSlopeBoard(entry, today, resort.upcoming, resort.slopeCatalog)
+  return {
+    board,
+    upcomingLines: formatUpcoming(resort.upcoming, today, board),
+    nightLine: formatNightStart(resort.nightStart, today, entry?.nightOpen),
+  }
 })
 
 // 스키장을 열 때마다 그 위치의 현재 날씨를 실시간으로 받아온다(Open-Meteo).
@@ -144,6 +149,7 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
           v-if="currentSlopes"
           :board="currentSlopes.board"
           :upcoming-lines="currentSlopes.upcomingLines"
+          :night-line="currentSlopes.nightLine"
         />
 
         <div v-if="currentResort.emergency?.length" class="emergency">
