@@ -182,12 +182,16 @@ VIVALDI_JSON = {
 
 
 class ParseVivaldiRowsTest(unittest.TestCase):
-    def test_reads_y_n_and_leaves_unfilled_values_unknown(self):
+    def test_reads_y_n_and_treats_unfilled_values_as_closed_like_the_official_screen(self):
         self.assertEqual(parse_vivaldi_rows(VIVALDI_JSON), [
             {"name": "블루스", "level": "초심", "day": "OPEN", "night": "CLOSE"},
             {"name": "발라드", "level": "초급", "day": "CLOSE", "night": "CLOSE"},
-            {"name": "락", "level": "최상급"},  # null은 미개방이 아니라 '모름'
+            {"name": "락", "level": "최상급", "day": "CLOSE", "night": "CLOSE"},  # null도 공식 화면처럼 미개방
         ])
+
+    def test_missing_state_keys_stay_unknown(self):
+        rows = parse_vivaldi_rows({"list": [{"slopeNm": "블루스", "slopeGrade": "초심"}]})
+        self.assertEqual(rows, [{"name": "블루스", "level": "초심"}])
 
     def test_dawn_only_slope_counts_as_open(self):
         rows = parse_vivaldi_rows({"list": [{"slopeNm": "블루스", "daytimeYn": "N", "nightYn": "N", "dawnYn": "Y"}]})

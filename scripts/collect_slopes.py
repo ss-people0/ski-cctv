@@ -546,11 +546,13 @@ VIVALDI_API = "https://sonolc.sonohotelsresorts.com/front.subMainAjax.getSlopeCo
 def parse_vivaldi_rows(data: dict[str, Any]) -> list[dict[str, Any]]:
     """스키장 상황 JSON → [{name, level, day, night}].
 
-    응답 list에는 오늘 값이 아직 입력되지 않으면 daytimeYn/nightYn/dawnYn이 모두 null로 온다
-    (사이트도 그때는 CLOSE 아이콘을 그린다). null은 '미개방'이 아니라 '모름'이므로 상태를 넣지 않는다.
+    응답 list에는 오늘 값이 아직 입력되지 않으면 daytimeYn/nightYn/dawnYn이 모두 null로 온다.
+    공식 화면은 그때도 슬로프마다 CLOSE(미개방) 아이콘을 그리므로, null도 같이 미개방(CLOSE)으로 적는다
+    (2026-11-28 사용자 요청: '?' 정보 미확인 대신 공홈처럼 '–' 미개방).
+    키가 아예 빠진 경우(개편 의심)만 상태를 넣지 않아 '정보 미확인'으로 남긴다.
     """
-    def state(v: Any) -> str | None:
-        return {"Y": "OPEN", "N": "CLOSE"}.get(str(v))
+    def state(v: Any) -> str:
+        return "OPEN" if str(v) == "Y" else "CLOSE"
 
     rows: list[dict[str, Any]] = []
     for d in data.get("list") or []:
@@ -560,10 +562,9 @@ def parse_vivaldi_rows(data: dict[str, Any]) -> list[dict[str, Any]]:
         row: dict[str, Any] = {"name": name}
         if d.get("slopeGrade"):
             row["level"] = d["slopeGrade"]
-        if state(d.get("daytimeYn")):
-            row["day"] = state(d.get("daytimeYn"))
-        if state(d.get("nightYn")):
-            row["night"] = state(d.get("nightYn"))
+        for key, field in (("daytimeYn", "day"), ("nightYn", "night")):
+            if key in d:
+                row[field] = state(d[key])
         # 밤샘/새벽만 여는 날은 상태 칸이 하나뿐이라 state로 넘긴다(개방으로 보이게).
         if state(d.get("dawnYn")) == "OPEN" and row.get("night") != "OPEN":
             row["state"] = "OPEN"
@@ -596,12 +597,16 @@ def vivaldi() -> dict[str, Any]:
 
     out["slopes"] = parse_vivaldi_rows(data)
     out["nightOpen"] = any(s.get("night") == "OPEN" for s in out["slopes"])
+    listed = data.get("list") or []
+    # 오늘 값이 통째로 비어 있는 날: 화면은 공식과 같이 전부 미개방으로 보여 주되, 자료에는 그 사실을 남긴다.
+    if listed and all(d.get(k) is None for d in listed for k in ("daytimeYn", "nightYn", "dawnYn")):
+        out["note"] = "오늘 슬로프별 개방 값이 비어 있어 공식 화면처럼 전부 미개방으로 표시"
     if not out["slopes"]:
         out["status"] = "partial"
         out["note"] = "슬로프 목록이 비어 있음(개편 의심)"
     elif not any(k in s for s in out["slopes"] for k in ("day", "night", "state")):
         out["status"] = "partial"
-        out["note"] = "공식 스키장 상황에 오늘 개방 값이 입력되지 않음(사이트도 CLOSE 표시)"
+        out["note"] = "공식 스키장 상황에 개방 값 칸이 없음(개편 의심)"
     return out
 
 

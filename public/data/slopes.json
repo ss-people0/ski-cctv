@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-28T07:12:36+09:00",
+ "generatedAt": "2026-11-28T07:16:02+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
@@ -774,58 +774,80 @@
    "id": "vivaldi",
    "name": "비발디파크",
    "sourceUrl": "https://sonolc.sonohotelsresorts.com/daemyung.vp.skiworld.04_02_04.ds/dmparse.dm",
-   "fetchedAt": "2026-11-28T00:05:13+09:00",
+   "fetchedAt": "2026-11-28T07:16:02+09:00",
    "sourceDate": null,
-   "status": "partial",
+   "status": "ok",
    "hours": [],
    "slopes": [
     {
      "name": "블루스",
-     "level": "초심"
+     "level": "초심",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "발라드",
-     "level": "초급"
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "재즈",
-     "level": "중급"
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "클래식",
-     "level": "중상급"
+     "level": "중상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "레게",
-     "level": "중상급"
+     "level": "중상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "힙합Ⅰ",
-     "level": "중상급"
+     "level": "중상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "힙합Ⅱ",
-     "level": "중상급"
+     "level": "중상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "펑키",
-     "level": "상급"
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "테크노Ⅰ",
-     "level": "상급"
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "테크노Ⅱ",
-     "level": "상급"
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "락",
-     "level": "최상급"
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
     }
    ],
    "lifts": [],
-   "note": "공식 스키장 상황에 오늘 개방 값이 입력되지 않음(사이트도 CLOSE 표시)",
+   "note": "오늘 슬로프별 개방 값이 비어 있어 공식 화면처럼 전부 미개방으로 표시",
    "error": null,
    "httpStatus": 200,
    "nightOpen": false

@@ -292,7 +292,7 @@ test('resort with no collected entry shows the official course list as 0 / N all
   expect(buildSlopeBoard(emptyFeed, TODAY, undefined, catalog)?.openCount).toBe(0)
 })
 
-test('slopes listed without any open value (vivaldi) stay 정보 미확인, not 미개방', () => {
+test('slopes listed without any state value stay 정보 미확인, not 미개방 (missing keys / old file)', () => {
   const board = buildSlopeBoard(
     make({
       status: 'partial',

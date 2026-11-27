@@ -35,7 +35,8 @@ const countText = computed(() => {
   if (!b) return ''
   return b.openCount === b.total ? '전 슬로프 개방' : `${b.openCount} / ${b.total}개 개방`
 })
-// 공식 현황이 슬로프 이름만 주고 개방 값을 비워 둔 곳(비발디파크) — 0/N이 '전부 미개방'으로 오해되지 않게 알린다.
+// 공식 현황이 개방 값을 비워 둔 곳은 수집기가 공식 화면처럼 CLOSE로 적으므로(비발디파크) 보통은 개방 수 0이 사실이다.
+// 상태 칸 자체가 없는 자료(옛 날짜 파일·사이트 개편)만 0/N이 '전부 미개방'으로 오해되지 않게 알린다.
 const unverified = computed(
   () => !!props.board && !props.board.preseason && props.board.groups.every((g) => g.chips.every((c) => c.status === 'unknown')),
 )
