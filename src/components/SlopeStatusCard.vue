@@ -44,7 +44,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 </script>
 
 <template>
-  <div class="slope-info" :class="{ empty: !board }">
+  <div class="slope-info" :class="{ empty: !board, listed: board?.listed }">
     <template v-if="board">
       <button
         type="button"
@@ -125,6 +125,8 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 .hours .off dd { color: #b0b4c6; }
 .hours small { display: block; font-size: 0.7rem; font-weight: 600; }
 .preseason { margin: -4px 0 8px; color: var(--muted); font-size: 0.8rem; }
+/* 목록만 있는 카드는 진행률 바가 없어서 안내 줄이 제목에 붙는다 → 조금 띄운다. */
+.slope-info.listed .preseason { margin-top: 4px; }
 .season-note { margin: 8px 0 0; color: var(--text); font-size: 0.85rem; font-weight: 600; word-break: keep-all; }
 .slope-title.static { display: block; margin: 0 0 4px; }
 .slope-upcoming { margin: 8px 0 0; color: var(--blue-dark); font-size: 0.9rem; font-weight: 700; }
