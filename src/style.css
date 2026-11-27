@@ -88,7 +88,7 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 .cams-soon { display: grid; justify-items: center; gap: 6px; padding: 24px 18px; border: 1px dashed #d8d4e9; border-radius: 20px; background: var(--surface); text-align: center; }
 .soon-mark { font-size: 1.5rem; line-height: 1; }
 .soon-title { margin: 0; color: var(--text); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
-.soon-text { margin: 0; max-width: 32ch; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+.soon-text { margin: 0; max-width: 32ch; color: var(--muted); font-size: 0.85rem; line-height: 1.5; word-break: keep-all; }
 .soon-link { display: inline-flex; align-items: center; min-height: 40px; margin-top: 6px; padding: 0 16px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 0.85rem; font-weight: 700; text-decoration: none; }
 .soon-link:hover, .soon-link:focus-visible { background: var(--blue-dark); }
 

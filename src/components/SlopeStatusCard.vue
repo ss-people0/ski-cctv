@@ -78,7 +78,10 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
         </ul>
       </div>
     </template>
-    <span v-else-if="!season">아직 오픈 현황 정보가 없어요.</span>
+    <template v-else>
+      <p class="slope-title static">슬로프 운영 현황</p>
+      <span v-if="!season">아직 오픈 현황 정보가 없어요.</span>
+    </template>
     <p v-if="season" class="season-note">{{ season }}</p>
     <dl v-if="hourRows.length" class="hours">
       <div v-for="hour in hourRows" :key="hour.label" :class="{ off: hour.off }">
@@ -119,7 +122,8 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 .hours .off dd { color: #b0b4c6; }
 .hours small { display: block; font-size: 0.7rem; font-weight: 600; }
 .preseason { margin: -4px 0 8px; color: var(--muted); font-size: 0.8rem; }
-.season-note { margin: 8px 0 0; color: var(--text); font-size: 0.85rem; font-weight: 600; }
+.season-note { margin: 8px 0 0; color: var(--text); font-size: 0.85rem; font-weight: 600; word-break: keep-all; }
+.slope-title.static { display: block; margin: 0 0 4px; }
 .slope-upcoming { margin: 8px 0 0; color: var(--blue-dark); font-size: 0.9rem; font-weight: 700; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>
