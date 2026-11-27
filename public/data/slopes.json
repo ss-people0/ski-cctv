@@ -1,12 +1,12 @@
 {
- "generatedAt": "2026-11-27T13:51:45+09:00",
+ "generatedAt": "2026-11-27T14:03:19+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
    "id": "yongpyong",
    "name": "모나용평",
    "sourceUrl": "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do",
-   "fetchedAt": "2026-11-27T13:51:45+09:00",
+   "fetchedAt": "2026-11-27T14:03:19+09:00",
    "sourceDate": "2026-11-27",
    "status": "ok",
    "hours": [
@@ -161,7 +161,7 @@
    "id": "high1",
    "name": "하이원리조트",
    "sourceUrl": "https://www.high1.com/ski/slopeView.do?key=748&mode=p",
-   "fetchedAt": "2026-11-27T13:51:47+09:00",
+   "fetchedAt": "2026-11-27T14:03:20+09:00",
    "sourceDate": null,
    "status": "ok",
    "hours": [
@@ -362,7 +362,7 @@
    "id": "jisan",
    "name": "지산리조트",
    "sourceUrl": "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-   "fetchedAt": "2026-11-27T13:51:50+09:00",
+   "fetchedAt": "2026-11-27T14:03:22+09:00",
    "sourceDate": "2026-03-01",
    "status": "ok",
    "hours": [
@@ -658,7 +658,7 @@
    "id": "gangchon",
    "name": "엘리시안 강촌",
    "sourceUrl": "https://api.elysian.co.kr/api/v1/resort-Intro/slope-list",
-   "fetchedAt": "2026-11-27T13:51:53+09:00",
+   "fetchedAt": "2026-11-27T14:03:24+09:00",
    "sourceDate": "2026-11-27",
    "status": "partial",
    "hours": [],
@@ -672,7 +672,7 @@
    "id": "alpensia",
    "name": "알펜시아",
    "sourceUrl": "https://www.alpensia.com/ski/slope-now.do",
-   "fetchedAt": "2026-11-27T13:51:54+09:00",
+   "fetchedAt": "2026-11-27T14:03:25+09:00",
    "sourceDate": "2026-11-27",
    "status": "ok",
    "hours": [],
