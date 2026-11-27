@@ -78,7 +78,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
         </ul>
       </div>
     </template>
-    <span v-else>아직 오픈 현황 정보가 없어요.</span>
+    <span v-else-if="!season">아직 오픈 현황 정보가 없어요.</span>
     <p v-if="season" class="season-note">{{ season }}</p>
     <dl v-if="hourRows.length" class="hours">
       <div v-for="hour in hourRows" :key="hour.label" :class="{ off: hour.off }">

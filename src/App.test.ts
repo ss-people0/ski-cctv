@@ -102,8 +102,8 @@ test('a resort without cam points out on the list card that its cam is coming', 
 
   const rows = app.findAll('.resort-row')
   const index = resorts.findIndex((r) => r.id === 'edenvalley')
-  expect(rows[index].get('.row-sub').text()).toContain('라이브 캠 준비 중')
-  expect(rows[0].get('.row-sub').text()).not.toContain('라이브 캠 준비 중')
+  expect(rows[index].get('.row-sub').text()).toContain('캠 준비 중')
+  expect(rows[0].get('.row-sub').text()).not.toContain('캠 준비 중')
 })
 
 test('the back button returns to the list', async () => {

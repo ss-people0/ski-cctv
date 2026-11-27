@@ -114,7 +114,7 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
         <span class="row-label" :style="themeVars(resort.id)">
           <span class="row-text">
             <span class="resort-name">{{ resort.name }}</span>
-            <span class="row-sub">{{ resort.region }}<template v-if="!resort.cams.length"> · 라이브 캠 준비 중</template></span>
+            <span class="row-sub">{{ resort.region }}<template v-if="!resort.cams.length"> · 캠 준비 중</template></span>
           </span>
           <span v-if="cardWeather.get(resort.id)" class="card-weather"
             >{{ cardWeather.get(resort.id)!.icon }} {{ cardWeather.get(resort.id)!.temp }}°</span
