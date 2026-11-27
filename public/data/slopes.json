@@ -1,13 +1,13 @@
 {
- "generatedAt": "2026-11-26T15:29:26+09:00",
+ "generatedAt": "2026-11-27T11:44:17+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
    "id": "yongpyong",
    "name": "모나용평",
    "sourceUrl": "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do",
-   "fetchedAt": "2026-11-26T15:29:26+09:00",
-   "sourceDate": "2026-11-26",
+   "fetchedAt": "2026-11-27T11:44:17+09:00",
+   "sourceDate": "2026-11-27",
    "status": "ok",
    "hours": [
     {
@@ -26,91 +26,127 @@
    "slopes": [
     {
      "name": "옐로우",
-     "day": "CLOSE",
+     "level": "초급",
+     "day": "OPEN",
      "night": "CLOSE"
     },
     {
      "name": "뉴옐로우",
+     "level": "초급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "메가그린",
+     "level": "초중급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "핑크",
+     "level": "초중급",
      "day": "OPEN",
      "night": "CLOSE"
     },
     {
+     "name": "골드파라다이스",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
      "name": "레인보우파라다이스",
+     "level": "중급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레드파라다이스",
+     "level": "중급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레드골드브릿지",
+     "level": "중급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "실버파라다이스",
+     "level": "중급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "골드환타스틱",
+     "level": "중상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "블루",
+     "level": "상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "골드밸리",
+     "level": "상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레인보우4",
+     "level": "상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "뉴레드",
+     "level": "상급",
      "day": "OPEN",
      "night": "CLOSE"
     },
     {
      "name": "뉴골드",
+     "level": "최상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레인보우1",
+     "level": "최상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레인보우2",
+     "level": "최상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레인보우3",
+     "level": "최상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "레드",
+     "level": "최상급",
      "day": "CLOSE",
      "night": "CLOSE"
     },
     {
      "name": "실버",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "드래곤파크",
+     "level": "익스트림",
      "day": "CLOSE",
      "night": "CLOSE"
     }
@@ -125,7 +161,7 @@
    "id": "high1",
    "name": "하이원리조트",
    "sourceUrl": "https://www.high1.com/ski/slopeView.do?key=748&mode=p",
-   "fetchedAt": "2026-11-26T15:29:27+09:00",
+   "fetchedAt": "2026-11-27T11:44:19+09:00",
    "sourceDate": null,
    "status": "ok",
    "hours": [
@@ -309,7 +345,7 @@
     },
     {
      "name": "팰리스(PALACE)",
-     "day": "OPEN",
+     "day": "CLOSE",
      "night": "CLOSE",
      "level": "초급/중급/상급"
     }
@@ -326,7 +362,7 @@
    "id": "jisan",
    "name": "지산리조트",
    "sourceUrl": "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-   "fetchedAt": "2026-11-26T15:29:30+09:00",
+   "fetchedAt": "2026-11-27T11:44:22+09:00",
    "sourceDate": "2026-03-01",
    "status": "ok",
    "hours": [
@@ -474,7 +510,7 @@
    "id": "phoenix",
    "name": "휘닉스 평창",
    "sourceUrl": "https://www.phoenixhnr.co.kr/api/snowpark/slope",
-   "fetchedAt": "2026-11-26T15:29:33+09:00",
+   "fetchedAt": "2026-11-27T11:44:24+09:00",
    "sourceDate": null,
    "status": "ok",
    "hours": [
@@ -494,10 +530,10 @@
    "slopes": [
     {
      "name": "스패로우",
-     "slot": null,
+     "slot": "주간",
      "level": "초급",
-     "state": "CLOSE",
-     "hours": null
+     "state": "OPEN",
+     "hours": "09:00-16:00"
     },
     {
      "name": "펭귄",
@@ -622,8 +658,8 @@
    "id": "gangchon",
    "name": "엘리시안 강촌",
    "sourceUrl": "https://api.elysian.co.kr/api/v1/resort-Intro/slope-list",
-   "fetchedAt": "2026-11-26T15:29:33+09:00",
-   "sourceDate": "2026-11-26",
+   "fetchedAt": "2026-11-27T11:44:24+09:00",
+   "sourceDate": "2026-11-27",
    "status": "partial",
    "hours": [],
    "slopes": [],
@@ -636,67 +672,78 @@
    "id": "alpensia",
    "name": "알펜시아",
    "sourceUrl": "https://www.alpensia.com/ski/slope-now.do",
-   "fetchedAt": "2026-11-26T15:29:34+09:00",
-   "sourceDate": "2026-03-03",
-   "status": "stale",
+   "fetchedAt": "2026-11-27T11:44:25+09:00",
+   "sourceDate": "2026-11-27",
+   "status": "ok",
    "hours": [],
    "slopes": [
     {
      "name": "알파",
+     "level": "초급",
      "주간": "CLOSE",
-     "주간Range": "2025-12-04~2026-03-02",
+     "주간Range": "2026-11-28~2026-12-07",
      "야간": "CLOSE",
-     "야간Range": "2025-12-20~2026-02-17"
+     "야간Range": "2025-12-20~2026-02-17",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "브라보",
+     "level": "중급",
      "주간": "CLOSE",
      "주간Range": "2026-02-24~2026-03-02",
      "야간": "CLOSE",
-     "야간Range": "2026-02-06~2026-02-17"
+     "야간Range": "2026-02-06~2026-02-17",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "찰리",
+     "level": "최상급",
      "주간": "CLOSE",
      "주간Range": "2026-02-24~2026-03-02",
      "야간": "CLOSE",
-     "야간Range": "2026-02-06~2026-02-17"
+     "야간Range": "2026-02-06~2026-02-17",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "델타",
+     "level": "상급",
      "주간": "CLOSE",
      "주간Range": "2026-02-24~2026-03-02",
      "야간": "CLOSE",
-     "야간Range": "2024-02-12~2024-02-12"
+     "야간Range": "2024-02-12~2024-02-12",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "에코",
+     "level": "상급",
      "주간": "CLOSE",
      "주간Range": "2026-02-24~2026-02-28",
      "야간": "CLOSE",
-     "야간Range": "2026-02-04~2026-02-04"
+     "야간Range": "2026-02-04~2026-02-04",
+     "day": "CLOSE",
+     "night": "CLOSE"
     },
     {
      "name": "폭스트롯",
+     "level": "최상급",
      "주간": "CLOSE",
      "주간Range": "2021-12-01~2021-12-31",
      "야간": "CLOSE",
-     "야간Range": "2021-12-01~2023-01-02"
-    },
-    {
-     "name": "눈썰매장",
-     "주간": "CLOSE",
-     "주간Range": "2026-03-04~2026-03-08",
-     "야간": "CLOSE",
-     "야간Range": "2023-01-14~2023-02-18"
+     "야간Range": "2021-12-01~2023-01-02",
+     "day": "CLOSE",
+     "night": "CLOSE"
     }
    ],
    "lifts": [],
-   "note": "사이트 값이 2026-03-03 갱신 이후 그대로 — 지난 시즌 값일 수 있음",
+   "note": null,
    "error": null,
    "httpStatus": 200,
    "lastUpdate": [
-    "2026-03-03 11:18:44.0"
+    "2026-11-27 10:04:21.0"
    ]
   }
  ]
