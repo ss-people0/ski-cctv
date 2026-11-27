@@ -6,7 +6,7 @@ import unittest
 
 import datetime as dt
 
-from collect_slopes import keep_uncollected, stick_open, parse_alpensia_records, parse_yongpyong_rows
+from collect_slopes import keep_uncollected, stick_open, parse_alpensia_records, parse_yongpyong_rows, parse_jisan_slopes
 
 
 class ParseAlpensiaRecordsTest(unittest.TestCase):
@@ -65,6 +65,61 @@ class ParseYongpyongRowsTest(unittest.TestCase):
             {"name": "골드파라다이스", "level": "중급", "day": "CLOSE", "night": "OPEN"},
             {"name": "드래곤파크", "level": "익스트림", "day": "CLOSE", "night": "CLOSE"},
         ])
+
+
+class ParseJisanSlopesTest(unittest.TestCase):
+    """지산 표: 코스 이름은 첫 머리글 줄, 난이도는 둘째 줄(class=colorN)에서 읽고, '1-1'은 '1·1'로 쓴다."""
+
+    TABLE = """
+<table class="slope_table">
+<thead>
+<tr>
+  <th scope="col" class="tit" rowspan="2">구분</th>
+  <th scope="col">1-1</th>
+  <th scope="col">2</th>
+  <th scope="col" class="txt">3(어린이 전용)</th>
+</tr>
+<tr class="bg_white">
+  <th scope="col" class="color1"><span>초급</span></th>
+  <th scope="col" class="color2"><span>중급</span></th>
+  <th scope="col" class="color2"><span>중급</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td class="tit">주간<br/>(09:00~17:00)</td>
+  <td><img src='../../asset/images/sub/ski/slope_open.png' alt=''></td>
+  <td><img src='../../asset/images/sub/ski/slope_close.png' alt=''></td>
+  <td><img src='../../asset/images/sub/ski/slope_close.png' alt=''></td>
+</tr>
+<tr>
+  <td class="tit">야간<br/>(18:30~24:00)</td>
+  <td><img src='../../asset/images/sub/ski/slope_close.png' alt=''></td>
+  <td><img src='../../asset/images/sub/ski/slope_close.png' alt=''></td>
+  <td><img src='../../asset/images/sub/ski/slope_close.png' alt=''></td>
+</tr>
+</tbody>
+</table>
+"""
+
+    def test_reads_level_per_slope_and_uses_the_middle_dot_in_1_1(self):
+        rows = parse_jisan_slopes(self.TABLE)
+        self.assertEqual(rows, [
+            {"name": "1·1", "slot": "주간", "state": "OPEN", "level": "초급"},
+            {"name": "2", "slot": "주간", "state": "CLOSE", "level": "중급"},
+            {"name": "3(어린이 전용)", "slot": "주간", "state": "CLOSE", "level": "중급"},
+            {"name": "1·1", "slot": "야간", "state": "CLOSE", "level": "초급"},
+            {"name": "2", "slot": "야간", "state": "CLOSE", "level": "중급"},
+            {"name": "3(어린이 전용)", "slot": "야간", "state": "CLOSE", "level": "중급"},
+        ])
+
+    def test_keeps_going_when_the_level_row_is_missing(self):
+        table = self.TABLE.split("<thead>")[0] + "<thead>" + \
+            self.TABLE.split("<thead>")[1].split("<tr class=\"bg_white\">")[0] + "</tr></thead>" + \
+            self.TABLE.split("</thead>")[1]
+        rows = parse_jisan_slopes(table)
+        self.assertEqual([r["name"] for r in rows], ["1·1", "2", "3(어린이 전용)"] * 2)
+        self.assertNotIn("level", rows[0])
 
 
 class KeepUncollectedTest(unittest.TestCase):

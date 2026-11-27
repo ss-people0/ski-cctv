@@ -79,6 +79,19 @@ export const resorts: readonly Resort[] = [
     coord: { lat: 37.2566, lon: 127.3607 }, // 이천 마장면
     symbol: 'symbols/jisan.png',
     emergency: [{ label: '응급후송', tels: ['031-644-1570'] }],
+    // 공식 '슬로프 오픈 현황' 표의 난이도 줄 + '슬로프 맵' 코스 소개에서 옮김(2026-11-27 확인).
+    // 자동 수집이 같은 표를 읽으므로 실시간 목록이 있으면 그쪽을 쓰고, 없을 때만 이 목록을 쓴다.
+    // 코스 이름의 하이픈은 코스 구분처럼 보여 화면에서는 가운뎃점으로 쓴다(1-1 → 1·1). 수집기도 같은 이름으로 맞춘다.
+    slopeCatalog: [
+      { name: '1·1', level: '초급' },
+      { name: '1', level: '초급' },
+      { name: '2', level: '중급' },
+      { name: '뉴 오렌지', level: '중급' },
+      { name: '3(어린이 전용)', level: '중급' },
+      { name: '5', level: '상급' },
+      { name: '6', level: '최상급' },
+      { name: '7', level: '중상급' },
+    ],
     note: 'jisan1~3 스트림(livecity)은 신호가 들어와 재생한다(2026-11-24, CORS *). 공식 버튼은 아직 "26/27시즌에 뵙겠습니다"로 막혀 있다. 블루·실버는 공식 페이지 cam_sel(4)/(5) 순서대로 jisan4·5(2026-11-26 신호·CORS * 확인).',
     cams: [
       { id: 'jisan-lemon',  name: '레몬 탑승장',            type: 'hls',  status: 'active',  url: 'https://ant.livecity.co.kr:5443/jisancam/streams/jisan1.m3u8', playLimitSec: PLAY_LIMIT_SEC },
@@ -260,6 +273,21 @@ export const resorts: readonly Resort[] = [
       { label: '심야', value: '23:00~03:00' },
     ],
     season: '26/27 시즌 11월 27일 09:00 개장 · 3월 1일까지',
+    // 공식 '스키&보드 소개 > 슬로프 안내' 표에서 옮김(2026-11-27 확인). 난이도는 공식 표기 그대로.
+    // 블루스는 공식 표기가 '초심'이라 그대로 두고, 락은 24/25 시즌부터 미운영이라 이름에 붙여 둔다.
+    slopeCatalog: [
+      { name: '블루스', level: '초심' },
+      { name: '발라드', level: '초급' },
+      { name: '재즈', level: '중급' },
+      { name: '레게', level: '중상급' },
+      { name: '클래식', level: '중상급' },
+      { name: '펑키', level: '중상급' },
+      { name: '테크노Ⅰ', level: '중상급' },
+      { name: '테크노Ⅱ', level: '상급' },
+      { name: '힙합Ⅰ', level: '중상급' },
+      { name: '힙합Ⅱ', level: '중상급' },
+      { name: '락(미운영)', level: '최상급' },
+    ],
     // 패트롤: 슬로프 안내판·현수막의 '부상자 발생 제보 전화 033-439-8484'.
     // 리프트권 안내 후기(2023.02), 렌탈샵 후기(2025.02), 사고 후기 현수막 사진(2026.02)에서 같은 번호 확인.
     emergency: [
@@ -284,6 +312,30 @@ export const resorts: readonly Resort[] = [
       { label: '야간', value: '18:30~22:00' },
     ],
     season: '26/27 시즌 11월 27일 09:00 개장 · 첫날은 설천 스피츠 하단',
+    // 공식 '슬로프&리프트 제원' 표에서 옮김(2026-11-27 확인). 표가 초급자/중급자/상급자/최상급자로 묶어 두어 그 등급을 쓴다.
+    slopeCatalog: [
+      { name: '서역기행', level: '초급' },
+      { name: '이스턴', level: '초급' },
+      { name: '루키힐', level: '중급' },
+      { name: '웨스턴', level: '중급' },
+      { name: '터보', level: '중급' },
+      { name: '썬다운', level: '중급' },
+      { name: '프리웨이', level: '상급' },
+      { name: '파노라마', level: '상급' },
+      { name: '레이더스 하단', level: '상급' },
+      { name: '야마가', level: '상급' },
+      { name: '레이더스 상단', level: '최상급' },
+      { name: '스피츠 하단', level: '초급' },
+      { name: '실크로드 하단', level: '중급' },
+      { name: '실크로드 상단', level: '중급' },
+      { name: '커넥션', level: '중급' },
+      { name: '미뉴에트', level: '상급' },
+      { name: '모차르트', level: '최상급' },
+      { name: '알레그로', level: '최상급' },
+      { name: '왈츠', level: '최상급' },
+      { name: '카덴자', level: '최상급' },
+      { name: '폴카', level: '최상급' },
+    ],
     // 공식 '슬로프119' 페이지(현재): 안내 패트롤 7331 / 의무실 7330, 부상자 제보전화 063-320-7333.
     // 7332(만선본부)는 2003년 '주요 전화번호 안내'에만 있어 현재 확인되지 않아 넣지 않았다.
     emergency: [
@@ -309,7 +361,23 @@ export const resorts: readonly Resort[] = [
       { label: '주간(오후)', value: '13:00~16:30' },
       { label: '야간', value: '18:00~21:30' },
     ],
-    season: '26/27 시즌 11월 26일 개장 · 드림1부터 순차 개방(총 10면)',
+    season: '26/27 시즌 11월 26일 개장 · 드림1부터 순차 개방 · 챌린지2·3 신설',
+    // 공식 '슬로프 오픈현황' 페이지의 슬로프 제원 표에서 옮김(2026-11-27 확인).
+    // 표에 함께 있는 하프파이프·눈썰매장·익스트림파크는 슬로프가 아니라 뺀다.
+    slopeCatalog: [
+      { name: '드림1', level: '초급' },
+      { name: '드림2', level: '초급' },
+      { name: '헤드', level: '중급' },
+      { name: '해피', level: '중급' },
+      { name: '글로리1', level: '상급' },
+      { name: '글로리2', level: '상급' },
+      { name: '글로리3', level: '상급' },
+      { name: '패션1', level: '최상급' },
+      { name: '패션2', level: '최상급' },
+      { name: '첼린지1', level: '최상급' },
+      { name: '첼린지2', level: '최상급' },
+      { name: '첼린지3', level: '최상급' },
+    ],
     emergency: [
       { label: '패트롤', tels: ['033-580-7420'] },
       { label: '의무실', tels: ['033-580-7412'] },
@@ -332,6 +400,18 @@ export const resorts: readonly Resort[] = [
       { label: '정설', value: '18:00~19:00' },
     ],
     season: '12월 중 개장 예정 · 공식 개장일은 아직 공지 전이에요',
+    // 공식 '슬로프/리프트' 표(이용자수준)에서 옮김(2026-11-27 확인). 표의 '초/중급'·'중/상급'은 초중급·중상급으로 쓴다.
+    slopeCatalog: [
+      { name: '그램', level: '초급' },
+      { name: '익시오', level: '초중급' },
+      { name: '씽큐1', level: '상급' },
+      { name: '씽큐2', level: '중급' },
+      { name: '홈봇 1/2', level: '중상급' },
+      { name: '홈봇 3', level: '초중급' },
+      { name: '홈봇 4', level: '중급' },
+      { name: 'CNP 1', level: '초중급' },
+      { name: 'CNP 2', level: '상급' },
+    ],
     // 공식 '안내 동영상'(스키장 이용 에티켓): 충돌·부상 시 SOS 번호 031-8026-5678.
     // 공식 '고객문의': 의무실 031-8026-5766(스키하우스 1F).
     emergency: [
@@ -358,6 +438,12 @@ export const resorts: readonly Resort[] = [
       { label: '야간', value: '18:30~22:00' },
     ],
     season: '개장일은 12월 11일 예정 · 26/27 운영시간은 아직 공지 전이에요(지난 시즌 기준)',
+    // 공식 '슬로프 / 리프트' 표에서 옮김(2026-11-27 확인). 슬로프는 I·F·G 3면(+I-1 퍼니런파크는 파크라 뺀다).
+    slopeCatalog: [
+      { name: 'I', level: '초급' },
+      { name: 'F', level: '중급' },
+      { name: 'G', level: '중급' },
+    ],
     emergency: [{ label: '리조트 대표', tels: ['033-730-3500'] }],
     cams: [],
   },
@@ -375,6 +461,15 @@ export const resorts: readonly Resort[] = [
       { label: '정설', value: '17:30~19:00' },
     ],
     season: '12월 중순 개장 예정 · 베이직·우라누스부터 개방',
+    // 공식 스키장 소개의 '슬로프 제원' 표에서 옮김(2026-11-27 확인). 새턴은 표에 '루지트랙으로 변경'이라 빼다.
+    slopeCatalog: [
+      { name: '베이직', level: '초급' },
+      { name: '메인', level: '초급' },
+      { name: '쥬피터', level: '중급' },
+      { name: '우라누스', level: '중급' },
+      { name: '머큐리', level: '상급' },
+      { name: '비너스', level: '상급' },
+    ],
     emergency: [
       { label: '종합안내', tels: ['055-379-8159', '055-379-8160'] },
       { label: '리조트 대표', tels: ['055-379-8000'] },

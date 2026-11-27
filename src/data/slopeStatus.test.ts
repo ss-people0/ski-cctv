@@ -239,6 +239,8 @@ test('slope board is hidden when there is no official slope list or the fetch fa
 test('level colors follow the design guide and blend for in-between levels', () => {
   expect(levelColor('초급')).toBe('#399165')
   expect(levelColor('최상급')).toBe('#505160')
+  expect(levelColor('초심')).toMatch(/^#[0-9A-F]{6}$/) // 비발디파크 공식 등급
+  expect(levelColor('초심')).not.toBe(levelColor('초급'))
   expect(levelColor('초중급')).toMatch(/^#[0-9A-F]{6}$/)
   expect(levelColor('초중급')).not.toBe(levelColor('초급'))
   expect(levelColor('알 수 없는 등급')).toBe('#64748B')
@@ -263,6 +265,36 @@ test('levels are grouped once each in difficulty order even when the official ta
     ['중급', ['헤라Ⅰ']],
     ['상급', ['빅토리아Ⅰ', '아폴로Ⅵ']],
     ['파크', ['익스트림']], // 모르는 등급은 정해진 등급 뒤에, 처음 나온 순서대로
+  ])
+})
+
+test('resort with no collected entry shows the official course list only, without open/closed claims', () => {
+  const catalog = [
+    { name: 'G', level: '중급' },
+    { name: 'I', level: '초급' },
+    { name: '블루스', level: '초심' },
+  ]
+  const board = buildSlopeBoard(undefined, TODAY, undefined, catalog)
+  expect(board?.listed).toBe(true)
+  expect(board?.total).toBe(3)
+  expect(board?.openCount).toBe(0)
+  expect(board?.groups.map((g) => g.level)).toEqual(['초심', '초급', '중급']) // 초심은 초급보다 앞
+  expect(board?.groups.flatMap((g) => g.chips).every((c) => c.status === 'unknown')).toBe(true)
+  // 수집값이라도 지난 시즌 값이면 '개방 전 → 전부 미개방'으로 본다(강촌 개장 전과 같은 표시).
+  expect(buildSlopeBoard(make({ status: 'partial', sourceDate: TODAY, slopes: [] }), TODAY, undefined, catalog)?.listed).toBeUndefined()
+})
+
+test('catalog levels fill live rows that have no level of their own (jisan)', () => {
+  const catalog = [{ name: '2', level: '중급' }, { name: '7', level: '중상급' }]
+  const board = buildSlopeBoard(
+    make({ sourceDate: '2026-03-01', slopes: [{ name: '2', slot: '주간', state: 'OPEN' }, { name: '7', slot: '주간', state: 'OPEN' }] }),
+    TODAY,
+    undefined,
+    catalog,
+  )
+  expect(board?.groups.map((g) => [g.level, g.chips.map((c) => c.name)])).toEqual([
+    ['중급', ['2']],
+    ['중상급', ['7']],
   ])
 })
 

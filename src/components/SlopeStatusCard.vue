@@ -33,6 +33,7 @@ const hourRows = computed<SlopeHourLine[]>(() => (props.hours?.length ? props.ho
 const countText = computed(() => {
   const b = props.board
   if (!b) return ''
+  if (b.listed) return `코스 ${b.total}면`
   return b.openCount === b.total ? '전 슬로프 개방' : `${b.openCount} / ${b.total}개 개방`
 })
 const asOfText = computed(() => {
@@ -56,22 +57,23 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
         <span class="slope-count">{{ countText }}</span>
         <span class="arrow" :class="{ up: !collapsed }" aria-hidden="true">▾</span>
       </button>
-      <div class="progress" aria-hidden="true"><span :style="{ width: `${percent}%` }" /></div>
-      <p v-if="board.preseason" class="preseason">올 시즌 오픈 전이에요. 공식 현황이 올라오면 자동으로 바뀌어요.</p>
+      <div v-if="!board.listed" class="progress" aria-hidden="true"><span :style="{ width: `${percent}%` }" /></div>
+      <p v-if="board.listed" class="preseason">공식 슬로프 안내에 있는 코스예요. 오늘 개방 현황은 아직 수집 전이에요.</p>
+      <p v-else-if="board.preseason" class="preseason">올 시즌 오픈 전이에요. 공식 현황이 올라오면 자동으로 바뀌어요.</p>
       <p v-else-if="board.asOf" class="preseason">{{ asOfText }} 기준이에요. 오늘 현황은 아침 8시쯤 바뀌어요.</p>
 
       <div v-show="!collapsed" id="slope-list" class="slope-list">
         <div v-for="group in board.groups" :key="group.level" class="level-row" :class="{ 'no-level': !group.level }">
           <span v-if="group.level" class="level" :style="{ color: levelColor(group.level) }">{{ group.level }}</span>
           <ul class="chips">
-            <li v-for="chip in group.chips" :key="chip.name" class="chip" :class="chip.status">
-              <span aria-hidden="true">{{ STATUS[chip.status].icon }}</span>{{ chip.name
+            <li v-for="chip in group.chips" :key="chip.name" class="chip" :class="board.listed ? 'listed' : chip.status">
+              <span v-if="!board.listed" aria-hidden="true">{{ STATUS[chip.status].icon }}</span>{{ chip.name
               }}<span v-if="chip.nightOnly" title="야간만 개방"> 🌙</span>
-              <span class="sr-only">{{ STATUS[chip.status].label }}</span>
+              <span v-if="!board.listed" class="sr-only">{{ STATUS[chip.status].label }}</span>
             </li>
           </ul>
         </div>
-        <ul class="legend" aria-label="운영 상태 범례">
+        <ul v-if="!board.listed" class="legend" aria-label="운영 상태 범례">
           <li v-for="[status, s] in LEGEND" :key="status" class="chip" :class="status">
             <span aria-hidden="true">{{ s.icon }}</span>{{ s.label }}
           </li>
@@ -112,6 +114,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 .chip.closed { background: #F0EFF3; color: #92909A; }
 .chip.upcoming { background: #FFF0D9; color: #A87532; }
 .chip.unknown { background: #E8EDF3; color: #64748B; }
+.chip.listed { background: var(--ice-light); color: var(--text); }
 .legend { margin: 8px 0 2px; padding-top: 8px; border-top: 1px solid var(--line); }
 .legend .chip { padding: 1px 6px; font-size: 0.72rem; }
 

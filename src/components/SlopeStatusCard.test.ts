@@ -74,6 +74,28 @@ test('without board data shows the placeholder and still shows upcoming lines', 
   expect(card.get('.slope-upcoming').text()).toContain('11월 27일')
 })
 
+test('list-only board (no collection yet) shows the level groups without open/closed icons or legend', () => {
+  const listed: SlopeBoard = {
+    openCount: 0,
+    total: 2,
+    groups: [
+      { level: '초급', chips: [{ name: 'I', status: 'unknown', nightOnly: false }] },
+      { level: '중급', chips: [{ name: 'F', status: 'unknown', nightOnly: false }] },
+    ],
+    hours: [],
+    preseason: true,
+    listed: true,
+  }
+  const card = mount(SlopeStatusCard, { props: { board: listed, hours: [{ label: '주간', value: '09:00~17:00' }], upcomingLines: [] } })
+  expect(card.get('.slope-count').text()).toBe('코스 2면')
+  expect(card.findAll('.chips .chip').map((c) => c.classes()[1])).toEqual(['listed', 'listed'])
+  expect(card.get('.chip.listed').text()).toBe('I') // 상태 기호·숨김 글자 없음
+  expect(card.find('.progress').exists()).toBe(false)
+  expect(card.find('.legend').exists()).toBe(false)
+  expect(card.get('.preseason').text()).toContain('수집 전')
+  expect(card.find('.hours').exists()).toBe(true) // 손으로 넣은 공식 운영시간은 그대로
+})
+
 test('pre-season board says the season has not opened and has no hours', () => {
   const card = mount(SlopeStatusCard, { props: { board: { ...board, openCount: 0, hours: [], preseason: true }, upcomingLines: [] } })
   expect(card.get('.slope-count').text()).toBe('0 / 3개 개방')

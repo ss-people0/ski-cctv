@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-27T15:51:26+09:00",
+ "generatedAt": "2026-11-27T17:01:41+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
@@ -362,7 +362,7 @@
    "id": "jisan",
    "name": "지산리조트",
    "sourceUrl": "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-   "fetchedAt": "2026-11-27T15:51:32+09:00",
+   "fetchedAt": "2026-11-27T17:01:41+09:00",
    "sourceDate": "2026-03-01",
    "status": "ok",
    "hours": [
@@ -381,124 +381,148 @@
    ],
    "slopes": [
     {
-     "name": "1-1",
+     "name": "1·1",
      "slot": "주간",
-     "state": "OPEN"
+     "state": "OPEN",
+     "level": "초급"
     },
     {
      "name": "1",
      "slot": "주간",
-     "state": "OPEN"
+     "state": "OPEN",
+     "level": "초급"
     },
     {
      "name": "2",
      "slot": "주간",
-     "state": "OPEN"
+     "state": "OPEN",
+     "level": "중급"
     },
     {
      "name": "뉴 오렌지",
      "slot": "주간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "3(어린이 전용)",
      "slot": "주간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "5",
      "slot": "주간",
-     "state": "OPEN"
+     "state": "OPEN",
+     "level": "상급"
     },
     {
      "name": "6",
      "slot": "주간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "최상급"
     },
     {
      "name": "7",
      "slot": "주간",
-     "state": "OPEN"
+     "state": "OPEN",
+     "level": "중상급"
     },
     {
-     "name": "1-1",
+     "name": "1·1",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "초급"
     },
     {
      "name": "1",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "초급"
     },
     {
      "name": "2",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "뉴 오렌지",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "3(어린이 전용)",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "5",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "상급"
     },
     {
      "name": "6",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "최상급"
     },
     {
      "name": "7",
      "slot": "야간",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중상급"
     },
     {
-     "name": "1-1",
+     "name": "1·1",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "초급"
     },
     {
      "name": "1",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "초급"
     },
     {
      "name": "2",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "뉴 오렌지",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "3(어린이 전용)",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중급"
     },
     {
      "name": "5",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "상급"
     },
     {
      "name": "6",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "최상급"
     },
     {
      "name": "7",
      "slot": "심야",
-     "state": "CLOSE"
+     "state": "CLOSE",
+     "level": "중상급"
     }
    ],
    "lifts": [],

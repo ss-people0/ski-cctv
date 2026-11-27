@@ -138,10 +138,11 @@ export interface SlopeBoard {
   groups: LevelGroup[]
   hours: SlopeHourLine[]
   preseason: boolean // 사이트에 지난 시즌 값만 있음 → 올 시즌 오픈 전으로 보고 전부 미개방
+  listed?: boolean // 수집값이 아예 없는 곳: 공식 안내의 코스 목록만(개방 여부는 표시하지 않는다)
   asOf?: string // 오늘 값이 아니면 그 기준일(YYYY-MM-DD) → 화면에 "N월 N일 기준" 표시
 }
 
-const LEVEL_ORDER = ['초급', '초중급', '중급', '중상급', '상급', '최상급']
+const LEVEL_ORDER = ['초심', '초급', '초중급', '중급', '중상급', '상급', '최상급']
 
 const isKnown = (row: SlopeRow) => [row.day, row.night, row.state].some((v) => v != null)
 const isNightRow = (row: SlopeRow) => row.night === 'OPEN' || (row.slot?.includes('야간') && row.state === 'OPEN')
@@ -164,6 +165,8 @@ export interface CatalogSlope {
 // 공식 표 전체를 난이도별 칩으로. 수집 실패·목록 없음이면 null.
 // 지난 시즌 값만 걸린 곳(지산·알펜시아)은 목록만 쓰고 옛 OPEN/CLOSE·운영시간은 버린다(전부 미개방).
 // 실시간 목록이 아직 없는 곳(강촌 개장 전)은 공식 고정 목록(catalog)으로 전부 미개방을 보여준다.
+// 수집값이 아예 없는 곳(2026-11-27 추가한 6곳)은 목록만 보여준다(listed) — 개방 여부를 모르는데
+// '전부 미개방'으로 보이면 거짓말이 된다.
 export function buildSlopeBoard(
   entry: ResortSlopeStatus | undefined,
   today: string,
@@ -173,13 +176,20 @@ export function buildSlopeBoard(
   if (entry?.status === 'error' || entry?.status === 'skipped') return null // 실패를 '미개방'으로 보이면 안 된다
   const live = entry && entry.slopes.length > 0 ? entry : undefined
   if (!live && !catalog?.length) return null
-  const slopes: readonly SlopeRow[] = live?.slopes ?? catalog!.map(({ name, level }) => ({ name, level }))
+  // 수집값에 난이도가 비어 있으면 공식 안내 목록에서 이름으로 채운다(지산: 수집 표에 난이도가 없던 시절 값·강촌).
+  const catalogLevel = new Map((catalog ?? []).map(({ name, level }) => [name, level]))
+  const fillLevel = (row: SlopeRow): SlopeRow =>
+    row.level || !catalogLevel.has(row.name) ? row : { ...row, level: catalogLevel.get(row.name) }
+  const slopes: readonly SlopeRow[] = live?.slopes.map(fillLevel) ?? catalog!.map(({ name, level }) => ({ name, level }))
+  const listed = !entry
   const badge = live ? formatSlopeBadge(live, today) : null
   const preseason = badge === null
   const toBoardChip = (name: string, rows: SlopeRow[], upcomingNames: ReadonlySet<string>): SlopeChip =>
-    preseason
-      ? { name, status: upcomingNames.has(name) ? 'upcoming' : 'closed', nightOnly: false }
-      : toChip(name, rows, upcomingNames)
+    listed
+      ? { name, status: 'unknown', nightOnly: false }
+      : preseason
+        ? { name, status: upcomingNames.has(name) ? 'upcoming' : 'closed', nightOnly: false }
+        : toChip(name, rows, upcomingNames)
 
   const byName = new Map<string, SlopeRow[]>()
   for (const row of slopes) byName.set(row.name, [...(byName.get(row.name) ?? []), row])
@@ -203,12 +213,14 @@ export function buildSlopeBoard(
     groups,
     hours: badge?.hours ?? [],
     preseason,
+    ...(listed ? { listed: true } : {}),
     ...(!preseason && live?.sourceDate && live.sourceDate !== today ? { asOf: live.sourceDate } : {}),
   }
 }
 
 // 난이도 이름 색(디자인 가이드). 사이 등급은 앞뒤 색을 섞고, 파크·익스트림 같은 특수 구역은 별도 색.
 const LEVEL_BASE: Readonly<Record<string, string>> = {
+  초심: '#6C9440', // 초급보다 연한 연두. 비발디파크가 공식으로 쓰는 등급명이다.
   초급: '#399165',
   중급: '#467DBB',
   상급: '#CB625E',

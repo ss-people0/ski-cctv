@@ -259,6 +259,53 @@ def high1() -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ 3. 지산
+JISAN_HEADER_SKIP = ("구분", "초급", "중급", "상급", "최상급", "중상급")
+
+
+def jisan_slope_name(raw: str) -> str:
+    """지산 표의 '1-1'은 하이픈이 코스 구분처럼 보여 화면에서는 가운뎃점으로 쓴다(1·1).
+
+    같은 이름을 cams.ts slopeCatalog와 맞춰 두어야 수집값과 고정 목록이 한 슬로프로 묶인다.
+    """
+    return raw.replace("-", "·")
+
+
+def parse_jisan_slopes(table: str) -> list[dict[str, Any]]:
+    """지산 슬로프 표 → [{name, slot, state, level}].
+
+    첫 머리글 줄이 코스 이름, 둘째 줄(class="colorN")이 코스별 난이도다.
+    난이도는 같은 표에서 바로 읽으므로 따로 손으로 관리하지 않는다.
+    """
+    headers = [strip_tags(h) for h in re.findall(r'<th scope="col"[^>]*>(.*?)</th>', table, re.S)]
+    names = [jisan_slope_name(h) for h in headers if h and not h.startswith(JISAN_HEADER_SKIP)]
+    levels = [strip_tags(v) for v in re.findall(r'<th scope="col" class="color\d+"[^>]*>(.*?)</th>', table, re.S)]
+
+    rows: list[dict[str, Any]] = []
+    for row in re.split(r"<tr>", table)[1:]:
+        t = re.search(r'<td class="tit">\s*([^<]*)<br', row)
+        if not t:
+            continue
+        slot = t.group(1).strip()
+        states = []
+        for src in re.findall(r"<td[^>]*>\s*<img src='([^']+)'", row):
+            if "slope_open" in src:
+                states.append("OPEN")
+            elif "slope_ready" in src:
+                states.append("READY")
+            elif "slope_close" in src:
+                states.append("CLOSE")
+            else:
+                states.append("?")
+        for i, st in enumerate(states):
+            if i >= len(names):
+                break
+            item: dict[str, Any] = {"name": names[i], "slot": slot, "state": st}
+            if i < len(levels) and levels[i]:
+                item["level"] = levels[i]
+            rows.append(item)
+    return rows
+
+
 def jisan() -> dict[str, Any]:
     """SSR이지만 상태가 이미지 파일명. WAF가 UA를 본다(브라우저 UA 필수).
 
@@ -286,29 +333,7 @@ def jisan() -> dict[str, Any]:
 
     start = html.find('<table class="slope_table')
     table = html[start : html.find("</table>", start)] if start >= 0 else ""
-    headers = [strip_tags(h) for h in re.findall(r"<th scope=\"col\"[^>]*>(.*?)</th>", table, re.S)]
-    skip = ("구분", "초급", "중급", "상급", "최상급", "중상급")
-    names = [h for h in headers if h and not h.startswith(skip)]
-
-    for row in re.split(r"<tr>", table)[1:]:
-        t = re.search(r'<td class="tit">\s*([^<]*)<br', row)
-        if not t:
-            continue
-        slot = t.group(1).strip()
-        states = []
-        for src in re.findall(r"<td[^>]*>\s*<img src='([^']+)'", row):
-            if "slope_open" in src:
-                states.append("OPEN")
-            elif "slope_ready" in src:
-                states.append("READY")
-            elif "slope_close" in src:
-                states.append("CLOSE")
-            else:
-                states.append("?")
-        for i, st in enumerate(states):
-            if i >= len(names):
-                break
-            out["slopes"].append({"name": names[i], "slot": slot, "state": st})
+    out["slopes"] = parse_jisan_slopes(table)
 
     # 운영시간 고정 문구(예: 주중 09:00~17:00)
     for value in re.findall(r"(\d{2}:\d{2}\s*~\s*\d{2}:\d{2})", table):
