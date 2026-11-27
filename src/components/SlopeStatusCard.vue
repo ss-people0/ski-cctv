@@ -33,9 +33,12 @@ const hourRows = computed<SlopeHourLine[]>(() => (props.hours?.length ? props.ho
 const countText = computed(() => {
   const b = props.board
   if (!b) return ''
-  if (b.listed) return `코스 ${b.total}면`
   return b.openCount === b.total ? '전 슬로프 개방' : `${b.openCount} / ${b.total}개 개방`
 })
+// 공식 현황이 슬로프 이름만 주고 개방 값을 비워 둔 곳(비발디파크) — 0/N이 '전부 미개방'으로 오해되지 않게 알린다.
+const unverified = computed(
+  () => !!props.board && !props.board.preseason && props.board.groups.every((g) => g.chips.every((c) => c.status === 'unknown')),
+)
 const asOfText = computed(() => {
   const d = props.board?.asOf
   return d ? `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일` : ''
@@ -44,7 +47,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 </script>
 
 <template>
-  <div class="slope-info" :class="{ empty: !board, listed: board?.listed }">
+  <div class="slope-info" :class="{ empty: !board }">
     <template v-if="board">
       <button
         type="button"
@@ -57,23 +60,23 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
         <span class="slope-count">{{ countText }}</span>
         <span class="arrow" :class="{ up: !collapsed }" aria-hidden="true">▾</span>
       </button>
-      <div v-if="!board.listed" class="progress" aria-hidden="true"><span :style="{ width: `${percent}%` }" /></div>
-      <p v-if="board.listed" class="preseason">공식 슬로프 안내에 있는 코스예요. 오늘 개방 현황은 아직 수집 전이에요.</p>
-      <p v-else-if="board.preseason" class="preseason">올 시즌 오픈 전이에요. 공식 현황이 올라오면 자동으로 바뀌어요.</p>
+      <div class="progress" aria-hidden="true"><span :style="{ width: `${percent}%` }" /></div>
+      <p v-if="board.preseason" class="preseason">올 시즌 오픈 전이에요. 공식 현황이 올라오면 자동으로 바뀌어요.</p>
+      <p v-else-if="unverified" class="preseason">공식 사이트에 오늘 슬로프별 개방 값이 아직 없어요.</p>
       <p v-else-if="board.asOf" class="preseason">{{ asOfText }} 기준이에요. 오늘 현황은 아침 8시쯤 바뀌어요.</p>
 
       <div v-show="!collapsed" id="slope-list" class="slope-list">
         <div v-for="group in board.groups" :key="group.level" class="level-row" :class="{ 'no-level': !group.level }">
           <span v-if="group.level" class="level" :style="{ color: levelColor(group.level) }">{{ group.level }}</span>
           <ul class="chips">
-            <li v-for="chip in group.chips" :key="chip.name" class="chip" :class="board.listed ? 'listed' : chip.status">
-              <span v-if="!board.listed" aria-hidden="true">{{ STATUS[chip.status].icon }}</span>{{ chip.name
+            <li v-for="chip in group.chips" :key="chip.name" class="chip" :class="chip.status">
+              <span aria-hidden="true">{{ STATUS[chip.status].icon }}</span>{{ chip.name
               }}<span v-if="chip.nightOnly" title="야간만 개방"> 🌙</span>
-              <span v-if="!board.listed" class="sr-only">{{ STATUS[chip.status].label }}</span>
+              <span class="sr-only">{{ STATUS[chip.status].label }}</span>
             </li>
           </ul>
         </div>
-        <ul v-if="!board.listed" class="legend" aria-label="운영 상태 범례">
+        <ul class="legend" aria-label="운영 상태 범례">
           <li v-for="[status, s] in LEGEND" :key="status" class="chip" :class="status">
             <span aria-hidden="true">{{ s.icon }}</span>{{ s.label }}
           </li>
@@ -114,7 +117,6 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 .chip.closed { background: #F0EFF3; color: #92909A; }
 .chip.upcoming { background: #FFF0D9; color: #A87532; }
 .chip.unknown { background: #E8EDF3; color: #64748B; }
-.chip.listed { background: var(--ice-light); color: var(--text); }
 .legend { margin: 8px 0 2px; padding-top: 8px; border-top: 1px solid var(--line); }
 .legend .chip { padding: 1px 6px; font-size: 0.72rem; }
 
@@ -125,8 +127,6 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 .hours .off dd { color: #b0b4c6; }
 .hours small { display: block; font-size: 0.7rem; font-weight: 600; }
 .preseason { margin: -4px 0 8px; color: var(--muted); font-size: 0.8rem; }
-/* 목록만 있는 카드는 진행률 바가 없어서 안내 줄이 제목에 붙는다 → 조금 띄운다. */
-.slope-info.listed .preseason { margin-top: 4px; }
 .season-note { margin: 8px 0 0; color: var(--text); font-size: 0.85rem; font-weight: 600; word-break: keep-all; }
 .slope-title.static { display: block; margin: 0 0 4px; }
 .slope-upcoming { margin: 8px 0 0; color: var(--blue-dark); font-size: 0.9rem; font-weight: 700; }

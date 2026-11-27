@@ -1,18 +1,18 @@
 {
- "generatedAt": "2026-11-27T18:06:15+09:00",
+ "generatedAt": "2026-11-27T18:10:41+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
    "id": "yongpyong",
    "name": "모나용평",
    "sourceUrl": "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do",
-   "fetchedAt": "2026-11-27T15:51:26+09:00",
+   "fetchedAt": "2026-11-27T18:10:41+09:00",
    "sourceDate": "2026-11-27",
    "status": "ok",
    "hours": [
     {
      "label": "주간",
-     "value": "08:30~16:30"
+     "value": "08:00~16:00"
     },
     {
      "label": "정설",
@@ -161,7 +161,7 @@
    "id": "high1",
    "name": "하이원리조트",
    "sourceUrl": "https://www.high1.com/ski/slopeView.do?key=748&mode=p",
-   "fetchedAt": "2026-11-27T15:51:28+09:00",
+   "fetchedAt": "2026-11-27T18:10:42+09:00",
    "sourceDate": null,
    "status": "ok",
    "hours": [
@@ -362,7 +362,7 @@
    "id": "jisan",
    "name": "지산리조트",
    "sourceUrl": "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-   "fetchedAt": "2026-11-27T17:01:41+09:00",
+   "fetchedAt": "2026-11-27T18:10:45+09:00",
    "sourceDate": "2026-03-01",
    "status": "ok",
    "hours": [
@@ -534,7 +534,7 @@
    "id": "phoenix",
    "name": "휘닉스 평창",
    "sourceUrl": "https://www.phoenixhnr.co.kr/api/snowpark/slope",
-   "fetchedAt": "2026-11-27T18:06:15+09:00",
+   "fetchedAt": "2026-11-27T18:10:54+09:00",
    "sourceDate": null,
    "status": "ok",
    "hours": [
@@ -682,7 +682,7 @@
    "id": "gangchon",
    "name": "엘리시안 강촌",
    "sourceUrl": "https://api.elysian.co.kr/api/v1/resort-Intro/slope-list",
-   "fetchedAt": "2026-11-27T15:51:35+09:00",
+   "fetchedAt": "2026-11-27T18:10:55+09:00",
    "sourceDate": "2026-11-27",
    "status": "partial",
    "hours": [],
@@ -696,7 +696,7 @@
    "id": "alpensia",
    "name": "알펜시아",
    "sourceUrl": "https://www.alpensia.com/ski/slope-now.do",
-   "fetchedAt": "2026-11-27T15:51:36+09:00",
+   "fetchedAt": "2026-11-27T18:10:55+09:00",
    "sourceDate": "2026-11-27",
    "status": "ok",
    "hours": [],
@@ -769,6 +769,433 @@
    "lastUpdate": [
     "2026-11-27 10:04:21.0"
    ]
+  },
+  {
+   "id": "vivaldi",
+   "name": "비발디파크",
+   "sourceUrl": "https://sonolc.sonohotelsresorts.com/daemyung.vp.skiworld.04_02_04.ds/dmparse.dm",
+   "fetchedAt": "2026-11-27T18:10:56+09:00",
+   "sourceDate": null,
+   "status": "partial",
+   "hours": [],
+   "slopes": [
+    {
+     "name": "블루스",
+     "level": "초심"
+    },
+    {
+     "name": "발라드",
+     "level": "초급"
+    },
+    {
+     "name": "재즈",
+     "level": "중급"
+    },
+    {
+     "name": "클래식",
+     "level": "중상급"
+    },
+    {
+     "name": "레게",
+     "level": "중상급"
+    },
+    {
+     "name": "힙합Ⅰ",
+     "level": "중상급"
+    },
+    {
+     "name": "힙합Ⅱ",
+     "level": "중상급"
+    },
+    {
+     "name": "펑키",
+     "level": "상급"
+    },
+    {
+     "name": "테크노Ⅰ",
+     "level": "상급"
+    },
+    {
+     "name": "테크노Ⅱ",
+     "level": "상급"
+    },
+    {
+     "name": "락",
+     "level": "최상급"
+    }
+   ],
+   "lifts": [],
+   "note": "공식 스키장 상황에 오늘 개방 값이 입력되지 않음(사이트도 CLOSE 표시)",
+   "error": null,
+   "httpStatus": 200,
+   "nightOpen": false
+  },
+  {
+   "id": "muju",
+   "name": "무주 덕유산",
+   "sourceUrl": "https://www.mdysresort.com/convert_main_slope_221207.asp?g=S&n_date=2026-11-27",
+   "fetchedAt": "2026-11-27T18:10:57+09:00",
+   "sourceDate": "2026-11-27",
+   "status": "ok",
+   "hours": [],
+   "slopes": [
+    {
+     "name": "이스턴 하단",
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "서역기행 상단",
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "서역기행 하단",
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "스피츠 하단",
+     "level": "초급",
+     "day": "OPEN",
+     "night": "OPEN"
+    },
+    {
+     "name": "스키학교 강습장",
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "이스턴 상단",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "웨스턴",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "실크로드 상단",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "실크로드 하단",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "루키힐",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "터보",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "커넥션",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "미뉴에트",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "프리웨이",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "야마가",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "파노라마",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레이더스 하단",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "왈츠",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "알레그로",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "썬다운",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레이더스 상단",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "폴카",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "카덴자",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "안단테",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "모차르트",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    }
+   ],
+   "lifts": [],
+   "note": null,
+   "error": null,
+   "httpStatus": 200,
+   "nightOpen": true
+  },
+  {
+   "id": "o2",
+   "name": "오투",
+   "sourceUrl": "https://o2resort.com/SKI/slopeOpen.jsp",
+   "fetchedAt": "2026-11-27T18:10:58+09:00",
+   "sourceDate": null,
+   "status": "ok",
+   "hours": [],
+   "slopes": [
+    {
+     "name": "드림1",
+     "level": "초급",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "드림2",
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "헤드",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "해피",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "글로리1",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "글로리2",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "글로리3",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "패션1",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "패션2",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "첼린지1",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "첼린지2",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "첼린지3",
+     "level": "최상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    }
+   ],
+   "lifts": [],
+   "note": null,
+   "error": null,
+   "httpStatus": 200,
+   "nightOpen": false
+  },
+  {
+   "id": "konjiam",
+   "name": "곤지암",
+   "sourceUrl": "https://www.konjiamresort.co.kr/ski/slopeOpenClose.dev",
+   "fetchedAt": "2026-11-27T18:10:59+09:00",
+   "sourceDate": null,
+   "status": "ok",
+   "hours": [],
+   "slopes": [
+    {
+     "name": "그램",
+     "level": "초급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "익시오",
+     "level": "초중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "씽큐1",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "씽큐2",
+     "level": "초중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "홈봇 1/2",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "홈봇 3",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "홈봇 4",
+     "level": "중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "CNP 1",
+     "level": "초중급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "CNP 2",
+     "level": "상급",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    }
+   ],
+   "lifts": [],
+   "note": null,
+   "error": null,
+   "httpStatus": 200,
+   "nightOpen": false
+  },
+  {
+   "id": "oakvalley",
+   "name": "오크밸리",
+   "sourceUrl": "https://api.oakvalley.co.kr/api/v1/skis/slopes",
+   "fetchedAt": "2026-11-27T18:11:00+09:00",
+   "sourceDate": null,
+   "status": "stale",
+   "hours": [],
+   "slopes": [
+    {
+     "name": "I",
+     "day": "OPEN",
+     "level": "초급"
+    },
+    {
+     "name": "F",
+     "day": "OPEN",
+     "level": "중급"
+    },
+    {
+     "name": "G",
+     "day": "OPEN",
+     "level": "중급"
+    }
+   ],
+   "lifts": [],
+   "note": "개장 전(2026-12-11) — API 값은 지난 시즌 기본값",
+   "error": null,
+   "httpStatus": 200
+  },
+  {
+   "id": "edenvalley",
+   "name": "에덴밸리",
+   "sourceUrl": "https://www.edenvalley.co.kr/",
+   "fetchedAt": "2026-11-27T18:11:01+09:00",
+   "sourceDate": null,
+   "status": "skipped",
+   "hours": [],
+   "slopes": [],
+   "lifts": [],
+   "note": "사이트 개편 중 — 스키 페이지 본문이 비어 있고 슬로프 현황 페이지가 없음(개장 후 재확인)",
+   "error": null
   }
  ]
 }

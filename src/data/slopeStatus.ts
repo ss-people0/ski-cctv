@@ -137,8 +137,7 @@ export interface SlopeBoard {
   total: number // 공식 표에 있는 전체 슬로프 수(같은 이름의 주간/야간 행은 하나로 셈)
   groups: LevelGroup[]
   hours: SlopeHourLine[]
-  preseason: boolean // 사이트에 지난 시즌 값만 있음 → 올 시즌 오픈 전으로 보고 전부 미개방
-  listed?: boolean // 수집값이 아예 없는 곳: 공식 안내의 코스 목록만(개방 여부는 표시하지 않는다)
+  preseason: boolean // 사이트에 지난 시즌 값만 있거나 수집값이 없음 → 올 시즌 오픈 전으로 보고 전부 미개방
   asOf?: string // 오늘 값이 아니면 그 기준일(YYYY-MM-DD) → 화면에 "N월 N일 기준" 표시
 }
 
@@ -163,33 +162,30 @@ export interface CatalogSlope {
 }
 
 // 공식 표 전체를 난이도별 칩으로. 수집 실패·목록 없음이면 null.
-// 지난 시즌 값만 걸린 곳(지산·알펜시아)은 목록만 쓰고 옛 OPEN/CLOSE·운영시간은 버린다(전부 미개방).
-// 실시간 목록이 아직 없는 곳(강촌 개장 전)은 공식 고정 목록(catalog)으로 전부 미개방을 보여준다.
-// 수집값이 아예 없는 곳(2026-11-27 추가한 6곳)은 목록만 보여준다(listed) — 개방 여부를 모르는데
-// '전부 미개방'으로 보이면 거짓말이 된다.
+// 지난 시즌 값만 걸린 곳(지산·알펜시아·개장 전 오크밸리)과 아직 수집값이 없는 곳(에덴밸리 등)은
+// 공식 코스 목록으로 '전부 미개방'을 보여준다 — 기존 7곳과 같은 형식(0 / N개 개방).
+// 다만 공식 현황이 슬로프 이름만 주고 개방 값을 비워 둔 곳(비발디파크)은 '미개방'이 아니라 '정보 미확인(?)'이다.
 export function buildSlopeBoard(
   entry: ResortSlopeStatus | undefined,
   today: string,
   upcoming?: readonly UpcomingOpening[],
   catalog?: readonly CatalogSlope[],
 ): SlopeBoard | null {
-  if (entry?.status === 'error' || entry?.status === 'skipped') return null // 실패를 '미개방'으로 보이면 안 된다
-  const live = entry && entry.slopes.length > 0 ? entry : undefined
+  // 수집 실패는 '미개방'으로 보이면 안 되지만, 공식 코스 목록(catalog)이 있으면 그 목록으로 형식을 갖춰 보여준다.
+  const usable = entry && entry.status !== 'error' && entry.status !== 'skipped' ? entry : undefined
+  const live = usable && usable.slopes.length > 0 ? usable : undefined
   if (!live && !catalog?.length) return null
   // 수집값에 난이도가 비어 있으면 공식 안내 목록에서 이름으로 채운다(지산: 수집 표에 난이도가 없던 시절 값·강촌).
   const catalogLevel = new Map((catalog ?? []).map(({ name, level }) => [name, level]))
   const fillLevel = (row: SlopeRow): SlopeRow =>
     row.level || !catalogLevel.has(row.name) ? row : { ...row, level: catalogLevel.get(row.name) }
   const slopes: readonly SlopeRow[] = live?.slopes.map(fillLevel) ?? catalog!.map(({ name, level }) => ({ name, level }))
-  const listed = !entry
   const badge = live ? formatSlopeBadge(live, today) : null
   const preseason = badge === null
   const toBoardChip = (name: string, rows: SlopeRow[], upcomingNames: ReadonlySet<string>): SlopeChip =>
-    listed
-      ? { name, status: 'unknown', nightOnly: false }
-      : preseason
-        ? { name, status: upcomingNames.has(name) ? 'upcoming' : 'closed', nightOnly: false }
-        : toChip(name, rows, upcomingNames)
+    preseason
+      ? { name, status: upcomingNames.has(name) ? 'upcoming' : 'closed', nightOnly: false }
+      : toChip(name, rows, upcomingNames)
 
   const byName = new Map<string, SlopeRow[]>()
   for (const row of slopes) byName.set(row.name, [...(byName.get(row.name) ?? []), row])
@@ -213,7 +209,6 @@ export function buildSlopeBoard(
     groups,
     hours: badge?.hours ?? [],
     preseason,
-    ...(listed ? { listed: true } : {}),
     ...(!preseason && live?.sourceDate && live.sourceDate !== today ? { asOf: live.sourceDate } : {}),
   }
 }

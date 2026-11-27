@@ -268,20 +268,49 @@ test('levels are grouped once each in difficulty order even when the official ta
   ])
 })
 
-test('resort with no collected entry shows the official course list only, without open/closed claims', () => {
+test('resort with no collected entry shows the official course list as 0 / N all closed, like the other resorts', () => {
   const catalog = [
     { name: 'G', level: '중급' },
     { name: 'I', level: '초급' },
     { name: '블루스', level: '초심' },
   ]
   const board = buildSlopeBoard(undefined, TODAY, undefined, catalog)
-  expect(board?.listed).toBe(true)
-  expect(board?.total).toBe(3)
-  expect(board?.openCount).toBe(0)
-  expect(board?.groups.map((g) => g.level)).toEqual(['초심', '초급', '중급']) // 초심은 초급보다 앞
-  expect(board?.groups.flatMap((g) => g.chips).every((c) => c.status === 'unknown')).toBe(true)
+  expect(board).toEqual({
+    openCount: 0,
+    total: 3,
+    preseason: true,
+    groups: [
+      { level: '초심', chips: [{ name: '블루스', status: 'closed', nightOnly: false }] }, // 초심은 초급보다 앞
+      { level: '초급', chips: [{ name: 'I', status: 'closed', nightOnly: false }] },
+      { level: '중급', chips: [{ name: 'G', status: 'closed', nightOnly: false }] },
+    ],
+    hours: [],
+  })
   // 수집값이라도 지난 시즌 값이면 '개방 전 → 전부 미개방'으로 본다(강촌 개장 전과 같은 표시).
-  expect(buildSlopeBoard(make({ status: 'partial', sourceDate: TODAY, slopes: [] }), TODAY, undefined, catalog)?.listed).toBeUndefined()
+  const emptyFeed = make({ status: 'partial', sourceDate: TODAY, slopes: [] })
+  expect(buildSlopeBoard(emptyFeed, TODAY, undefined, catalog)?.preseason).toBe(true)
+  expect(buildSlopeBoard(emptyFeed, TODAY, undefined, catalog)?.openCount).toBe(0)
+})
+
+test('slopes listed without any open value (vivaldi) stay 정보 미확인, not 미개방', () => {
+  const board = buildSlopeBoard(
+    make({
+      status: 'partial',
+      slopes: [{ name: '블루스', level: '초심' }, { name: '발라드', level: '초급' }],
+    }),
+    TODAY,
+  )
+  expect(board?.preseason).toBe(false) // 개장한 곳이라 '올 시즌 오픈 전'이 아니다
+  expect(board?.openCount).toBe(0)
+  expect(board?.total).toBe(2)
+  expect(board?.groups.flatMap((g) => g.chips).map((c) => c.status)).toEqual(['unknown', 'unknown'])
+})
+
+test('a failed fetch still shows the official course list all closed when there is one', () => {
+  const catalog = [{ name: 'I', level: '초급' }]
+  const failed = make({ status: 'error', slopes: [] })
+  expect(buildSlopeBoard(failed, TODAY, undefined, catalog)?.groups[0].chips[0]).toEqual({ name: 'I', status: 'closed', nightOnly: false })
+  expect(buildSlopeBoard(failed, TODAY)).toBeNull()
 })
 
 test('catalog levels fill live rows that have no level of their own (jisan)', () => {

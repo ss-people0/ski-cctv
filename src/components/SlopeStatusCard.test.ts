@@ -74,26 +74,40 @@ test('without board data shows the placeholder and still shows upcoming lines', 
   expect(card.get('.slope-upcoming').text()).toContain('11월 27일')
 })
 
-test('list-only board (no collection yet) shows the level groups without open/closed icons or legend', () => {
-  const listed: SlopeBoard = {
+test('no collection yet (pre-season) still uses the normal format: 0 / N, bar, closed chips and legend', () => {
+  const notCollected: SlopeBoard = {
     openCount: 0,
     total: 2,
     groups: [
-      { level: '초급', chips: [{ name: 'I', status: 'unknown', nightOnly: false }] },
-      { level: '중급', chips: [{ name: 'F', status: 'unknown', nightOnly: false }] },
+      { level: '초급', chips: [{ name: 'I', status: 'closed', nightOnly: false }] },
+      { level: '중급', chips: [{ name: 'F', status: 'closed', nightOnly: false }] },
     ],
     hours: [],
     preseason: true,
-    listed: true,
   }
-  const card = mount(SlopeStatusCard, { props: { board: listed, hours: [{ label: '주간', value: '09:00~17:00' }], upcomingLines: [] } })
-  expect(card.get('.slope-count').text()).toBe('코스 2면')
-  expect(card.findAll('.chips .chip').map((c) => c.classes()[1])).toEqual(['listed', 'listed'])
-  expect(card.get('.chip.listed').text()).toBe('I') // 상태 기호·숨김 글자 없음
-  expect(card.find('.progress').exists()).toBe(false)
-  expect(card.find('.legend').exists()).toBe(false)
-  expect(card.get('.preseason').text()).toContain('수집 전')
+  const card = mount(SlopeStatusCard, { props: { board: notCollected, hours: [{ label: '주간', value: '09:00~17:00' }], upcomingLines: [] } })
+  expect(card.get('.slope-count').text()).toBe('0 / 2개 개방')
+  expect(card.findAll('.chips .chip').map((c) => c.classes()[1])).toEqual(['closed', 'closed'])
+  expect(card.get('.chip.closed').text()).toContain('–')
+  expect(card.get('.chip.closed').text()).toContain('미개방')
+  expect(card.find('.progress').exists()).toBe(true)
+  expect(card.find('.legend').exists()).toBe(true)
+  expect(card.get('.preseason').text()).toContain('시즌 오픈 전')
   expect(card.find('.hours').exists()).toBe(true) // 손으로 넣은 공식 운영시간은 그대로
+})
+
+test('a board whose official feed has no open values says so instead of claiming all closed', () => {
+  const unverified: SlopeBoard = {
+    openCount: 0,
+    total: 2,
+    groups: [{ level: '초심', chips: [{ name: '블루스', status: 'unknown', nightOnly: false }, { name: '발라드', status: 'unknown', nightOnly: false }] }],
+    hours: [],
+    preseason: false,
+  }
+  const card = mount(SlopeStatusCard, { props: { board: unverified, upcomingLines: [] } })
+  expect(card.get('.slope-count').text()).toBe('0 / 2개 개방')
+  expect(card.get('.preseason').text()).toContain('개방 값이 아직 없어요')
+  expect(card.findAll('.chips .chip').map((c) => c.classes()[1])).toEqual(['unknown', 'unknown'])
 })
 
 test('pre-season board says the season has not opened and has no hours', () => {
