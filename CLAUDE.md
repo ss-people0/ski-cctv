@@ -40,6 +40,9 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - `public/illustrations/{id}.jpg` — 사용자가 그린 스키장 일러스트(목록 2열 그리드·상세 상단). `MountainScene.vue`는 미사용(삭제 대기).
 - `public/brand/` — 확정 브랜드 로고(확정 시안에서 원본 픽셀 그대로 분리, 바깥 배경만 투명). `logo-solid.png`(A안 채움형 심볼)·`logo-outline.png`(B안 윤곽선형 심볼)·`logo-solid-full.png`/`logo-outline-full.png`(심볼+Watch Your Ride). 헤더는 `-78.png`(26px 표시용 3배)를 라이트=윤곽선형, 다크(prefers-color-scheme)=채움형으로 씀. **새로 그리거나 재해석하지 말 것.**
 - `public/favicon-16/32/48.png`·`apple-touch-icon.png`·`icon-192.png`·`icon-512.png`·`icon-192-maskable.png`·`icon-512-maskable.png`·`icon-1024.png` — A안 심볼 아이콘(스노우 화이트 `#F8FAFC` 배경, 카빙 궤적 안전 여백). `public/manifest.json`이 192/512·maskable을 연결. **서비스 워커는 없다(오프라인 캐시 안 함).**
+  - **파비콘(16/32/48·`favicon.png`)만** 모서리 반경 25%의 둥근 사각형 배지로 만든다(바깥 모서리 alpha=0, 심볼은 한 변의 74%). 사파리 다크 탭 바처럼 어두운 배경에서 흰 사각형이 각져 보이던 문제 때문에 바꾼 것이니, 파비콘을 불투명 정사각형으로 되돌리지 말 것.
+  - `apple-touch-icon`·`icon-192/512/1024`·`*-maskable`은 OS가 직접 마스킹하므로 **투명 모서리 없이** 불투명하게 유지한다(iOS 홈 화면에서 검은 모서리가 생긴다).
+  - 파비콘 링크에는 `?v=2` 캐시 버스트가 붙어 있다. 이미지를 다시 바꾸면 `index.html`의 버전을 올린다.
 - `public/og-image.jpg` — 1200×630 공유 이미지(아이스 블루·흑백 스노보더·WATCH YOUR RIDE·LIVE CAM). 로고를 여기에 얹지 않는다.
 - `src/components/CamCard.vue` — type·status별 카드. ▶재생(미리보기) 버튼, 재생 중 카운트다운/이름 유지, 끝나면 "다시 보기", ✕ 닫기. 하이원은 https에서 `.popup` 새 창 링크.
 - `src/components/HlsPlayer.vue` — hls.js 재생, `playLimitSec` 카운트다운 + 종료/오류 emit, 정리.
