@@ -49,7 +49,7 @@ export const resorts: readonly Resort[] = [
     ],
     upcoming: [
       { name: '옐로우', date: '2026-11-27', time: '08:30' }, // 홈페이지 메인 이미지로만 공지(2026-11-26 사용자 전달)
-      { name: '레드', date: '2026-12-02' }, // 모나용평 인스타그램 공지(2026-11-27 사용자 전달, 시각은 공지에 없음)
+      { name: '레드', date: '2026-12-02', time: '08:30' }, // 모나용평 인스타그램 공지 "2026.12.2.Wed. 08:30AM RED, OPEN"(2026-11-27 확인)
     ],
     note: 'cam09·03·07은 공식 웹캠 페이지에 없고 SkiWatch(open-ski-data)에서 확인한 주소다(2026-11-24). 언제든 막힐 수 있다.',
     cams: [
@@ -146,6 +146,8 @@ export const resorts: readonly Resort[] = [
     emergency: [{ label: '패트롤실', tels: ['033-340-3696'] }],
     // 공식 공지 "26/27 WINTER SEASON OPEN 2026.12.4. FRI. 09:00"(사용자 휴대폰 캡처, 2026-11-26).
     upcoming: [{ name: '스키장', date: '2026-12-04', time: '09:00' }],
+    // 개장 공지 포스터의 운영시간 "주간 09:00~16:30 / 야간 18:30~22:00"(2026-11-27 인스타그램 @wellihillipark). 개장일부터 야간 운영.
+    nightStart: { date: '2026-12-04' },
     // 공식 홈페이지 '슬로프안내' 표에서 옮김(사용자 휴대폰 캡처, 2026-11-26). 사이트가 자동 접근을 막아 수집 대상이 아니다.
     slopeCatalog: [
       { name: 'A1 펀파크', level: '최상급' },
@@ -187,6 +189,9 @@ export const resorts: readonly Resort[] = [
     officialPage: 'https://www.alpensia.com/guide/web-cam.do',
     coord: { lat: 37.6565, lon: 128.6815 }, // 평창 대관령면
     emergency: [{ label: '패트롤 상황실', tels: ['033-339-0305'] }],
+    // 공식 공지 10734(2026-11-27) "26/27 동계시즌 스키장 운영 일정 안내": 스키장 2026.11.28(토)~2027.3.7(일).
+    // 인스타그램(@alpensia_official)도 같은 날 "드디어 내일 개장" 공지. 시각은 어디에도 없음.
+    upcoming: [{ name: '스키장', date: '2026-11-28' }],
     note: '방송이 새로 시작되면 videoId가 바뀔 수 있다. 채널: UCrmFQpznvkrLQSjJG1wGdGg',
     cams: [
       { id: 'alpensia-live', name: '알펜시아 실시간', type: 'youtube', status: 'active', videoId: 'hU6FtSnVEyw' }, // 2026-11-24 11:11 UTC 시작한 방송(이전 IBGo-_Y3-g4는 종료)
