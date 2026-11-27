@@ -47,7 +47,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
   - **파비콘(16/32/48·`favicon.png`)만** 모서리 반경 25%의 둥근 사각형 배지로 만든다(바깥 모서리 alpha=0, 심볼은 한 변의 74%). 사파리 다크 탭 바처럼 어두운 배경에서 흰 사각형이 각져 보이던 문제 때문에 바꾼 것이니, 파비콘을 불투명 정사각형으로 되돌리지 말 것.
   - `apple-touch-icon`·`icon-192/512/1024`·`*-maskable`은 OS가 직접 마스킹하므로 **투명 모서리 없이** 불투명하게 유지한다(iOS 홈 화면에서 검은 모서리가 생긴다).
   - 파비콘 링크에는 `?v=2` 캐시 버스트가 붙어 있다. 이미지를 다시 바꾸면 `index.html`의 버전을 올린다.
-- `public/og-image.jpg` — 1200×630 공유 이미지(아이스 블루·흑백 스노보더·WATCH YOUR RIDE·LIVE CAM). 로고를 여기에 얹지 않는다.
+- `public/og-image-v2.jpg` — 1200×630 공유 이미지(아이스 블루·흑백 스노보더·WATCH YOUR RIDE·LIVE CAM). 로고를 여기에 얹지 않는다. 메타 태그는 이 파일을 가리킨다. `public/og-image.jpg`는 같은 이미지의 사본으로, 예전 URL로 들어오는 크롤러·이미 공유된 링크가 404가 되지 않게 남겨 둔다(파일명을 바꾼 이유는 카카오톡·사파리 등 메신저 크롤러 캐시 우회다 — 이미지를 다시 바꾸면 새 파일명으로 올린다).
 - `src/components/CamCard.vue` — type·status별 카드. ▶재생(미리보기) 버튼, 재생 중 카운트다운/이름 유지, 끝나면 "다시 보기", ✕ 닫기. 하이원은 https에서 `.popup` 새 창 링크.
 - `src/components/HlsPlayer.vue` — hls.js 재생, `playLimitSec` 카운트다운 + 종료/오류 emit, 정리.
 - `src/playingCam.ts` — 재생 중 카드 id(전역, 한 번에 하나만).
