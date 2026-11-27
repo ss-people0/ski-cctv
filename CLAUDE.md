@@ -22,7 +22,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
   - 슬로프 카드: "N / 전체개 개방"(전부면 "전 슬로프 개방") + 진행률 바 + 난이도별 칩(개방 ✓초록/미개방 –회색/개방 예정 ◷주황/정보 미확인 ?) + 범례 + 운영시간 가로 3칸 + 🎿 오픈 예정 안내. **들어올 때마다 접힘**(펼침 상태 기억 안 함 — 사용자 요청).
   - 지난 시즌 값만 걸린 곳은 "올 시즌 오픈 전" 문구 + 전부 미개방(옛 운영시간 숨김).
 - **스크롤 고정 헤더:** 상세에서 150px 넘게 내리면 상단에 뒤로가기+스키장명이 고정(그라데이션 페이드로 자연스럽게). `scrolled` ref + window scroll 리스너.
-- 테마: 파스텔 라이트(라벤더), 글꼴은 시스템 산세리프(`--sans`). 색 토큰은 `style.css` `:root`.
+- 테마: 파스텔 라이트(라벤더), 글꼴은 시스템 산세리프(`--sans`). 색 토큰은 `style.css` `:root`. **다크 테마는 없음**(라이트 전용) — 헤더 심볼만 OS 다크 설정에서 채움형으로 바뀐다.
 
 ## 파일 구조
 
@@ -38,6 +38,9 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - `src/data/slopeStatus.ts` `buildSlopeBoard`(칩 데이터, 지난 시즌 값이면 preseason=전부 미개방, 목록 없으면 `slopeCatalog` 사용) · `formatUpcoming`(날짜만 표기, 당일·공식 현황 개방 시 자동 삭제) · `levelColor`.
 - `cams.ts` `upcoming`(손으로 넣는 오픈 예정, name '스키장'=스키장 개장) · `slopeCatalog`(공식 슬로프 안내에서 옮긴 목록: 강촌 맵, 웰리힐리 사용자 캡처).
 - `public/illustrations/{id}.jpg` — 사용자가 그린 스키장 일러스트(목록 2열 그리드·상세 상단). `MountainScene.vue`는 미사용(삭제 대기).
+- `public/brand/` — 확정 브랜드 로고(확정 시안에서 원본 픽셀 그대로 분리, 바깥 배경만 투명). `logo-solid.png`(A안 채움형 심볼)·`logo-outline.png`(B안 윤곽선형 심볼)·`logo-solid-full.png`/`logo-outline-full.png`(심볼+Watch Your Ride). 헤더는 `-78.png`(26px 표시용 3배)를 라이트=윤곽선형, 다크(prefers-color-scheme)=채움형으로 씀. **새로 그리거나 재해석하지 말 것.**
+- `public/favicon-16/32/48.png`·`apple-touch-icon.png`·`icon-192.png`·`icon-512.png`·`icon-192-maskable.png`·`icon-512-maskable.png`·`icon-1024.png` — A안 심볼 아이콘(스노우 화이트 `#F8FAFC` 배경, 카빙 궤적 안전 여백). `public/manifest.json`이 192/512·maskable을 연결. **서비스 워커는 없다(오프라인 캐시 안 함).**
+- `public/og-image.jpg` — 1200×630 공유 이미지(아이스 블루·흑백 스노보더·WATCH YOUR RIDE·LIVE CAM). 로고를 여기에 얹지 않는다.
 - `src/components/CamCard.vue` — type·status별 카드. ▶재생(미리보기) 버튼, 재생 중 카운트다운/이름 유지, 끝나면 "다시 보기", ✕ 닫기. 하이원은 https에서 `.popup` 새 창 링크.
 - `src/components/HlsPlayer.vue` — hls.js 재생, `playLimitSec` 카운트다운 + 종료/오류 emit, 정리.
 - `src/playingCam.ts` — 재생 중 카드 id(전역, 한 번에 하나만).

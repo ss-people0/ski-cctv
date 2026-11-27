@@ -82,7 +82,14 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
 <template>
   <main>
     <header class="topbar">
-      <span class="brand">스키장 CCTV</span>
+      <div class="brand-lockup">
+        <!-- 라이트는 윤곽선형(B), 다크는 채움형(A). 사이트는 지금 라이트 테마 전용이라 보통은 윤곽선형이 보인다. -->
+        <picture class="brand-mark">
+          <source media="(prefers-color-scheme: dark)" :srcset="'brand/logo-solid-78.png'" />
+          <img :src="'brand/logo-outline-78.png'" alt="" width="25" height="26" decoding="async" />
+        </picture>
+        <span class="brand">스키장 CCTV</span>
+      </div>
       <span class="count">바로 볼 수 있는 영상 {{ playableTotal }}개</span>
     </header>
 

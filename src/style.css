@@ -18,8 +18,12 @@ body { margin: 0; min-height: 100vh; background: radial-gradient(135% 85% at 50%
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 16px 48px; }
 
-.topbar { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 4px 2px; }
-.brand { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 4px 2px; }
+/* 브랜드 락업: 작은 심볼 + 제목. 심볼 높이가 헤더 높이를 늘리지 않게 제목 글자 높이에 맞춘다. */
+.brand-lockup { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.brand-mark { display: flex; flex: none; }
+.brand-mark img { display: block; width: auto; height: 26px; }
+.brand { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
 .count { color: var(--muted); font-size: 0.82rem; }
 
 /* ───────── 목록: 일러스트 카드 그리드(모바일 2열, 태블릿 이상 3열) ───────── */
@@ -86,6 +90,15 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 
 @media (max-width: 767px) {
   main { padding: 14px 12px 40px; }
+  .brand-lockup { gap: 6px; }
+  .brand-mark img { height: 24px; }
   .lead { font-size: 1.55rem; }
   .detail-head h2 { font-size: 1.5rem; }
+}
+
+/* 아주 좁은 화면(320px대)에서도 심볼·제목·영상 개수가 한 줄에 들어가게 */
+@media (max-width: 359px) {
+  .brand { font-size: 1.15rem; }
+  .count { font-size: 0.74rem; }
+  .brand-mark img { height: 22px; }
 }
