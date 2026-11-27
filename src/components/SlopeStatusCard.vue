@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
-import { levelColor, type ChipStatus, type SlopeBoard } from '../data/slopeStatus'
+import { levelColor, type ChipStatus, type SlopeBoard, type SlopeHourLine } from '../data/slopeStatus'
 
 // 상세 화면 슬로프 운영 현황: 개방 수·진행률 → 난이도별 칩(전체 하나의 토글로 접힘) → 범례 → 운영시간.
-const props = defineProps<{ board: SlopeBoard | null; upcomingLines: string[]; nightLine?: string | null }>()
+// hours는 자동 수집값(board.hours)이 없을 때 Resort에 손으로 넣은 공식 운영시간이다.
+const props = defineProps<{
+  board: SlopeBoard | null
+  hours?: SlopeHourLine[]
+  season?: string | null
+  upcomingLines: string[]
+  nightLine?: string | null
+}>()
 
 // 색만으로 구분하지 않도록 칩마다 기호 + 숨김 글자를 붙인다.
 const STATUS: Record<ChipStatus, { icon: string; label: string }> = {
@@ -19,6 +26,9 @@ const collapsed = shallowRef(true)
 const toggle = () => {
   collapsed.value = !collapsed.value
 }
+
+// 운영시간: 넘겨받은 값(자동 수집이 없는 스키장의 공식 시간)이 있으면 그걸, 없으면 수집값(board.hours).
+const hourRows = computed<SlopeHourLine[]>(() => (props.hours?.length ? props.hours : (props.board?.hours ?? [])))
 
 const countText = computed(() => {
   const b = props.board
@@ -67,15 +77,15 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
           </li>
         </ul>
       </div>
-
-      <dl v-if="board.hours.length" class="hours">
-        <div v-for="hour in board.hours" :key="hour.label" :class="{ off: hour.off }">
-          <dt>{{ hour.label }}</dt>
-          <dd>{{ hour.value }}<small v-if="hour.off">미운영</small></dd>
-        </div>
-      </dl>
     </template>
     <span v-else>아직 오픈 현황 정보가 없어요.</span>
+    <p v-if="season" class="season-note">{{ season }}</p>
+    <dl v-if="hourRows.length" class="hours">
+      <div v-for="hour in hourRows" :key="hour.label" :class="{ off: hour.off }">
+        <dt>{{ hour.label }}</dt>
+        <dd>{{ hour.value }}<small v-if="hour.off">미운영</small></dd>
+      </div>
+    </dl>
     <p v-if="nightLine" class="slope-upcoming night">🌙 {{ nightLine }}</p>
     <p v-for="line in upcomingLines" :key="line" class="slope-upcoming">🎿 {{ line }}</p>
   </div>
@@ -109,6 +119,7 @@ const percent = computed(() => (props.board?.total ? (props.board.openCount / pr
 .hours .off dd { color: #b0b4c6; }
 .hours small { display: block; font-size: 0.7rem; font-weight: 600; }
 .preseason { margin: -4px 0 8px; color: var(--muted); font-size: 0.8rem; }
+.season-note { margin: 8px 0 0; color: var(--text); font-size: 0.85rem; font-weight: 600; }
 .slope-upcoming { margin: 8px 0 0; color: var(--blue-dark); font-size: 0.9rem; font-weight: 700; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>

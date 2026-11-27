@@ -49,6 +49,9 @@ const currentSlopes = computed(() => {
   const board = buildSlopeBoard(entry, today, resort.upcoming, resort.slopeCatalog)
   return {
     board,
+    // 자동 수집이 없는 스키장(2026-11-27 추가한 6곳)은 공식 공지에서 옮긴 운영시간을 그대로 쓴다.
+    hours: board?.hours.length ? board.hours : (resort.hours ?? []),
+    season: resort.season ?? null,
     upcomingLines: formatUpcoming(resort.upcoming, today, board),
     nightLine: formatNightStart(resort.nightStart, today, entry?.nightOpen),
   }
@@ -111,7 +114,7 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
         <span class="row-label" :style="themeVars(resort.id)">
           <span class="row-text">
             <span class="resort-name">{{ resort.name }}</span>
-            <span class="row-sub">{{ resort.region }}</span>
+            <span class="row-sub">{{ resort.region }}<template v-if="!resort.cams.length"> · 라이브 캠 준비 중</template></span>
           </span>
           <span v-if="cardWeather.get(resort.id)" class="card-weather"
             >{{ cardWeather.get(resort.id)!.icon }} {{ cardWeather.get(resort.id)!.temp }}°</span
@@ -129,13 +132,14 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
         <img class="hero-art" :src="`illustrations/${currentResort.id}.jpg`" alt="" />
         <button type="button" class="back" aria-label="스키장 목록으로" @click="goBack">←</button>
         <a
+          v-if="currentResort.symbol"
           class="symbol-link"
           :href="currentResort.officialPage"
           target="_blank"
           rel="noopener noreferrer"
           :aria-label="`${currentResort.name} 공식 웹캠 바로가기, 새 창`"
         >
-          <img class="symbol" :src="`symbols/${currentResort.id}.png`" alt="" />
+          <img class="symbol" :src="currentResort.symbol" alt="" />
         </a>
         <span v-if="weather" class="weather-chip" :title="weather.label">{{ weather.icon }} {{ weather.temp }}°</span>
       </div>
@@ -148,6 +152,8 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
         <SlopeStatusCard
           v-if="currentSlopes"
           :board="currentSlopes.board"
+          :hours="currentSlopes.hours"
+          :season="currentSlopes.season"
           :upcoming-lines="currentSlopes.upcomingLines"
           :night-line="currentSlopes.nightLine"
         />
@@ -163,8 +169,19 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
         </div>
 
         <h3 class="cams-title">라이브 캠</h3>
-        <div class="cams">
+        <div v-if="currentResort.cams.length" class="cams">
           <CamCard v-for="cam in currentResort.cams" :key="cam.id" :resort="currentResort" :cam="cam" />
+        </div>
+        <!-- 캠 주소를 아직 찾지 못한 스키장: 빈 목록 대신 준비 중 안내 + 공식 페이지 링크 -->
+        <div v-else class="cams-soon">
+          <span class="soon-mark" aria-hidden="true">🚧</span>
+          <p class="soon-title">최대한 빨리 작업중입니다!!</p>
+          <p class="soon-text">
+            이 스키장 라이브 캠을 준비하고 있어요. 준비되면 여기서 바로 볼 수 있어요.
+          </p>
+          <a class="soon-link" :href="currentResort.officialPage" target="_blank" rel="noopener noreferrer"
+            >공식 페이지에서 보기 ↗</a
+          >
         </div>
       </div>
     </section>

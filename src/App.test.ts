@@ -11,7 +11,21 @@ beforeEach(() => {
   playingCamId.value = null
 })
 
-const ORDER = ['모나용평', '지산리조트', '휘닉스 평창', '하이원리조트', '웰리힐리파크', '알펜시아', '엘리시안강촌']
+const ORDER = [
+  '모나용평',
+  '지산리조트',
+  '휘닉스 평창',
+  '하이원리조트',
+  '웰리힐리파크',
+  '알펜시아',
+  '엘리시안강촌',
+  '비발디파크',
+  '무주덕유산리조트',
+  '오투리조트',
+  '곤지암리조트',
+  '오크밸리',
+  '에덴밸리',
+]
 
 test('the main screen lists every resort as a symbol + name row, in the chosen order', () => {
   const app = mount(App)
@@ -23,12 +37,12 @@ test('the main screen lists every resort as a symbol + name row, in the chosen o
   expect(app.find('.cams').exists()).toBe(false) // 목록에서는 CCTV를 깔지 않는다
 })
 
-test('every resort has a symbol file and renders its own illustration image', () => {
+test('every resort has an illustration, and a symbol file where one is registered', () => {
   const app = mount(App)
 
   resorts.forEach((resort) => {
-    expect(existsSync(`public/symbols/${resort.id}.png`), `symbol ${resort.id}`).toBe(true)
     expect(existsSync(`public/illustrations/${resort.id}.jpg`), `illustration ${resort.id}`).toBe(true)
+    if (resort.symbol) expect(existsSync(`public/${resort.symbol}`), `symbol ${resort.id}`).toBe(true)
   })
   // 스키장 순서는 데이터 순서 그대로다(sortResorts는 캠만 정렬).
   expect(app.findAll('.row-art img').map((img) => img.attributes('src'))).toEqual(
@@ -62,6 +76,36 @@ test('the detail symbol links to the official page in a new tab', async () => {
   expect(link.find('img.symbol').exists()).toBe(true)
 })
 
+test('a resort without a symbol shows no symbol link', async () => {
+  const app = mount(App)
+
+  const index = resorts.findIndex((r) => r.id === 'konjiam')
+  await app.findAll('.resort-row')[index].trigger('click')
+
+  expect(app.find('.resort-detail a.symbol-link').exists()).toBe(false)
+})
+
+test('a resort with no cam yet shows the 준비 중 notice instead of an empty cam list', async () => {
+  const app = mount(App)
+
+  const index = resorts.findIndex((r) => r.id === 'muju')
+  await app.findAll('.resort-row')[index].trigger('click')
+
+  expect(app.find('.cams').exists()).toBe(false)
+  const notice = app.get('.cams-soon')
+  expect(notice.text()).toContain('최대한 빨리 작업중입니다!!')
+  expect(notice.get('a').attributes('href')).toBe(resorts.find((r) => r.id === 'muju')!.officialPage)
+})
+
+test('a resort without cam points out on the list card that its cam is coming', () => {
+  const app = mount(App)
+
+  const rows = app.findAll('.resort-row')
+  const index = resorts.findIndex((r) => r.id === 'edenvalley')
+  expect(rows[index].get('.row-sub').text()).toContain('라이브 캠 준비 중')
+  expect(rows[0].get('.row-sub').text()).not.toContain('라이브 캠 준비 중')
+})
+
 test('the back button returns to the list', async () => {
   const app = mount(App)
   await app.findAll('.resort-row')[1].trigger('click')
@@ -92,6 +136,18 @@ test('detail shows a placeholder when slope data is unavailable', async () => {
   const info = app.get('.slope-info')
   expect(info.classes()).toContain('empty')
   expect(info.text()).toContain('정보가 없어요')
+})
+
+test('a resort without collected slope data still shows its official hours and season note', async () => {
+  const app = mount(App, { global: { stubs: { CamCard: true } } })
+
+  const index = resorts.findIndex((r) => r.id === 'vivaldi')
+  await app.findAll('.resort-row')[index].trigger('click')
+
+  const info = app.get('.slope-info')
+  expect(info.get('.season-note').text()).toContain('11월 27일')
+  const hours = info.findAll('.hours > div').map((row) => row.text())
+  expect(hours).toContain('주간09:00~17:30')
 })
 
 test('detail shows the resort emergency contact as a tap-to-call link', async () => {

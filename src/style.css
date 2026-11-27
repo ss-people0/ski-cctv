@@ -84,6 +84,13 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 
 .cams-title { margin: 22px 0 10px; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
 .cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); align-items: start; gap: 12px; }
+/* 캠 주소를 아직 찾지 못한 스키장: 빈 목록 대신 준비 중 안내 */
+.cams-soon { display: grid; justify-items: center; gap: 6px; padding: 24px 18px; border: 1px dashed #d8d4e9; border-radius: 20px; background: var(--surface); text-align: center; }
+.soon-mark { font-size: 1.5rem; line-height: 1; }
+.soon-title { margin: 0; color: var(--text); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+.soon-text { margin: 0; max-width: 32ch; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+.soon-link { display: inline-flex; align-items: center; min-height: 40px; margin-top: 6px; padding: 0 16px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+.soon-link:hover, .soon-link:focus-visible { background: var(--blue-dark); }
 
 .credit { margin-top: 26px; color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
 .credit a { color: var(--blue-dark); }

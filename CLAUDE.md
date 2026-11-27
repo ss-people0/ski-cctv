@@ -10,7 +10,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 
 ## 명령
 
-- `npm test` — Vitest(jsdom). 현재 61개 통과. 수집기 테스트: `python3 -m unittest discover scripts`.
+- `npm test` — Vitest(jsdom). 현재 72개 통과. 수집기 테스트: `python3 -m unittest discover scripts`.
 - `npm run build` — vue-tsc 타입체크 + vite 빌드.
 - `npm run dev -- --host --port 5199` — 휴대폰 확인용(같은 와이파이에서 `http://<맥 IP>:5199`).
 
@@ -27,9 +27,12 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 ## 파일 구조
 
 - `src/data/cams.ts` — **웹캠·스키장 데이터와 타입. 주소/좌표/연락처는 여기서만 관리.**
-  - `Resort`: `id, name, region, officialPage, note?, coord?{lat,lon}, emergency?[{label,tels[]}], upcoming?[{name,date,time?}], nightStart?{date}, cams[]`
+  - `Resort`: `id, name, region, officialPage, note?, coord?{lat,lon}, emergency?[{label,tels[]}], symbol?, hours?, season?, upcoming?[{name,date,time?}], nightStart?{date}, cams[]`
   - `Cam` status: `active | pending | investigate`, type: `hls | youtube | link`
-  - 순서: 용평 · 지산 · 휘팍 · 하이원 · 웰리힐리 · 알펜시아 · 강촌
+  - 순서: 용평 · 지산 · 휘팍 · 하이원 · 웰리힐리 · 알펜시아 · 강촌 · 비발디 · 무주 · 오투 · 곤지암 · 오크밸리 · 에덴밸리
+  - `symbol` — 상세 상단 공식 페이지 링크의 심볼(`symbols/{id}.png`). 파일이 없는 리조트는 이 링크를 숨긴다(로고를 새로 그리지 않는다).
+  - `hours`/`season` — 자동 수집(slopes.json)이 없는 리조트의 **공식 공지 운영시간·시즌 안내 한 줄**. 수집값(board.hours)이 있으면 그쪽이 우선.
+  - **캠이 0개인 리조트**는 상세 '라이브 캠' 자리에 “최대한 빨리 작업중입니다!!” 안내(`.cams-soon`)와 공식 페이지 링크가 뜨고, 목록 카드 아래에는 `· 라이브 캠 준비 중`이 붙는다(2026-11-27 추가한 6곳).
   - `GANGCHON_TOKEN`(공개 서명 토큰, 2027-10-30 만료), `PLAY_LIMIT_SEC=15`, `HIGH1_PLAY_LIMIT_SEC=30`
 - `src/data/sortResorts.ts` — `isPlayable`, 캠 정렬(재생→링크→investigate→pending). `isBlockedByHttps`(https에서 http 스트림 차단).
 - `src/data/slopeStatus.ts` — `slopes.json` 로드(`loadSlopeStatus`), `formatSlopeBadge`(오늘 값인지 판정 + 운영시간), `todayKst`.
@@ -84,6 +87,15 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 - 웰리힐리 정상광장(cam05) 404 → `investigate` 유지.
 - 알펜시아 유튜브 라이브 videoId `hU6FtSnVEyw`로 교체(11-26, 이전 `IBGo-_Y3-g4`는 종료). 방송이 새로 시작되면 또 바뀜 → 채널 `/live` 주소의 canonical로 확인.
 - 지산 블루/실버 탑승장 `jisan4`/`jisan5` HLS로 열어 `active`(11-26). 이제 지산 5개 캠 모두 재생.
+
+### 2026-11-27 추가한 6곳(캠 주소 없음 → 준비 중 안내)
+사용자가 그린 일러스트 6장을 받아 목록·상세에 넣었다. **캠 주소는 일부러 넣지 않았다**(사용자: "캠 작업은 따로 할께 없으니까"). 슬로프 자동 수집 대상도 아니다 → `hours`/`season` 고정값으로 보여 준다.
+- **비발디파크**(`vivaldi`): 공식 이용안내 2026.11.27~2027.3.1, 주간 09:00~17:30·정설 17:30~19:00·야간 19:00~23:00·심야 23:00~03:00(12/18~2/13, 월 미운영). 11/27 09:00 개장.
+- **무주덕유산리조트**(`muju`): 11/27 09:00 개장, 첫날 설천 스피츠 하단 · 09:00~22:00. 주간 09:00~16:30·정설 16:00~18:00·야간 18:30~22:00. 연락처는 리조트 대표(063-322-9000)만 공식 확인.
+- **오투리조트**(`o2`): 11/26 09:00 개장(드림1부터), 11/28 글로리2 추가, 시즌 10면. 주간(오전) 09:00~13:00·(오후) 13:00~16:30·야간 18:00~21:30. 패트롤 033-580-7420 / 의무실 033-580-7412.
+- **곤지암리조트**(`konjiam`): 개장일 미공지(공식 11-19 "제설·점검 후 공지"). 개장일~12/27 08:00~24:00, 12/28~ 08:00~01:00(주말·공휴일 07:00), 정설 18:00~19:00. 의무실 031-8026-5766.
+- **오크밸리**(`oakvalley`): 12/11 개장 예정(시즌권 공지 12/11~2/20, I·F·G + I-1 퍼니런파크·D). 26/27 운영시간 미발표 → 지난 시즌 값(09:00~17:00 / 정설 17:00~18:30 / 야간 18:30~22:00)으로 표시.
+- **에덴밸리**(`edenvalley`): 12월 중순 개장 예정, 베이직·우라누스부터. 13:30~23:00(정설 17:30~19:00). 종합안내 055-379-8159~8160.
 
 ## 지킬 것 (규칙)
 
