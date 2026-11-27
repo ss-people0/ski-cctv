@@ -1,18 +1,18 @@
 {
- "generatedAt": "2026-11-28T00:05:04+09:00",
+ "generatedAt": "2026-11-28T07:12:36+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
    "id": "yongpyong",
    "name": "모나용평",
    "sourceUrl": "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do",
-   "fetchedAt": "2026-11-28T00:05:04+09:00",
+   "fetchedAt": "2026-11-28T07:12:36+09:00",
    "sourceDate": "2026-11-28",
    "status": "ok",
    "hours": [
     {
      "label": "주간",
-     "value": "08:00~16:00"
+     "value": "08:30~16:30"
     },
     {
      "label": "정설",
@@ -20,7 +20,7 @@
     },
     {
      "label": "야간",
-     "value": "19:00~23:00"
+     "value": "18:00~22:00"
     }
    ],
    "slopes": [

@@ -129,6 +129,28 @@ def parse_yongpyong_rows(body: str) -> list[dict[str, Any]]:
     return rows
 
 
+def parse_yongpyong_hours(html: str) -> list[dict[str, str]]:
+    """슬로프 표 머리글의 오늘 운영시간 → [{label, value}].
+
+    머리글의 둘째 줄에 사이트가 그날 값으로 바꾸는 시간이 박혀 있다
+    (`<th scope="col"> 08:30~16:30</th>`, 야간 칸은 미운영이면 비어 있다).
+    같은 페이지의 `[주간] Daytime 08:00 ~ 16:00`은 무인발권기 '발권가능시간'이라
+    리프트 운영시간이 아니다 — 2026-11-28 이 칸을 잘못 읽던 것을 표 머리글로 바꿨다.
+    정설·야간은 표에 없어 공식 26/27시즌 리프트&렌탈요금 안내(rentCharge.do) 기준으로 채운다:
+    운영 08:30~22:00, 정설 16:30~18:00.
+    """
+    start = html.find('id="slopeStatus"')
+    head = html[html.rfind("<table", 0, start) : start] if start >= 0 else ""
+    times = re.findall(r"(\d{2}:\d{2})\s*[~∼]\s*(\d{2}:\d{2})", head)
+    day = f"{times[0][0]}~{times[0][1]}" if times else "08:30~16:30"
+    night = f"{times[1][0]}~{times[1][1]}" if len(times) > 1 else "18:00~22:00"
+    return [
+        {"label": "주간", "value": day},
+        {"label": "정설", "value": "16:30~18:00"},
+        {"label": "야간", "value": night},
+    ]
+
+
 def yongpyong() -> dict[str, Any]:
     """SSR 표. 가장 깔끔한 케이스 — 표 제목에 서버가 만든 오늘 날짜가 찍힌다."""
     url = "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do"
@@ -150,19 +172,8 @@ def yongpyong() -> dict[str, Any]:
 
     out["slopes"] = parse_yongpyong_rows(body)
 
-    # 주간은 사이트 실시간 값을 쓴다(성수기 09:00→08:30 자동 반영). 오전/오후 세분은 글랜스엔 과해서 뺀다.
-    # "<li><strong>[주간] Daytime</strong> 08:30 ~ 16:30</li>"
-    for label, s, e in re.findall(
-        r"\[(주간)\][^<]*</strong>\s*(\d{2}:\d{2})\s*[~∼]\s*(\d{2}:\d{2})", html
-    ):
-        item = {"label": label, "value": f"{s}~{e}"}
-        if item not in out["hours"]:
-            out["hours"].append(item)
-    # 사이트가 안 주는 정설·야간은 공식 공지 기준으로 고정한다(시즌마다 거의 안 바뀜). 바뀌면 여기만 고친다.
-    out["hours"] += [
-        {"label": "정설", "value": "16:30~18:00"},
-        {"label": "야간", "value": "19:00~23:00"},
-    ]
+    # 주간·야간은 사이트 표 머리글의 오늘 값을 쓴다(비수기·성수기에 따라 바뀜). 정설은 공식 요금안내 고정값.
+    out["hours"] = parse_yongpyong_hours(html)
     # 야간 슬로프가 하나라도 열렸는지(평일 미운영·주말 운영이 섞여 매일 달라짐).
     out["nightOpen"] = any(s.get("night") == "OPEN" for s in out["slopes"])
 

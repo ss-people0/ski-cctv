@@ -55,6 +55,15 @@ export const resorts: readonly Resort[] = [
       { name: '옐로우', date: '2026-11-27', time: '08:30' }, // 홈페이지 메인 이미지로만 공지(2026-11-26 사용자 전달)
       { name: '레드', date: '2026-12-02', time: '08:30' }, // 모나용평 인스타그램 공지 "2026.12.2.Wed. 08:30AM RED, OPEN"(2026-11-27 확인)
     ],
+    // 운영시간: 공식 26/27시즌 리프트&렌탈요금 안내(rentCharge.do) 기준, 2026-11-28 확인.
+    // '스키장 운영시간은 08:30-22:00이며, 정설 시간(16:30~18:00)에는 이용이 불가합니다.'
+    // (같은 페이지의 '발권 가능 시간 08:00~21:00'은 무인발권기 시간이라 운영시간이 아니다.)
+    // 자동 수집(slopes.json)이 있으면 그쪽이 우선이고, 수집이 실패한 날 이 값을 쓴다.
+    hours: [
+      { label: '주간', value: '08:30~16:30' },
+      { label: '정설', value: '16:30~18:00' },
+      { label: '야간', value: '18:00~22:00' },
+    ],
     note: 'cam09·03·07은 공식 웹캠 페이지에 없고 SkiWatch(open-ski-data)에서 확인한 주소다(2026-11-24). 언제든 막힐 수 있다.',
     cams: [
       { id: 'yongpyong-cam08', name: '베이스전경 / 레드 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam08/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },

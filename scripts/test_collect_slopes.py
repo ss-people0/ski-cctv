@@ -18,6 +18,7 @@ from collect_slopes import (
     parse_o2_rows,
     parse_oakvalley,
     parse_vivaldi_rows,
+    parse_yongpyong_hours,
     parse_yongpyong_rows,
     stick_open,
 )
@@ -78,6 +79,40 @@ class ParseYongpyongRowsTest(unittest.TestCase):
             {"name": "뉴옐로우", "level": "초급", "day": "OPEN", "night": "CLOSE"},
             {"name": "골드파라다이스", "level": "중급", "day": "CLOSE", "night": "OPEN"},
             {"name": "드래곤파크", "level": "익스트림", "day": "CLOSE", "night": "CLOSE"},
+        ])
+
+
+class ParseYongpyongHoursTest(unittest.TestCase):
+    """용평 운영시간은 슬로프 표 머리글에서 읽는다(발권가능시간 아님)."""
+
+    def test_reads_day_hours_from_table_header_and_ignores_ticketing_hours(self):
+        html = """
+        <table><thead>
+        <tr><th scope="col">주간</th><th scope="col">야간</th></tr>
+        <tr><th scope="col"> 08:30~16:30</th><th scope="col"> </th></tr>
+        </thead><tbody id="slopeStatus"></tbody></table>
+        <li><strong>[주간] Daytime</strong> 08:00 ~ 16:00</li>
+        """
+        self.assertEqual(parse_yongpyong_hours(html), [
+            {"label": "주간", "value": "08:30~16:30"},
+            {"label": "정설", "value": "16:30~18:00"},
+            {"label": "야간", "value": "18:00~22:00"},
+        ])
+
+    def test_uses_the_night_hours_once_the_table_shows_them(self):
+        html = """
+        <table><thead>
+        <tr><th scope="col">주간</th><th scope="col">야간</th></tr>
+        <tr><th scope="col"> 08:30~16:30</th><th scope="col"> 18:30~22:00</th></tr>
+        </thead><tbody id="slopeStatus"></tbody></table>
+        """
+        self.assertEqual(parse_yongpyong_hours(html)[2], {"label": "야간", "value": "18:30~22:00"})
+
+    def test_falls_back_to_official_26_27_hours_when_the_header_has_no_time(self):
+        self.assertEqual(parse_yongpyong_hours("<tbody id=\"slopeStatus\"></tbody>"), [
+            {"label": "주간", "value": "08:30~16:30"},
+            {"label": "정설", "value": "16:30~18:00"},
+            {"label": "야간", "value": "18:00~22:00"},
         ])
 
 
