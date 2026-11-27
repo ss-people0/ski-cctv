@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""스키장 「오늘 슬로프 운영 현황」 수집 참고용 프로토타입.
+"""스키장 「오늘 슬로프 운영 현황」 수집기.
 
-- 목적: GitHub Actions(파이썬 표준 라이브러리만 사용)에서 6개 스키장의
-  슬로프 OPEN/CLOSE + (있으면) 운영시간을 모아 JSON으로 출력한다.
-- 웰리힐리파크는 개발자 도구 접근 차단으로 현재 수집 불가 → 이 스크립트에서 제외.
-  (2026-11-25 실측: 본문이 클라이언트 렌더링이고 렌더용 청크가 404. 개장 후 재확인)
-- 이 파일은 "참고용 원형"이다. 실제 도입 시에는 리조트별 함수를 그대로 가져다
-  `scripts/collect_slopes.py`로 옮기고 실패 처리·캐시만 보강하면 된다.
+- 목적: GitHub Actions(파이썬 표준 라이브러리만 사용)에서 각 스키장의
+  슬로프 OPEN/CLOSE + (있으면) 운영시간을 모아 `public/data/slopes.json`으로 저장한다.
+- 웰리힐리파크·에덴밸리는 수집 불가 → `skipped`로만 남긴다(화면은 공식 코스 목록으로 형식을 갖춘다).
+  웰리힐리: 개발자 도구 접근 차단(2026-11-25 실측, 개장 후 재확인).
+  에덴밸리: 사이트 개편 중, 스키 페이지 본문 비어 있음(2026-11-27 실측).
 
 사용법
-    python3 scripts/probe_slopes.py                 # 6곳 전부
-    python3 scripts/probe_slopes.py yongpyong jisan # 일부만
-    python3 scripts/probe_slopes.py --out result.json
+    python3 scripts/collect_slopes.py                 # 웰리힐리를 뺀 전부
+    python3 scripts/collect_slopes.py yongpyong jisan # 일부만
+    python3 scripts/collect_slopes.py --out public/data/slopes.json
 
 설계 메모
 - 외부 패키지(requests, bs4) 없이 urllib + re 만 쓴다. Actions 러너에서 설치 단계가 필요 없다.
@@ -528,6 +527,347 @@ def wellihilli() -> dict[str, Any]:
     return out
 
 
+# ------------------------------------------------------------------ 8. 비발디파크
+VIVALDI_PAGE = "https://sonolc.sonohotelsresorts.com/daemyung.vp.skiworld.04_02_04.ds/dmparse.dm"
+VIVALDI_API = "https://sonolc.sonohotelsresorts.com/front.subMainAjax.getSlopeConditionAjax.dp/dmparse.dm"
+
+
+def parse_vivaldi_rows(data: dict[str, Any]) -> list[dict[str, Any]]:
+    """스키장 상황 JSON → [{name, level, day, night}].
+
+    응답 list에는 오늘 값이 아직 입력되지 않으면 daytimeYn/nightYn/dawnYn이 모두 null로 온다
+    (사이트도 그때는 CLOSE 아이콘을 그린다). null은 '미개방'이 아니라 '모름'이므로 상태를 넣지 않는다.
+    """
+    def state(v: Any) -> str | None:
+        return {"Y": "OPEN", "N": "CLOSE"}.get(str(v))
+
+    rows: list[dict[str, Any]] = []
+    for d in data.get("list") or []:
+        name = (d.get("slopeNm") or "").strip()
+        if not name:
+            continue
+        row: dict[str, Any] = {"name": name}
+        if d.get("slopeGrade"):
+            row["level"] = d["slopeGrade"]
+        if state(d.get("daytimeYn")):
+            row["day"] = state(d.get("daytimeYn"))
+        if state(d.get("nightYn")):
+            row["night"] = state(d.get("nightYn"))
+        # 밤샘/새벽만 여는 날은 상태 칸이 하나뿐이라 state로 넘긴다(개방으로 보이게).
+        if state(d.get("dawnYn")) == "OPEN" and row.get("night") != "OPEN":
+            row["state"] = "OPEN"
+        rows.append(row)
+    return rows
+
+
+def vivaldi() -> dict[str, Any]:
+    """구 소노 '스키장 상황' AJAX(JSON). 슬로프 이름·난이도는 항상 오지만 개방 값은 비어 있을 때가 있다.
+
+    신형 사이트(Nuxt)는 오늘 운영 시간대만 보여 주고 슬로프별 개방 값은 이 구 시스템에서만 준다.
+    """
+    out = base("vivaldi", "비발디파크", VIVALDI_PAGE)
+    status, body = get(VIVALDI_API, headers={
+        "Referer": VIVALDI_PAGE,
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept": "application/json",
+    })
+    out["httpStatus"] = status
+    if status != 200:
+        out["status"] = "error"
+        out["error"] = f"HTTP {status}"
+        return out
+    try:
+        data = json.loads(body)
+    except json.JSONDecodeError:
+        out["status"] = "error"
+        out["error"] = "JSON 아님(개편 의심)"
+        return out
+
+    out["slopes"] = parse_vivaldi_rows(data)
+    out["nightOpen"] = any(s.get("night") == "OPEN" for s in out["slopes"])
+    if not out["slopes"]:
+        out["status"] = "partial"
+        out["note"] = "슬로프 목록이 비어 있음(개편 의심)"
+    elif not any(k in s for s in out["slopes"] for k in ("day", "night", "state")):
+        out["status"] = "partial"
+        out["note"] = "공식 스키장 상황에 오늘 개방 값이 입력되지 않음(사이트도 CLOSE 표시)"
+    return out
+
+
+# ------------------------------------------------------------------ 9. 무주덕유산리조트
+MUJU_POPUP = "https://www.mdysresort.com/convert_main_slope_221207.asp"
+MUJU_LEVEL = {"초급자용": "초급", "중급자용": "중급", "상급자용": "상급", "최상급자용": "최상급"}
+
+
+def muju_slope_name(raw: str) -> str:
+    """'스피츠하단' → '스피츠 하단'. 상세 화면·slopeCatalog와 이름을 맞춰야 칩이 한 슬로프로 묶인다."""
+    name = re.sub(r"\s+", " ", raw).strip()
+    if name.endswith(("상단", "하단")) and not name.endswith((" 상단", " 하단")):
+        name = f"{name[:-2]} {name[-2:]}"
+    return name
+
+
+def parse_muju_courses(html: str) -> list[dict[str, Any]]:
+    """오픈슬로프 popup의 코스 목록 → [{name, level, day, night}].
+
+    코스마다 `<p>이름</p><ul class="color_check">` 아래 칸이 5개(새벽·오전·오후·야간·자정)이고
+    열린 칸에만 class="on"이 붙는다. 난이도는 코스 앞 HTML 주석('<!-- 초급자용 코스(...) -->')에 있다.
+    """
+    start = html.find('<div class="course_list">')
+    if start < 0:
+        return []
+    end = html.find('<section class="schedule">', start)
+    seg = html[start : end if end > start else len(html)]
+    rows: list[dict[str, Any]] = []
+    level = None
+    # 난이도 주석과 코스 한 칸을 문서 순서대로 한 번에 찾는다(칸 안의 주석 때문에 잘라서 보면 안 된다).
+    pattern = re.compile(
+        r'<!--\s*(초급자용|중급자용|상급자용|최상급자용)\s*코스|<p>([^<]+)</p>\s*<ul class="color_check">(.*?)</ul>',
+        re.S,
+    )
+    for m in pattern.finditer(seg):
+        if m.group(1):
+            level = MUJU_LEVEL[m.group(1)]
+            continue
+        cells = re.findall(r"<li([^>]*)>", m.group(3))
+        on = ['class="on"' in c for c in cells]
+        row: dict[str, Any] = {"name": muju_slope_name(m.group(2))}
+        if level:
+            row["level"] = level
+        if len(on) >= 5:
+            row["day"] = "OPEN" if (on[1] or on[2]) else "CLOSE"
+            row["night"] = "OPEN" if on[3] else "CLOSE"
+        rows.append(row)
+    return rows
+
+
+def muju() -> dict[str, Any]:
+    """SSR popup. `n_date`로 그날 운영표를 보여 주고, 화면에 기준일이 그대로 찍힌다."""
+    date = today_kst().isoformat()
+    url = f"{MUJU_POPUP}?g=S&n_date={date}"
+    out = base("muju", "무주 덕유산", url)
+    status, html = get(url)
+    out["httpStatus"] = status
+    if status != 200:
+        out["status"] = "error"
+        out["error"] = f"HTTP {status}"
+        return out
+
+    m = re.search(r'<p class="day_txt">\s*(\d{4}-\d{2}-\d{2})', html)
+    out["sourceDate"] = m.group(1) if m else None
+    out["slopes"] = parse_muju_courses(html)
+    out["nightOpen"] = any(s.get("night") == "OPEN" for s in out["slopes"])
+    if not out["slopes"]:
+        out["status"] = "partial"
+        out["note"] = "코스 목록을 찾지 못함(마크업 변경 의심)"
+    return out
+
+
+# ------------------------------------------------------------------ 10. 오투리조트
+O2_STATUS = "https://o2resort.com/SKI/slopeOpen.jsp"
+
+
+def o2_slope_name(raw: str) -> str:
+    """'드림1 (DREAM1)' → '드림1'. slopeCatalog와 같은 이름으로 맞춘다."""
+    return re.sub(r"\s*\([^)]*\)\s*$", "", raw).strip()
+
+
+def parse_o2_rows(html: str) -> list[dict[str, Any]]:
+    """왼쪽 제원 표(이름·난이도)와 오른쪽 오픈현황 표(주간·야간 아이콘)를 순서대로 짝지어 읽는다.
+
+    오른쪽 표는 왼쪽 표와 같은 순서이고, 슬로프 12면 뒤에 부대시설 3칸이 더 있다 → 앞 12칸만 쓴다.
+    """
+    i = html.find("skiLeftBox")
+    if i < 0:
+        return []
+    left = html[i : html.find("</table>", i)]
+    names: list[tuple[str, str | None]] = []
+    level = None
+    for attrs, row in re.findall(r"<tr([^>]*)>(.*?)</tr>", left, re.S)[1:]:
+        if "slopeFacil" in attrs or "slopeFacil" in row:  # 하프파이프·눈썰매장·익스트림파크
+            continue
+        cells = [strip_tags(c) for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.S)]
+        if not cells or cells[0].startswith("슬로프"):
+            continue
+        if cells[0] in ("초급", "중급", "상급", "최상급"):
+            level = cells[0]
+            cells = cells[1:]
+        if len(cells) < 2:
+            continue
+        name = o2_slope_name(cells[1])
+        if name:
+            names.append((name, level))
+
+    j = html.find("skiRightBox")
+    status_rows = re.findall(r"<tr[^>]*>(.*?)</tr>", html[j : html.find("</table>", j)], re.S)[2:] if j >= 0 else []
+
+    rows: list[dict[str, Any]] = []
+    for k, (name, level) in enumerate(names):
+        row: dict[str, Any] = {"name": name}
+        if level:
+            row["level"] = level
+        if k < len(status_rows):
+            states = re.findall(r"icon_slope_(open|closed)\.jpg", status_rows[k])
+            if states:
+                row["day"] = "OPEN" if states[0] == "open" else "CLOSE"
+                if len(states) > 1:
+                    row["night"] = "OPEN" if states[1] == "open" else "CLOSE"
+        rows.append(row)
+    return rows
+
+
+def o2() -> dict[str, Any]:
+    """SSR 표 2장. 페이지에 기준일이 없어 fetchedAt으로 대신한다."""
+    out = base("o2", "오투", O2_STATUS)
+    status, html = get(O2_STATUS)
+    out["httpStatus"] = status
+    if status != 200:
+        out["status"] = "error"
+        out["error"] = f"HTTP {status}"
+        return out
+    html = strip_comments(html)
+    out["slopes"] = parse_o2_rows(html)
+    out["nightOpen"] = any(s.get("night") == "OPEN" for s in out["slopes"])
+    if not out["slopes"]:
+        out["status"] = "partial"
+        out["note"] = "슬로프 표를 찾지 못함(마크업 변경 의심)"
+    return out
+
+
+# ------------------------------------------------------------------ 11. 곤지암리조트
+KONJIAM_STATUS = "https://www.konjiamresort.co.kr/ski/slopeOpenClose.dev"
+# 사이트가 옛 이름을 괄호로 붙여 쓴다('씽큐 1 (구 제타)') → 우리 목록 이름으로 되돌린다.
+KONJIAM_NAMES = {
+    "그램(구 하늬)": "그램",
+    "익시오(구 휘슬)": "익시오",
+    "씽큐 1 (구 제타)": "씽큐1",
+    "씽큐 2 (구 제타)": "씽큐2",
+    "홈봇 1/2(구 윈디)": "홈봇 1/2",
+    "홈봇 3(구 윈디)": "홈봇 3",
+    "홈봇 4(구 윈디)": "홈봇 4",
+    "CNP 1(구 게일)": "CNP 1",
+    "CNP 2(구 게일)": "CNP 2",
+}
+
+
+def konjiam_slope_name(raw: str) -> str:
+    if raw in KONJIAM_NAMES:
+        return KONJIAM_NAMES[raw]
+    return re.sub(r"\s+", " ", re.sub(r"\s*\([^)]*\)\s*$", "", raw)).strip()
+
+
+def parse_konjiam_rows(html: str) -> list[dict[str, Any]]:
+    """슬로프현황 표 → [{name, level, day, night}]. 칸 순서는 주간·야간·백야이고 값은 Open/Close 글자다.
+
+    백야만 열린 날도 개방으로 보이도록 night에 합친다(야간 칸과 백야 칸 중 하나라도 Open).
+    """
+    i = html.find('<table class="chart-a1">')
+    if i < 0:
+        return []
+    table = html[i : html.find("</table>", i)]
+    rows: list[dict[str, Any]] = []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", table, re.S):
+        m = re.search(r'<span class="slope-[a-z]+">([^<]+)</span>', tr)
+        if not m:
+            continue
+        cells = re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)
+        states = re.findall(r'<td class="(open|close)"[^>]*>', tr)
+        row: dict[str, Any] = {"name": konjiam_slope_name(m.group(1))}
+        level = strip_tags(cells[1]).replace("/", "") if len(cells) > 1 else ""
+        if level:
+            row["level"] = level
+        if len(states) >= 2:
+            row["day"] = "OPEN" if states[0] == "open" else "CLOSE"
+            night = states[1] == "open" or (len(states) > 2 and states[2] == "open")
+            row["night"] = "OPEN" if night else "CLOSE"
+        rows.append(row)
+    return rows
+
+
+def konjiam() -> dict[str, Any]:
+    """SSR 표. PC 사이트의 '슬로프/리프트 현황'(slopeOpenClose.dev). 기준일 표기는 없다."""
+    out = base("konjiam", "곤지암", KONJIAM_STATUS)
+    status, html = get(KONJIAM_STATUS)
+    out["httpStatus"] = status
+    if status != 200:
+        out["status"] = "error"
+        out["error"] = f"HTTP {status}"
+        return out
+    html = strip_comments(html)
+    out["slopes"] = parse_konjiam_rows(html)
+    out["nightOpen"] = any(s.get("night") == "OPEN" for s in out["slopes"])
+    if not out["slopes"]:
+        out["status"] = "partial"
+        out["note"] = "슬로프 표를 찾지 못함(마크업 변경 의심)"
+    return out
+
+
+# ------------------------------------------------------------------ 12. 오크밸리
+OAK_API = "https://api.oakvalley.co.kr/api/v1/skis/slopes"
+# 26/27 운영 코스는 I·F·G 3면(+I-1 퍼니런파크·D 게이트). API에는 옛 코스 A·B도 남아 있어 3면만 쓴다.
+OAK_SLOPES = ("I", "F", "G")
+OAK_SEASON_START = dt.date(2026, 12, 11)  # 공식 26/27 개장일
+
+
+def parse_oakvalley(data: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for group in (data.get("data") or {}).get("groups") or []:
+        level = group.get("levelCategoryValue") or None
+        for item in group.get("items") or []:
+            name = (item.get("name") or "").strip()
+            if name not in OAK_SLOPES:
+                continue
+            row: dict[str, Any] = {"name": name, "day": "OPEN" if item.get("open") else "CLOSE"}
+            if level:
+                row["level"] = level
+            rows.append(row)
+    return rows
+
+
+def oakvalley() -> dict[str, Any]:
+    """SPA가 쓰는 공개 JSON API. 개장 전에는 지난 시즌 값(전 코스 open=true)이 그대로 남아 있다."""
+    out = base("oakvalley", "오크밸리", OAK_API)
+    status, body = get(OAK_API, headers={
+        "Origin": "https://oakvalley.co.kr",
+        "Referer": "https://oakvalley.co.kr/",
+        "Accept": "application/json",
+    })
+    out["httpStatus"] = status
+    if status != 200:
+        out["status"] = "error"
+        out["error"] = f"HTTP {status}"
+        return out
+    try:
+        data = json.loads(body)
+    except json.JSONDecodeError:
+        out["status"] = "error"
+        out["error"] = "JSON 아님(개편 의심)"
+        return out
+
+    out["slopes"] = parse_oakvalley(data)
+    if today_kst() < OAK_SEASON_START:
+        # 개장 전에는 API가 지난 시즌 기본값(개방)을 그대로 준다 → 화면에서 '개장 전 → 전부 미개방'으로 보이게 stale.
+        out["status"] = "stale"
+        out["note"] = f"개장 전({OAK_SEASON_START.isoformat()}) — API 값은 지난 시즌 기본값"
+    elif not out["slopes"]:
+        out["status"] = "partial"
+        out["note"] = "슬로프 목록을 찾지 못함(개편 의심)"
+    return out
+
+
+# ------------------------------------------------------------------ 13. 에덴밸리 (제외)
+def edenvalley() -> dict[str, Any]:
+    """수집 불가. 공식 사이트(edenvalley.co.kr)가 골프 사이트로 넘어가고, 스키 페이지 본문이 비어 있다.
+
+    2026-11-27 확인: 메인은 golf.edenvalley.co.kr로 리다이렉트, 스키 요금·학교 페이지는 '개편 중'으로
+    본문이 없고, 슬로프·리프트 개방 현황 페이지 자체가 없다. 개장(12월 중순) 뒤 다시 확인.
+    """
+    out = base("edenvalley", "에덴밸리", "https://www.edenvalley.co.kr/")
+    out["status"] = "skipped"
+    out["note"] = "사이트 개편 중 — 스키 페이지 본문이 비어 있고 슬로프 현황 페이지가 없음(개장 후 재확인)"
+    return out
+
+
 RESORTS = {
     "yongpyong": yongpyong,
     "high1": high1,
@@ -536,6 +876,12 @@ RESORTS = {
     "gangchon": elysian,
     "alpensia": alpensia,
     "wellihilli": wellihilli,  # skip 상태로만 출력
+    "vivaldi": vivaldi,
+    "muju": muju,
+    "o2": o2,
+    "konjiam": konjiam,
+    "oakvalley": oakvalley,
+    "edenvalley": edenvalley,  # skip 상태로만 출력
 }
 
 
