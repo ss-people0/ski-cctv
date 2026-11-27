@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-27T17:01:41+09:00",
+ "generatedAt": "2026-11-27T18:06:15+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
@@ -534,7 +534,7 @@
    "id": "phoenix",
    "name": "휘닉스 평창",
    "sourceUrl": "https://www.phoenixhnr.co.kr/api/snowpark/slope",
-   "fetchedAt": "2026-11-27T15:51:34+09:00",
+   "fetchedAt": "2026-11-27T18:06:15+09:00",
    "sourceDate": null,
    "status": "ok",
    "hours": [
