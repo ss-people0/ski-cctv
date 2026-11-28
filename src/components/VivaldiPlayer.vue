@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: contain;
+  object-fit: contain !important;
 }
 /* SDK는 문서 좌표로 캡션·시각·JPEG 사본·투명 판을 따로 그린다. 칸 안에서는 위치가 어툋나고
    내용도 우리 화면(이름·미리보기 시간)과 겹처서 숨긴다. */
