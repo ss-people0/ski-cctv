@@ -8,13 +8,21 @@ class FakeController {
   disposed = false
   layouts: [number, number][] = []
   private onReady?: () => void
-  constructor() {
+  private id: string
+  constructor(id: string) {
+    this.id = id
     sdk.controllers.push(this)
   }
   init(onReady: () => void) {
     this.onReady = onReady
   }
-  ready() {
+  /** SDK가 로그인을 마치고 콜백을 부른 상태(아직 영상이 없을 수도 있다). */
+  ready(withFrames = true) {
+    if (withFrames) {
+      const video = document.createElement('video')
+      Object.defineProperty(video, 'readyState', { value: 4 })
+      document.getElementById(this.id)?.appendChild(video)
+    }
     this.onReady?.()
   }
   changeLayout(count: number, first: number) {
@@ -43,7 +51,7 @@ afterEach(() => {
 test('플레이어가 준비되면 한 채널만 보여 주고 미리보기 시간을 센다', async () => {
   vi.useFakeTimers()
   sdk.install()
-  const player = mount(VivaldiPlayer, { props: PROPS })
+  const player = mount(VivaldiPlayer, { props: PROPS, attachTo: document.body })
   await vi.waitFor(() => expect(sdk.controllers).toHaveLength(1))
 
   sdk.controllers[0].ready()
@@ -59,11 +67,24 @@ test('플레이어가 준비되면 한 채널만 보여 주고 미리보기 시�
 
 test('화면에서 사라지면 SDK 플레이어를 정리한다(dispose)', async () => {
   sdk.install()
-  const player = mount(VivaldiPlayer, { props: PROPS })
+  const player = mount(VivaldiPlayer, { props: PROPS, attachTo: document.body })
   await vi.waitFor(() => expect(sdk.controllers).toHaveLength(1))
 
   player.unmount()
   expect(sdk.controllers[0].disposed).toBe(true)
+})
+
+test('재생은 시작됐는데 화면이 안 들어오면 8초 뒤 안내로 바꾼다', async () => {
+  vi.useFakeTimers()
+  sdk.install()
+  const player = mount(VivaldiPlayer, { props: PROPS, attachTo: document.body })
+  await vi.waitFor(() => expect(sdk.controllers).toHaveLength(1))
+
+  sdk.controllers[0].ready(false) // 프레임 없이 콜백만 온 상태
+  vi.advanceTimersByTime(8500)
+  await player.vm.$nextTick()
+  expect(player.find('.note.error').exists()).toBe(true)
+  player.unmount()
 })
 
 test('SDK가 플레이어를 만들지 못하면 안내와 다시 시도·공식 페이지 링크를 보여 준다', async () => {
@@ -74,7 +95,7 @@ test('SDK가 플레이어를 만들지 못하면 안내와 다시 시도·공식
       }
     },
   }
-  const player = mount(VivaldiPlayer, { props: PROPS })
+  const player = mount(VivaldiPlayer, { props: PROPS, attachTo: document.body })
   await vi.waitFor(() => expect(player.find('.note.error').exists()).toBe(true))
 
   expect(player.get('.note.error').text()).toContain('지금은 영상을 볼 수 없어요')

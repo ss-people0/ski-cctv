@@ -11,6 +11,8 @@ const emit = defineEmits<{ end: [] }>()
 
 const SDK_URL = 'https://www.sonohotelsresorts.com/wespJSSDKEncV4.min.js'
 const LOAD_TIMEOUT_MS = 12000
+// 재생이 시작됐는데도 화면이 안 들어오면(장비·회선 문제) '다시 시도' 안내로 바꾼다.
+const FRAME_WAIT_MS = 8000
 
 type VivaldiController = {
   init(onReady: () => void, onFail?: (error: unknown) => void): void
@@ -36,6 +38,7 @@ let controller: VivaldiController | undefined
 let disposed = false
 let loadTimer: ReturnType<typeof setTimeout> | undefined
 let limitTimer: ReturnType<typeof setInterval> | undefined
+let frameTimer: ReturnType<typeof setInterval> | undefined
 
 // 같은 페이지에서 여러 번 켜도 id가 겹치지 않게 센다.
 let playerSeq = 0
@@ -67,6 +70,26 @@ function loadSdk(): Promise<VivaldiSdk> {
 function clearTimers() {
   clearTimeout(loadTimer)
   clearInterval(limitTimer)
+  clearInterval(frameTimer)
+}
+
+// SDK는 로그인이 끝나면 콜백을 부른다. 하지만 그때는 아직 영상이 안 올 수 있어서,
+// 실제로 프레임이 들어오는지 잠깐 지켜보고 안 들어오면 실패로 본다.
+function watchFrames() {
+  const from = Date.now()
+  clearInterval(frameTimer)
+  frameTimer = setInterval(() => {
+    const video = host.value?.querySelector('video, canvas')
+    const playing = video instanceof HTMLVideoElement ? video.readyState >= 2 || video.videoWidth > 0 : !!video
+    if (playing) {
+      clearInterval(frameTimer)
+      return
+    }
+    if (Date.now() - from > FRAME_WAIT_MS) {
+      clearInterval(frameTimer)
+      fail()
+    }
+  }, 500)
 }
 
 function fail() {
@@ -120,6 +143,7 @@ async function start() {
         created.changeLayout(1, siteInfo.channel - 1)
         status.value = 'playing'
         startLimit()
+        watchFrames()
       },
       (error) => {
         console.error('[vivaldi] 재생을 시작하지 못했습니다', error)
@@ -164,16 +188,27 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .vivaldi { position: absolute; inset: 0; overflow: hidden; background: #000; }
-/* SDK가 넣는 캔버스·영상은 우리 칸을 꽉 채우게 한다(인라인 크기를 덮어쓴다). */
+/* SDK가 넣는 표·영상은 장비가 알려 준 크기(예: 640x360)로 만들어지므로 우리 칸에 맞춰 늘린다. */
 .wesp { position: absolute; inset: 0; overflow: hidden; }
-.wesp :deep(canvas),
+.wesp :deep(table) { width: 100% !important; height: 100% !important; margin: 0 !important; border: 0 !important; }
+.wesp :deep(tbody), .wesp :deep(tr), .wesp :deep(td) { width: 100% !important; height: 100% !important; border: 0 !important; }
+.wesp :deep(.embed-responsive) { width: 100% !important; height: 100% !important; padding: 0 !important; }
 .wesp :deep(video),
+.wesp :deep(canvas),
 .wesp :deep(iframe) {
   width: 100% !important;
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
   object-fit: contain;
+}
+/* SDK는 문서 좌표로 캡션·시각·JPEG 사본·투명 판을 따로 그린다. 칸 안에서는 위치가 어툋나고
+   내용도 우리 화면(이름·미리보기 시간)과 겹처서 숨긴다. */
+.wesp :deep(.video-caption),
+.wesp :deep(.video-timestamp),
+.wesp :deep(.video-jpeg-image),
+.wesp :deep(.transparent-panel) {
+  display: none !important;
 }
 .note {
   position: absolute;
