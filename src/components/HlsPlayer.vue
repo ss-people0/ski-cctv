@@ -2,7 +2,8 @@
 import Hls from 'hls.js'
 import { onBeforeUnmount, onMounted, shallowRef } from 'vue'
 
-const props = defineProps<{ url: string; playLimitSec: number; label: string }>()
+// continuous: 미리보기 시간이 끝나도 끊지 않고 다음 구간을 이어 붙인다(라이브처럼, 사용자 요청 2026-11-28).
+const props = defineProps<{ url: string; playLimitSec: number; label: string; continuous?: boolean }>()
 const emit = defineEmits<{ end: []; error: [] }>()
 
 const video = shallowRef<HTMLVideoElement>()
@@ -25,6 +26,10 @@ function startLimit() {
   timer = setInterval(() => {
     remaining.value -= 1
     if (remaining.value <= 0) {
+      if (props.continuous) {
+        remaining.value = props.playLimitSec
+        return
+      }
       clearTimer()
       emit('end')
     }
@@ -71,11 +76,13 @@ onBeforeUnmount(() => {
       @loadedmetadata="startLimit"
       @error="emit('error')"
     />
-    <span v-if="started" class="countdown" aria-hidden="true">미리보기 {{ remaining }}초</span>
+    <span v-if="started && continuous" class="countdown live" aria-hidden="true">● LIVE</span>
+    <span v-else-if="started" class="countdown" aria-hidden="true">미리보기 {{ remaining }}초</span>
   </div>
 </template>
 
 <style scoped>
 .player { display: contents; }
+.countdown.live { color: #ff8a8e; }
 .countdown { position: absolute; top: 8px; left: 8px; padding: 3px 10px; border-radius: 999px; background: #0009; color: #fff; font-size: 0.75rem; font-weight: 700; pointer-events: none; }
 </style>

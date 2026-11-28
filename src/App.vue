@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
-import CamCard from './components/CamCard.vue'
+import { computed, onMounted, shallowRef } from 'vue'
+import CamPickList from './components/CamPickList.vue'
+import HeroPlayer from './components/HeroPlayer.vue'
 import SlopeStatusCard from './components/SlopeStatusCard.vue'
 import { resorts } from './data/cams'
 import { isPlayable, sortResorts } from './data/sortResorts'
@@ -28,17 +29,15 @@ onMounted(async () => {
   cardWeather.value = new Map(entries.filter((e): e is [string, Weather] => e[1] !== null))
 })
 
-// 상세 화면에서 스크롤을 내리면 상단 고정 헤더(뒤로가기)를 보여준다.
-const scrolled = shallowRef(false)
-const onScroll = () => {
-  scrolled.value = window.scrollY > 150
-}
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
-onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 
 // null = 스키장 목록 화면, 값이 있으면 그 스키장 상세 화면
 const selectedId = shallowRef<string | null>(null)
 const currentResort = computed(() => sortedResorts.find((resort) => resort.id === selectedId.value) ?? null)
+
+// 캠이 있는 스키장은 모두: 아래 이름 목록에서 누르면 위 화면(HeroPlayer)에서 재생한다.
+const heroMode = computed(() => !!currentResort.value?.cams.length)
+// 영상을 켜면 상단 화면(=플레이어)이 헤더 바로 아래에 같이 붙는다.
+const heroPlaying = computed(() => heroMode.value && !!playingCamId.value)
 
 // 상세 슬로프 현황과, 그 현황으로 걸러낸 오픈 예정 안내(이미 열렸거나 당일이 된 건 빠진다).
 const currentSlopes = computed(() => {
@@ -65,7 +64,6 @@ async function openResort(id: string) {
   playingCamId.value = null
   selectedId.value = id
   weather.value = null
-  scrolled.value = false
   window.scrollTo({ top: 0 })
   const resort = sortedResorts.find((r) => r.id === id)
   if (!resort?.coord) return
@@ -76,7 +74,6 @@ function goBack() {
   playingCamId.value = null
   selectedId.value = null
   weather.value = null
-  scrolled.value = false
   window.scrollTo({ top: 0 })
 }
 
@@ -89,7 +86,22 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
 
 <template>
   <main>
-    <header class="topbar">
+    <!-- 상세 헤더: ← · 스키장 이름 · 로고. 스크롤해도 화면 맨 위에 붙어 있다. -->
+    <header v-if="currentResort" class="topbar detail-bar" :class="{ 'with-player': heroPlaying }">
+      <button type="button" class="topbar-back" aria-label="스키장 목록으로" @click="goBack">←</button>
+      <span class="topbar-name">{{ currentResort.name }}</span>
+      <a
+        v-if="currentResort.symbol"
+        class="bar-symbol"
+        :href="currentResort.officialPage"
+        target="_blank"
+        rel="noopener noreferrer"
+        :aria-label="`${currentResort.name} 공식 웹캠 바로가기, 새 창`"
+      >
+        <img class="symbol" :src="currentResort.symbol" alt="" />
+      </a>
+    </header>
+    <header v-else class="topbar">
       <div class="brand-lockup">
         <!-- 라이트는 윤곽선형(B), 다크는 채움형(A). 사이트는 지금 라이트 테마 전용이라 보통은 윤곽선형이 보인다. -->
         <picture class="brand-mark">
@@ -124,24 +136,10 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
     </nav>
 
     <section v-if="currentResort" class="resort-detail">
-      <header class="detail-topbar" :class="{ show: scrolled }">
-        <button type="button" class="topbar-back" aria-label="스키장 목록으로" @click="goBack">←</button>
-        <span class="topbar-name">{{ currentResort.name }}</span>
-      </header>
-      <div class="detail-hero">
+      <div class="detail-hero" :class="{ playing: heroPlaying }">
         <img class="hero-art" :src="`illustrations/${currentResort.id}.jpg`" alt="" />
-        <button type="button" class="back" aria-label="스키장 목록으로" @click="goBack">←</button>
-        <a
-          v-if="currentResort.symbol"
-          class="symbol-link"
-          :href="currentResort.officialPage"
-          target="_blank"
-          rel="noopener noreferrer"
-          :aria-label="`${currentResort.name} 공식 웹캠 바로가기, 새 창`"
-        >
-          <img class="symbol" :src="currentResort.symbol" alt="" />
-        </a>
         <span v-if="weather" class="weather-chip" :title="weather.label">{{ weather.icon }} {{ weather.temp }}°</span>
+        <HeroPlayer v-if="heroMode" :resort="currentResort" />
       </div>
       <div class="detail-head">
         <h2>{{ currentResort.name }}</h2>
@@ -169,9 +167,10 @@ const themeVars = (id: string) => ({ '--theme-bg': themeOf(id).background, '--th
         </div>
 
         <h3 class="cams-title">라이브 캠</h3>
-        <div v-if="currentResort.cams.length" class="cams">
-          <CamCard v-for="cam in currentResort.cams" :key="cam.id" :resort="currentResort" :cam="cam" />
-        </div>
+        <template v-if="heroMode">
+          <p class="cams-hint">이름을 누르면 위 화면에서 바로 나와요</p>
+          <CamPickList :resort="currentResort" />
+        </template>
         <!-- 캠 주소를 아직 찾지 못한 스키장: 빈 목록 대신 준비 중 안내 + 공식 페이지 링크 -->
         <div v-else class="cams-soon">
           <span class="soon-mark" aria-hidden="true">🚧</span>

@@ -9,21 +9,28 @@
   --blue-dark: #6456d8;
   --ice-light: #eef1fb; /* 영상 자리 표시 */
   --alert: #d94a4f;
+  /* 상단 헤더(.topbar) 모양 값. */
+  --bar-h: 56px;
+  --bar-bg: rgba(255, 255, 255, 0.95);
+  --bar-radius: 26px 26px 18px 18px;
+  --bar-shadow: 0 4px 14px rgba(70, 55, 130, 0.07);
+  --bar-title: 800 1.05rem/1 var(--sans);
+  --page-bg: radial-gradient(135% 85% at 50% -12%, #eae5fb 0%, #f4f2fc 52%) fixed; /* body 배경 = 헤더 가림막(화면 기준이라 이음새가 안 보인다) */
   --sans: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
 }
-body { margin: 0; min-height: 100vh; background: radial-gradient(135% 85% at 50% -12%, #eae5fb 0%, #f4f2fc 52%) fixed; }
+body { margin: 0; min-height: 100vh; background: var(--page-bg); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 16px 48px; }
 
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 4px 2px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; height: var(--bar-h); margin-bottom: 12px; padding: 0 18px; border: 1px solid var(--line); border-radius: var(--bar-radius); background: var(--bar-bg); backdrop-filter: blur(8px); box-shadow: var(--bar-shadow); }
 /* 브랜드 락업: 작은 심볼 + 제목. 심볼 높이가 헤더 높이를 늘리지 않게 제목 글자 높이에 맞춘다. */
 .brand-lockup { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .brand-mark { display: flex; flex: none; }
 .brand-mark img { display: block; width: auto; height: 26px; }
-.brand { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+.brand { font: var(--bar-title); letter-spacing: -0.02em; white-space: nowrap; }
 .count { color: var(--muted); font-size: 0.82rem; }
 
 /* ───────── 목록: 일러스트 카드 그리드(모바일 2열, 태블릿 이상 3열) ───────── */
@@ -49,19 +56,25 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 }
 
 /* ───────── 상세 ───────── */
-/* 스크롤을 내리면 스르륵 나타나는 고정 헤더 (모바일 패턴) */
-.detail-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 20; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; max-width: 880px; margin: 0 auto; padding: 9px 16px; background: linear-gradient(to bottom, rgba(244, 242, 252, 0.97) 50%, rgba(244, 242, 252, 0.62)); backdrop-filter: blur(12px); transform: translateY(-100%); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; pointer-events: none; }
-/* 경계선 대신 아래로 부드럽게 풀리는 그라데이션 */
-.detail-topbar::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 22px; background: linear-gradient(to bottom, rgba(244, 242, 252, 0.72), rgba(244, 242, 252, 0)); backdrop-filter: blur(2px); pointer-events: none; }
-.detail-topbar.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
 .topbar-back { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--text); font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(70, 55, 130, 0.08); }
-.topbar-name { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
-
+.topbar-name { flex: 1; min-width: 0; overflow: hidden; font: var(--bar-title); letter-spacing: -0.02em; text-overflow: ellipsis; white-space: nowrap; }
+/* 상세 헤더: ← · 스키장 이름 · 로고. 스크롤해도 맨 위에 붙어 있다. */
+.detail-bar { justify-content: flex-start; gap: 10px; padding: 0 16px; }
+.detail-bar { position: sticky; top: 0; z-index: 20; }
+/* 헤더 뒤 가림막: 위쪽 여백·둥근 모서리 틈으로 아래 글이 비치지 않게 페이지 배경으로 덮는다. 영상이 붙어 있으면 영상 위 틈까지. */
+/* 아래 18px은 투명해지는 그라데이션 → 내용이 헤더 밑으로 들어갈 때 딱 잘리지 않고 스르륵 사라진다. */
+.detail-bar { --fade: 18px; }
+.detail-bar::before { content: ''; position: absolute; z-index: -1; top: -40px; right: -16px; bottom: calc(var(--fade) * -1); left: -16px; background: var(--page-bg); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fade)), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fade)), transparent); pointer-events: none; }
+.detail-bar.with-player::before { bottom: calc(-34px - var(--fade)); }
+/* 가림막이 헤더 안쪽까지 덮으므로, 헤더의 흰 바 모양은 가림막 위 층(::after)에 다시 그린다. */
+.detail-bar { border-color: transparent; background: none; box-shadow: none; backdrop-filter: none; }
+.detail-bar::after { content: ''; position: absolute; z-index: -1; inset: -1px; border: 1px solid var(--line); border-radius: var(--bar-radius); background: var(--bar-bg); box-shadow: var(--bar-shadow); }
+.bar-symbol { display: inline-flex; flex: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(70, 55, 130, 0.18); }
+.bar-symbol .symbol { height: 38px; }
 .detail-hero { position: relative; box-sizing: border-box; width: 100%; aspect-ratio: 16 / 9; max-height: 380px; margin-bottom: 4px; border: 1px solid var(--line); border-radius: 26px; overflow: hidden; box-shadow: 0 10px 26px rgba(70, 55, 130, 0.1); }
 .hero-art { position: absolute; inset: 0; }
-.back { position: absolute; top: 16px; left: 16px; z-index: 2; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 999px; background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(6px); color: var(--text); font-size: 1.2rem; font-weight: 700; cursor: pointer; }
-.back:hover { background: #fff; }
-.symbol-link { position: absolute; top: 16px; right: 16px; z-index: 2; display: inline-flex; border-radius: 14px; box-shadow: 0 4px 12px rgba(70, 55, 130, 0.18); }
+/* 영상을 켜면 헤더 바로 아래에 붙는다(헤더 + 영상 둘 다 고정). */
+.detail-hero.playing { position: sticky; top: calc(var(--bar-h) + 8px); z-index: 25; /* 헤더 가림막보다 위 */ max-height: 300px; }
 .symbol { box-sizing: border-box; width: 54px; height: 42px; padding: 5px; border-radius: 13px; background: #fff; object-fit: contain; }
 .weather-chip { position: absolute; bottom: 16px; left: 16px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 999px; background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(6px); color: var(--text); font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 12px rgba(70, 55, 130, 0.12); }
 
@@ -83,7 +96,7 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 .e-tel:hover, .e-tel:focus-visible { text-decoration: underline; }
 
 .cams-title { margin: 22px 0 10px; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
-.cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); align-items: start; gap: 12px; }
+.cams-hint { margin: -6px 4px 12px; color: var(--muted); font-size: 0.82rem; }
 /* 캠 주소를 아직 찾지 못한 스키장: 빈 목록 대신 준비 중 안내 */
 .cams-soon { display: grid; justify-items: center; gap: 6px; padding: 24px 18px; border: 1px dashed #d8d4e9; border-radius: 20px; background: var(--surface); text-align: center; }
 .soon-mark { font-size: 1.5rem; line-height: 1; }
@@ -105,7 +118,6 @@ main { box-sizing: border-box; max-width: 880px; margin: 0 auto; padding: 18px 1
 
 /* 아주 좁은 화면(320px대)에서도 심볼·제목·영상 개수가 한 줄에 들어가게 */
 @media (max-width: 359px) {
-  .brand { font-size: 1.15rem; }
   .count { font-size: 0.74rem; }
   .brand-mark img { height: 22px; }
 }

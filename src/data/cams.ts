@@ -5,8 +5,8 @@ import type { CatalogSlope, NightStart, SlopeHour, UpcomingOpening } from './slo
 
 export type CamStatus = 'active' | 'pending' | 'investigate';
 
-export type Cam = { id: string; name: string; status: CamStatus } & (
-  | { type: 'hls'; url: string; playLimitSec: number; popupUrl?: string } // .m3u8 스트림 → hls.js (Safari는 네이티브 재생)
+export type Cam = { id: string; name: string; status: CamStatus; group?: string } & ( // group: 상세 CCTV 목록 묶음 이름
+  | { type: 'hls'; url: string; playLimitSec: number; popupUrl?: string; previewOnly?: true } // previewOnly: 상단 플레이어에서도 playLimitSec 뒤 멈춘다(하이원, 중계 트래픽 절감). .m3u8 스트림 → hls.js (Safari는 네이티브 재생)
   | { type: 'youtube'; videoId: string }
   | { type: 'link'; url: string | null }               // 직접 재생 불가 → 새 창 링크 (null이면 officialPage)
 );
@@ -32,6 +32,8 @@ export interface Resort {
 const PLAY_LIMIT_SEC = 15;
 // 하이원 공식 팝업은 30초 뒤 닫힌다.
 const HIGH1_PLAY_LIMIT_SEC = 30;
+// 하이원 원본(http :1935)을 https로 넘겨주는 Vercel 중계(relay/). 원본 url로 되돌리면 https에서 다시 새 창(popupUrl)으로 열린다.
+const HIGH1_RELAY = 'https://relay-rho-pearl.vercel.app/api/high1';
 // 강촌 공식 페이지와 open-ski-data에 공개된 서명 토큰(2027-10-30 만료). 막히면 링크로 되돌린다.
 const GANGCHON_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRoIjoiL21haW4uc3RyZWFtIiwiZXhwIjoxODI0ODcyNDAwfQ.ZQxQ30C3ZxdlaA88LHJTN1dhdMhxxjPUAEI1ymZnB1g';
@@ -66,16 +68,16 @@ export const resorts: readonly Resort[] = [
     ],
     note: 'cam09·03·07은 공식 웹캠 페이지에 없고 SkiWatch(open-ski-data)에서 확인한 주소다(2026-11-24). 언제든 막힐 수 있다.',
     cams: [
-      { id: 'yongpyong-cam08', name: '베이스전경 / 레드 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam08/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam10', name: '핑크 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam10/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam11', name: '옐로우 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam11/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam04', name: '메가그린 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam04/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam09', name: '골드 베이스', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam09/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam03', name: '골드 정상', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam03/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam07', name: '레인보우 베이스', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam07/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam01', name: '발왕산 氣 스카이워크', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam01/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam02', name: '발왕산 천년주목숲길', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam02/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
-      { id: 'yongpyong-cam05', name: '모나용평 진입로', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam05/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam08', group: '슬로프', name: '베이스전경 / 레드 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam08/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam10', group: '슬로프', name: '핑크 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam10/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam11', group: '슬로프', name: '옐로우 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam11/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam04', group: '슬로프', name: '메가그린 슬로프', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam04/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam09', group: '베이스·정상', name: '골드 베이스', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam09/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam03', group: '베이스·정상', name: '골드 정상', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam03/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam07', group: '베이스·정상', name: '레인보우 베이스', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam07/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam01', group: '발왕산·진입로', name: '발왕산 氣 스카이워크', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam01/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam02', group: '발왕산·진입로', name: '발왕산 천년주목숲길', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam02/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
+      { id: 'yongpyong-cam05', group: '발왕산·진입로', name: '모나용평 진입로', type: 'hls', status: 'active', url: 'https://live.yongpyong.co.kr/cam05/index.m3u8', playLimitSec: PLAY_LIMIT_SEC },
     ],
   },
 
@@ -142,26 +144,26 @@ export const resorts: readonly Resort[] = [
     coord: { lat: 37.2096, lon: 128.8257 }, // 정선 고한읍
     symbol: 'symbols/high1.png',
     emergency: [{ label: '패트롤', tels: ['033-590-7119'] }],
-    note: 'HLS가 http+IP 주소라 앱을 http로 열 때만 재생된다. https에서는 공식 팝업(popupUrl)을 새 창으로 연다.',
+    note: '원본 HLS가 http+IP(:1935)라 https에서 막혀, Vercel 중계(relay/)를 거쳐 https로 받는다. 중계가 죽으면 원본 url로 되돌리면 popupUrl 새 창으로 돌아간다.',
     cams: [
-      { id: 'high1-ch1',  name: '제우스 2번 슬로프 입구', type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch1.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=1' },
-      { id: 'high1-ch2',  name: '헤라 2번 슬로프 입구',   type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch2.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=2' },
-      { id: 'high1-ch3',  name: '하이원탑',              type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch3.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=3' },
-      { id: 'high1-ch4',  name: '아테나 1번 슬로프',      type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch4.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=4' },
-      { id: 'high1-ch5',  name: '마운틴 허브 베이스',     type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch5.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=5' },
-      { id: 'high1-ch6',  name: '아테나 2번 슬로프',      type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch6.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=6' },
-      { id: 'high1-ch7',  name: '마운틴 베이스',          type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch7.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=7' },
-      { id: 'high1-ch8',  name: '아테나 2번 슬로프 하단', type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch8.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=8' },
-      { id: 'high1-ch9',  name: '빅토리아 상단',          type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch9.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=9' },
-      { id: 'high1-ch10', name: '제우스 2번',             type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch10.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=10' },
-      { id: 'high1-ch11', name: '밸리 허브 베이스',       type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch11.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=11' },
-      { id: 'high1-ch12', name: '빅토리아 1번 슬로프',    type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch12.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=12' },
-      { id: 'high1-ch13', name: '제우스 3번 슬로프',      type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch13.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=13' },
-      { id: 'high1-ch14', name: '제우스 3번 중단부',      type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch14.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=14' },
-      { id: 'high1-ch15', name: '아폴로 4번 중단부',      type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch15.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=15' },
-      { id: 'high1-ch16', name: '아폴로 베이스',          type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch16.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=16' },
-      { id: 'high1-ch17', name: '제우스 3번 하단',        type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch17.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=17' },
-      { id: 'high1-ch18', name: '밸리 베이스',            type: 'hls', status: 'active', url: 'http://59.30.12.195:1935/live/ch18.stream/playlist.m3u8', playLimitSec: HIGH1_PLAY_LIMIT_SEC, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=18' },
+      { id: 'high1-ch1',  name: '제우스 2번 슬로프 입구', type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=1&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=1' },
+      { id: 'high1-ch2',  name: '헤라 2번 슬로프 입구',   type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=2&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=2' },
+      { id: 'high1-ch3',  name: '하이원탑',              type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=3&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=3' },
+      { id: 'high1-ch4',  name: '아테나 1번 슬로프',      type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=4&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=4' },
+      { id: 'high1-ch5',  name: '마운틴 허브 베이스',     type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=5&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=5' },
+      { id: 'high1-ch6',  name: '아테나 2번 슬로프',      type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=6&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=6' },
+      { id: 'high1-ch7',  name: '마운틴 베이스',          type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=7&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=7' },
+      { id: 'high1-ch8',  name: '아테나 2번 슬로프 하단', type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=8&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=8' },
+      { id: 'high1-ch9',  name: '빅토리아 상단',          type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=9&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=9' },
+      { id: 'high1-ch10', name: '제우스 2번',             type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=10&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=10' },
+      { id: 'high1-ch11', name: '밸리 허브 베이스',       type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=11&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=11' },
+      { id: 'high1-ch12', name: '빅토리아 1번 슬로프',    type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=12&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=12' },
+      { id: 'high1-ch13', name: '제우스 3번 슬로프',      type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=13&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=13' },
+      { id: 'high1-ch14', name: '제우스 3번 중단부',      type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=14&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=14' },
+      { id: 'high1-ch15', name: '아폴로 4번 중단부',      type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=15&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=15' },
+      { id: 'high1-ch16', name: '아폴로 베이스',          type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=16&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=16' },
+      { id: 'high1-ch17', name: '제우스 3번 하단',        type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=17&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=17' },
+      { id: 'high1-ch18', name: '밸리 베이스',            type: 'hls', status: 'active', url: `${HIGH1_RELAY}?ch=18&f=playlist.m3u8`, playLimitSec: HIGH1_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.high1.com/webcam/pop_webcam.do?ch=18' },
     ],
   },
 
