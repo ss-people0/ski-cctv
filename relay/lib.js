@@ -59,5 +59,6 @@ export function rewriteTo(text, toRelay) {
 export const FETCH_OPTS = {
   headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36' },
   redirect: 'follow',
-  signal: AbortSignal.timeout(10000),
+  // 요청마다 새 10초 타이머(한 번 만든 signal을 재사용하면 함수가 살아 있는 동안 10초 뒤부터 모든 요청이 즉시 실패한다).
+  get signal() { return AbortSignal.timeout(10000) },
 }

@@ -65,3 +65,10 @@ test('오투 목록 줄은 조각마다 중계 주소로 바꾼다', () => {
   const media = '#EXTM3U\n#EXT-X-MEDIA-SEQUENCE:783\n#EXTINF:1.998000,\ncam0783.ts\nhttp://evil.example/x.ts\n'
   expect(o2Playlist(media, '1')).toBe('#EXTM3U\n#EXT-X-MEDIA-SEQUENCE:783\n#EXTINF:1.998000,\no2?ch=1&f=cam0783.ts\n\n')
 })
+
+test('FETCH_OPTS gives each request a fresh, unaborted timeout', async () => {
+  const { FETCH_OPTS } = await import('./lib.js')
+  const first = FETCH_OPTS.signal
+  expect(first).not.toBe(FETCH_OPTS.signal)
+  expect({ ...FETCH_OPTS }.signal.aborted).toBe(false)
+})
