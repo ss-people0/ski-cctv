@@ -6,7 +6,8 @@ import type { CatalogSlope, NightStart, SlopeHour, UpcomingOpening } from './slo
 export type CamStatus = 'active' | 'pending' | 'investigate';
 
 export type Cam = { id: string; name: string; status: CamStatus; group?: string } & ( // group: 상세 CCTV 목록 묶음 이름
-  | { type: 'hls'; url: string; playLimitSec: number; popupUrl?: string; previewOnly?: true } // previewOnly: 상단 플레이어에서도 playLimitSec 뒤 멈춘다(하이원, 중계 트래픽 절감). .m3u8 스트림 → hls.js (Safari는 네이티브 재생)
+  | { type: 'hls'; url: string; playLimitSec: number; popupUrl?: string; previewOnly?: true } // previewOnly: 상단 플레이어에서도 playLimitSec 뒤 멈춘다(중계 캠, 트래픽 절감). .m3u8 스트림 → hls.js (Safari는 네이티브 재생)
+  | { type: 'vivaldi'; channel: number; serial: string; playLimitSec: number } // 비발디파크: hls가 아니라 소노 WESP SDK(WebSocket)로 재생한다
   | { type: 'youtube'; videoId: string }
   | { type: 'link'; url: string | null }               // 직접 재생 불가 → 새 창 링크 (null이면 officialPage)
 );
@@ -33,7 +34,20 @@ const PLAY_LIMIT_SEC = 15;
 // 하이원 공식 팝업은 30초 뒤 닫힌다.
 const HIGH1_PLAY_LIMIT_SEC = 30;
 // 하이원 원본(http :1935)을 https로 넘겨주는 Vercel 중계(relay/). 원본 url로 되돌리면 https에서 다시 새 창(popupUrl)으로 열린다.
-const HIGH1_RELAY = 'https://relay-rho-pearl.vercel.app/api/high1';
+const RELAY = 'https://relay-rho-pearl.vercel.app/api';
+const HIGH1_RELAY = `${RELAY}/high1`;
+// 곤지암·무주·오투도 같은 중계(relay/api/konjiam·muju·o2.js)로 http 원본을 https로 받는다.
+const KONJIAM_RELAY = `${RELAY}/konjiam`;
+const MUJU_RELAY = `${RELAY}/muju`;
+const O2_RELAY = `${RELAY}/o2`;
+// 중계를 거치는 캠은 Vercel 무료 대역폭을 아끼려고 미리보기 시간 뒤 멈춘다(공식 팝업도 25~30초에서 끊는다).
+const RELAY_PLAY_LIMIT_SEC = 30;
+// 비발디파크 공식 온라인캠은 20초 뒤 스스로 끊는다. 우리도 비슷한 길이(30초)만 보여 준다.
+const VIVALDI_PLAY_LIMIT_SEC = 30;
+// 비발디파크 온라인캠은 소노호텔리조트 페이지에 평문으로 박힌 고정 라이선스 문자열을 그대로 쓴다(WESP SDK용).
+const VIVALDI_TOKEN =
+  ';b64707e34a200ee658255a03b96b6fb175ab8122aaed3462f8bb9f162ceab445e2ea8e66c0a0e7035c03354d7df4ff4b0a25a4519cbd8a11a5851fd6f71fef597d786574210744785c5bced6b51b7295da116039f706d42e87001761f1ba197ba91707dfb5f8ef49643e10ca4510cdcdbbfe7dbca96af5961b7265c27533c0fde1bbb7d09fe329b921da6b36a37ded7851cd4e1c7ed48db6e7a08f693331782c';
+export { VIVALDI_TOKEN };
 // 강촌 공식 페이지와 open-ski-data에 공개된 서명 토큰(2027-10-30 만료). 막히면 링크로 되돌린다.
 const GANGCHON_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRoIjoiL21haW4uc3RyZWFtIiwiZXhwIjoxODI0ODcyNDAwfQ.ZQxQ30C3ZxdlaA88LHJTN1dhdMhxxjPUAEI1ymZnB1g';
@@ -305,7 +319,26 @@ export const resorts: readonly Resort[] = [
       { label: '패트롤', tels: ['033-439-8484'] },
       { label: '리조트 대표', tels: ['1588-4888'] },
     ],
-    cams: [],
+    note: '공식 온라인캠 16대 중 클래식은 레게와 같은 카메라(채널·시리얼 동일)라 15개만 보여 준다. hls가 아니라 소노 WESP SDK로 WebSocket 영상을 그리며, 공식 페이지처럼 30초 미리보기 뒤 멈춘다(2026-11-28).',
+    // 공식 카메라 목록 API(mice.sonohotelsresorts.com front.main.getCamListDataAjax)의 chn·remark를 그대로 썼다.
+    // 한 카메라를 여러 각도로 쓰는 곳(블루스·재즈 상단 등)은 시리얼이 달라 따로 재생된다.
+    cams: [
+      { id: 'vivaldi-skiworld', group: '슬로프', name: '슬로프 전경(Ski World)', type: 'vivaldi', status: 'active', channel: 8, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-ballad-top', group: '슬로프', name: '발라드 상단', type: 'vivaldi', status: 'active', channel: 11, serial: 'TD0314A17496', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-ballad-bottom', group: '슬로프', name: '발라드 하단', type: 'vivaldi', status: 'active', channel: 2, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-jazz-top', group: '슬로프', name: '재즈 상단', type: 'vivaldi', status: 'active', channel: 4, serial: 'XU0121A37907', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-jazz-bottom', group: '슬로프', name: '재즈 하단', type: 'vivaldi', status: 'active', channel: 1, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-techno-top', group: '슬로프', name: '테크노 상단', type: 'vivaldi', status: 'active', channel: 2, serial: 'XU0121A37904', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-techno-bottom', group: '슬로프', name: '테크노 하단', type: 'vivaldi', status: 'active', channel: 5, serial: 'XU0121A37904', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-blues', group: '슬로프', name: '블루스', type: 'vivaldi', status: 'active', channel: 4, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-reggae', group: '슬로프', name: '레게', type: 'vivaldi', status: 'active', channel: 10, serial: 'TD0314A17496', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-funky-top', group: '슬로프', name: '펑키 상단', type: 'vivaldi', status: 'active', channel: 5, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-funky-bottom', group: '슬로프', name: '펑키 하단', type: 'vivaldi', status: 'active', channel: 8, serial: 'XU0121A37904', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-hiphop', group: '슬로프', name: '힙합', type: 'vivaldi', status: 'active', channel: 6, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-summit', group: '정상', name: '스키월드 정상', type: 'vivaldi', status: 'active', channel: 9, serial: 'TW0014A15451', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-snowyland1', group: '스노위랜드', name: '스노위랜드 1', type: 'vivaldi', status: 'active', channel: 16, serial: 'TD0314A17496', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+      { id: 'vivaldi-snowyland2', group: '스노위랜드', name: '스노위랜드 2', type: 'vivaldi', status: 'active', channel: 12, serial: 'TD0314A17496', playLimitSec: VIVALDI_PLAY_LIMIT_SEC },
+    ],
   },
 
   // ───────────────────────── 무주덕유산리조트 ─────────────────────────
@@ -364,7 +397,21 @@ export const resorts: readonly Resort[] = [
       { label: '의무실', tels: ['063-320-7330'] },
       { label: '리조트 대표', tels: ['063-322-9000'] },
     ],
-    cams: [],
+    note: '원본이 http라 https에서 막혀 Vercel 중계(relay/api/muju.js)를 거친다. 주소에 붙는 9시간짜리 서명 토큰은 중계가 팝업 페이지에서 그때그때 뽑아 쓴다. 공식 팝업(30초)도 함께 열 수 있다.',
+    // 공식 웹캠 페이지(webcam.asp)의 이름과 cam_num 그대로(2026-11-28 확인). 무주는 밤에도 화면이 밝게 나온다.
+    cams: [
+      { id: 'muju-cam01', name: '만선하우스', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=01&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=01' },
+      { id: 'muju-cam02', name: '만선봉 정상', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=02&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=02' },
+      { id: 'muju-cam03', name: '하이디 하우스', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=03&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=03' },
+      { id: 'muju-cam04', name: '서역기행·썬다운', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=04&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=04' },
+      { id: 'muju-cam05', name: '설천하우스', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=05&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=05' },
+      { id: 'muju-cam06', name: '설천상단슬로프', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=06&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=06' },
+      { id: 'muju-cam07', name: '설천봉 정상', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=07&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=07' },
+      { id: 'muju-cam08', name: '모차르트·미뉴에트', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=08&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=08' },
+      { id: 'muju-cam09', name: '폴카', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=09&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=09' },
+      { id: 'muju-cam10', name: '실크로드', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=10&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=10' },
+      { id: 'muju-cam11', name: '커넥션', type: 'hls', status: 'active', url: `${MUJU_RELAY}?cam=11&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://www.mdysresort.com/guide/webcam_popup_jh.asp?cam_num=11' },
+    ],
   },
 
   // ───────────────────────── 오투리조트 ─────────────────────────
@@ -402,7 +449,19 @@ export const resorts: readonly Resort[] = [
       { label: '패트롤', tels: ['033-580-7420'] },
       { label: '의무실', tels: ['033-580-7412'] },
     ],
-    cams: [],
+    note: '공식 웹캠 팝업(cam-01~12.htm)이 모두 404라 채널별 위치 이름은 확인할 수 없어 번호로 표시한다. 원본이 http:8080이라 Vercel 중계(relay/api/o2.js)를 거친다.',
+    // 공식 웹캠 페이지는 깨졌지만 플레이어 페이지(streamhls2.jsp?ch=0~7)는 살아 있다(2026-11-28 확인).
+    // ch0~3 → cam0~3, ch4~7 → cam20~23처럼 번호가 이어지지 않아 중계가 페이지에서 실제 파일 이름을 확인해 준다.
+    cams: [
+      { id: 'o2-ch0', name: '채널 1', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=0&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=0' },
+      { id: 'o2-ch1', name: '채널 2', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=1&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=1' },
+      { id: 'o2-ch2', name: '채널 3', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=2&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=2' },
+      { id: 'o2-ch3', name: '채널 4', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=3&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=3' },
+      { id: 'o2-ch4', name: '채널 5', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=4&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=4' },
+      { id: 'o2-ch5', name: '채널 6', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=5&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=5' },
+      { id: 'o2-ch6', name: '채널 7', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=6&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=6' },
+      { id: 'o2-ch7', name: '채널 8', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=7&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=7' },
+    ],
   },
 
   // ───────────────────────── 곤지암리조트 ─────────────────────────
@@ -439,7 +498,15 @@ export const resorts: readonly Resort[] = [
       { label: '의무실', tels: ['031-8026-5766'] },
       { label: '리조트 대표', tels: ['1661-8787'] },
     ],
-    cams: [],
+    note: '원본이 http라 https에서 막혀 Vercel 중계(relay/api/konjiam.js)를 거친다(하이원과 같은 방식). 공식 웹캠은 24시간 송출한다.',
+    // 공식 웹캠 페이지(m.konjiamresort.co.kr/ski/skiLveCam.dev)의 이름과 cam 번호 그대로(2026-11-28 확인).
+    cams: [
+      { id: 'konjiam-cam01', name: '정상 휴게소', type: 'hls', status: 'active', url: `${KONJIAM_RELAY}?cam=cam01&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true },
+      { id: 'konjiam-cam02', name: '정상부 슬로프', type: 'hls', status: 'active', url: `${KONJIAM_RELAY}?cam=cam02&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true },
+      { id: 'konjiam-cam05', name: '중간 슬로프', type: 'hls', status: 'active', url: `${KONJIAM_RELAY}?cam=cam05&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true },
+      { id: 'konjiam-cam03', name: '초중급 베이스', type: 'hls', status: 'active', url: `${KONJIAM_RELAY}?cam=cam03&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true },
+      { id: 'konjiam-cam04', name: '중상급 베이스', type: 'hls', status: 'active', url: `${KONJIAM_RELAY}?cam=cam04&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true },
+    ],
   },
 
   // ───────────────────────── 오크밸리 ─────────────────────────

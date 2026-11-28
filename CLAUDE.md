@@ -36,7 +36,7 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
   - `symbol` — 상세 상단 공식 페이지 링크의 심볼(`symbols/{id}.png`). 파일이 없는 리조트는 이 링크를 숨긴다(로고를 새로 그리지 않는다).
   - `hours`/`season` — 자동 수집(slopes.json)이 없는 리조트의 **공식 공지 운영시간·시즌 안내 한 줄**. 수집값(board.hours)이 있으면 그쪽이 우선.
   - **캠이 0개인 리조트**는 상세 '라이브 캠' 자리에 “최대한 빨리 작업중입니다!!” 안내(`.cams-soon`)와 공식 페이지 링크가 뜨고, 목록 카드 아래에는 `· 라이브 캠 준비 중`이 붙는다(2026-11-27 추가한 6곳).
-  - `GANGCHON_TOKEN`(공개 서명 토큰, 2027-10-30 만료), `PLAY_LIMIT_SEC=15`, `HIGH1_PLAY_LIMIT_SEC=30`
+  - `RELAY`(중계 주소 `https://relay-rho-pearl.vercel.app/api`) + `HIGH1/KONJIAM/MUJU/O2_RELAY`, `RELAY_PLAY_LIMIT_SEC=30`(중계 캠 미리보기), `VIVALDI_PLAY_LIMIT_SEC=30`, `VIVALDI_TOKEN`(소노 WESP SDK 라이선스 문자열), `GANGCHON_TOKEN`(공개 서명 토큰, 2027-10-30 만료), `PLAY_LIMIT_SEC=15`
 - `src/data/sortResorts.ts` — `isPlayable`, 캠 정렬(재생→링크→investigate→pending). `isBlockedByHttps`(https에서 http 스트림 차단).
 - `src/data/slopeStatus.ts` — `slopes.json` 로드(`loadSlopeStatus`), `formatSlopeBadge`(오늘 값인지 판정 + 운영시간), `todayKst`.
 - `src/data/weather.ts` — **Open-Meteo**로 실시간 날씨. `fetchWeather(lat,lon)`, `weatherFrom(code,temp,isDay)`. 키 불필요, CORS 열림, 비상업 무료(출처표기 CC BY 4.0).
@@ -112,10 +112,21 @@ Vue 3 + Vite + TypeScript. 국내 스키장 웹캠을 모아 보는 **개인용 
 ## 지킬 것 (규칙)
 
 - **사용자가 "배포해"(또는 "ㄱㄱ...배포까지")라고 할 때까지 push 하지 않는다.** `main` push = 사이트 즉시 변경. 이전 허락은 다음 push에 적용 안 됨. 로컬에서 확인시켜 주고 승인받는다.
-- 막힌 스트림은 프록시 우회 X, 링크로 둠. **예외: 하이원은 사용자 요청(2026-11-28)으로 Vercel 중계(`relay/`, `https://relay-rho-pearl.vercel.app/api/high1`, 서울 icn1, 하이원 ch1~18 파일명만 허용·CORS는 우리 사이트만)를 거친다.** 무료 플랜 대역폭(월 ~100GB, 1시간 시청 ≈1.2GB) 때문에 하이원은 상단 플레이어에서도 30초 뒤 멈춘다(`previewOnly`). 중계 재배포: `cd relay && npx vercel deploy --prod`. 중계를 접으려면 `cams.ts` 하이원 url을 원본 http로 되돌리면 https에서 다시 새 창(popupUrl). 강촌은 공개 토큰 그대로 쓰기로 사용자가 정함(2026-11-24). 막히면 링크로 되돌림.
+- 막힌 스트림은 프록시 우회 X, 링크로 둠. **예외: 사용자 요청(2026-11-28)으로 http 원본을 Vercel 중계(`relay/`, `https://relay-rho-pearl.vercel.app/api/...`, 서울 icn1)로 넘긴다 — 하이원(`/high1`, ch1~18)·곤지암(`/konjiam`, cam01~05)·무주(`/muju`, cam01~11)·오투(`/o2`, ch0~7).** 리조트별로 정해진 채널·파일 이름만 통과시키고 CORS는 우리 사이트만(`lib.js` `ALLOWED_ORIGINS`). 무료 플랜 대역폭(월 ~100GB, 1시간 시청 ≈1.2GB) 때문에 중계를 거치는 캠은 상단 플레이어에서도 30초 뒤 멈춘다(`previewOnly` + `RELAY_PLAY_LIMIT_SEC`). 중계 재배포: `cd relay && npx vercel deploy --prod`(Vercel 프로젝트가 저장소에 연결돼 있지 않으면 push로는 안 올라간다). 중계를 접으려면 `cams.ts`의 url을 원본 http로 되돌리면 https에서 다시 popupUrl 새 창으로 열린다. 강촌은 공개 토큰 그대로 쓰기로 사용자가 정함(2026-11-24). 막히면 링크로 되돌림.
 - `playLimitSec`(미리보기 시간) 없애지 않는다. 자동재생 X, 동시 1개만 재생. **예외: 용평 상단 플레이어(`HeroPlayer`)는 15초 구간을 계속 이어 붙여 라이브처럼 재생**(`HlsPlayer` `continuous`, 사용자 요청 2026-11-28). 대신 화면을 끄거나 다른 앱·탭으로 가면 멈춘다(`visibilitychange`). 15초는 원래 용평 공식 플레이어가 트래픽 절감용으로 끊는 시간이었다 — 스트림이 막히면 15초 미리보기로 되돌린다.
 - 날씨: 공식 기상청이 필요하면 키+Actions 수집 방식이어야 함(CORS·키노출 때문). 지금은 Open-Meteo 실시간.
 - 공개 홍보 전 각 리조트 임베드 허락·약관 재확인(개인용이라 보류). 휘팍 API는 robots.txt가 `/api/` 금지 → 저빈도(하루 3회)로만.
+
+### 2026-11-28 비발디·곤지암·무주·오투 캠 연결 (총 73개)
+
+사용자 승낙("그랭")으로 네 곳을 붙였다. 앞선 조사는 `handoffs/📹-신규-6개-스키장-cctv-링크-토큰-확인/6개-리조트-CCTV-조사.md`.
+
+- **곤지암 5대** — `KONJIAM_RELAY`. 원본 `http://konjiam.live.cdn.cloudn.co.kr/konjiam/cam0N.stream/playlist.m3u8`(N=1~5). 파일 이름 규칙이 하이원과 같아 `relay/konjiam.js`가 `relay/lib.js`의 `rewriteTo`를 쓴다. 공식 이름: cam01 정상 휴게소 / cam02 정상부 슬로프 / cam05 중간 슬로프 / cam03 초중급 베이스 / cam04 중상급 베이스.
+- **무주 11대** — `MUJU_RELAY`. 원본이 http에 **9시간짜리 서명 토큰**(`?e=만료시각&h=해시`)이 붙는다. `relay/muju.js`가 팝업 페이지(`webcam_popup_jh.asp?cam_num=NN`)를 받아 `src="…m3u8?e=&h="`를 뽑고, `relay/api/muju.js`가 토큰을 5분 캐시하며 400/403이면 새로 뽑아 한 번 더 시도한다. 팝업 페이지는 **User-Agent·Referer가 없으면 403**이다(이 환경 기본 curl은 403, 브라우저 UA를 주면 200). 이름은 공식 `webcam.asp`의 title 그대로(만선하우스·만선봉 정상·하이디 하우스·서역기행·썬다운·설천하우스·설천상단슬로프·설천봉 정상·모차르트·미뉴에트·폴카·실크로드·커넥션).
+- **오투 8채널** — `O2_RELAY`. 원본 `http://118.46.149.144:8080/ramdisk/camN.m3u8`(**8080 포트**). 채널과 파일 이름이 순서대로 맞지 않아(ch0~3 → cam0~3, ch4~7 → cam20~23) `relay/api/o2.js`가 `streamhls2.jsp?ch=N`을 받아 실제 파일 이름을 10분 캐시한다. 조각 이름은 `cam0783.ts`처럼 `cam+숫자`. **공식 웹캠 팝업(cam-01~12.htm)이 모두 404라 채널별 위치 이름은 확인 불가** → 화면에는 `채널 1~8`로 표시. 공식 플레이어는 25초 뒤 스스로 닫는다.
+- **비발디파크 15대** — hls가 아니라 **소노 WESP SDK**(`WespJSSDKEncV4.min.js`, WebSocket + MediaSource)라 `VivaldiPlayer.vue`가 따로 있다. `cams.ts`의 `channel`·`serial`(공식 카메라 목록 API)과 `VIVALDI_TOKEN`(페이지에 박힌 고정 라이선스 문자열, AES로 host `skirds.daemyung.com:8081`·id·pass를 담고 있다)로 재생하고, 언마운트 때 `controller.dispose()`. SDK는 한 페이지에서 여러 영상을 동시에 못 띄우므로 한 번에 하나만(상단 플레이어) 쓴다. 클래식은 레게와 채널·시리얼이 같아(같은 카메라) 15개만 둔다. **2026-11-28 저녁 확인: SDK 로드·`MonitorUIController.init` 콜백까지는 오지만 캡션이 `CH8 - Disconnected`, `video.readyState=0`으로 화면이 안 왔다**(직접 `wss://skirds.daemyung.com:8081`도 실패, hletrd/slopes는 같은 서버에 `/wesp`로 붙어 로그인 요청 없이는 서버가 끊는다고 기록). 그래서 실패하면 안내+`다시 시도`+`공식 페이지` 링크를 보여 준다. 재생이 확인되면 이 문단을 고친다.
+- 테스트: `relay/sources.test.ts`(곤지암·무주·오투 주소·토큰·목록 재작성), `src/components/VivaldiPlayer.test.ts`(가짜 SDK로 init·dispose·오류 안내). `npm test` 101개.
+- **오크밸리·에덴밸리 제외**(사용자 지시): 오크밸리는 502/멈춘 목록, 에덴밸리는 rtsp.me 미납. 둘 다 `cams: []`(준비 중 안내) 유지.
 
 ## 함정 / 메모
 

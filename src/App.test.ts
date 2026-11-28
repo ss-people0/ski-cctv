@@ -180,13 +180,14 @@ test('a resort without a symbol shows no symbol link', async () => {
 test('a resort with no cam yet shows the 준비 중 notice instead of an empty cam list', async () => {
   const app = mount(App)
 
-  const index = resorts.findIndex((r) => r.id === 'muju')
+  // 무주·곤지암은 2026-11-28 캠을 붙였으므로, 아직 캠이 없는 에덴밸리로 확인한다.
+  const index = resorts.findIndex((r) => r.id === 'edenvalley')
   await app.findAll('.resort-row')[index].trigger('click')
 
   expect(app.find('.cam-picks').exists()).toBe(false)
   const notice = app.get('.cams-soon')
   expect(notice.text()).toContain('최대한 빨리 작업중입니다!!')
-  expect(notice.get('a').attributes('href')).toBe(resorts.find((r) => r.id === 'muju')!.officialPage)
+  expect(notice.get('a').attributes('href')).toBe(resorts.find((r) => r.id === 'edenvalley')!.officialPage)
 })
 
 test('a resort without cam points out on the list card that its cam is coming', () => {

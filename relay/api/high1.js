@@ -1,11 +1,11 @@
-import { allowOrigin, rewritePlaylist, upstreamUrl } from '../lib.js'
+import { corsHeaders, rewritePlaylist, upstreamUrl } from '../lib.js'
 
 // GET /api/high1?ch=1&f=playlist.m3u8 → 하이원 :1935 스트림을 https로 넘겨준다(Vercel Node 함수).
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const ch = searchParams.get('ch')
   const f = searchParams.get('f')
-  const cors = { 'Access-Control-Allow-Origin': allowOrigin(request.headers.get('origin')) ?? 'https://ss-people0.github.io', Vary: 'Origin' }
+  const cors = corsHeaders(request.headers.get('origin'))
 
   const url = upstreamUrl(ch, f)
   if (!url) return new Response('not allowed', { status: 400, headers: cors })

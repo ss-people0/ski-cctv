@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue'
 import type { Resort } from '../data/cams'
+import { VIVALDI_TOKEN } from '../data/cams'
 import { playingCamId } from '../playingCam'
 import HlsPlayer from './HlsPlayer.vue'
+import VivaldiPlayer from './VivaldiPlayer.vue'
 
 // 상세 상단 일러스트 위에 겹쳐 뜨는 플레이어. 아래 CCTV 목록에서 고른 캠을 여기서 튼다.
 const props = defineProps<{ resort: Resort }>()
@@ -45,6 +47,18 @@ function stop(outcome: keyof typeof NOTICES) {
         :continuous="!cam.previewOnly"
         @end="stop('ended')"
         @error="stop('error')"
+      />
+      <!-- 비발디: hls가 아니라 소노 WESP SDK(WespJSSDKEncV4)로 그린다. 오류·다시 시도는 컴포넌트 안에서 처리한다. -->
+      <VivaldiPlayer
+        v-else-if="cam.type === 'vivaldi'"
+        :key="cam.id"
+        :channel="cam.channel"
+        :serial="cam.serial"
+        :token="VIVALDI_TOKEN"
+        :label="title"
+        :play-limit-sec="cam.playLimitSec"
+        :fallback-url="resort.officialPage"
+        @end="stop('ended')"
       />
       <iframe
         v-else-if="cam.type === 'youtube'"
