@@ -449,18 +449,19 @@ export const resorts: readonly Resort[] = [
       { label: '패트롤', tels: ['033-580-7420'] },
       { label: '의무실', tels: ['033-580-7412'] },
     ],
-    note: '공식 웹캠 팝업(cam-01~12.htm)이 모두 404라 채널별 위치 이름은 확인할 수 없어 번호로 표시한다. 원본이 http:8080이라 Vercel 중계(relay/api/o2.js)를 거친다.',
+    note: '원본이 http:8080이라 Vercel 중계(relay/api/o2.js)를 거친다. 채널 이름은 SkiWatch(open-ski-data) 목록에서 옮겼다(2026-11-28).',
     // 공식 웹캠 페이지는 깨졌지만 플레이어 페이지(streamhls2.jsp?ch=0~7)는 살아 있다(2026-11-28 확인).
     // ch0~3 → cam0~3, ch4~7 → cam20~23처럼 번호가 이어지지 않아 중계가 페이지에서 실제 파일 이름을 확인해 준다.
+    // 공식 웹캠 팝업(cam-01~12.htm)이 모두 404라 채널 이름은 공식 자료로 확인할 수 없어, SkiWatch(powder-nomad/SkiWatch)의 오투 채널 목록에서 옮겼다(2026-11-28).
     cams: [
-      { id: 'o2-ch0', name: '채널 1', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=0&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=0' },
-      { id: 'o2-ch1', name: '채널 2', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=1&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=1' },
-      { id: 'o2-ch2', name: '채널 3', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=2&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=2' },
-      { id: 'o2-ch3', name: '채널 4', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=3&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=3' },
-      { id: 'o2-ch4', name: '채널 5', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=4&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=4' },
-      { id: 'o2-ch5', name: '채널 6', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=5&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=5' },
-      { id: 'o2-ch6', name: '채널 7', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=6&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=6' },
-      { id: 'o2-ch7', name: '채널 8', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=7&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=7' },
+      { id: 'o2-ch0', name: '스키하우스', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=0&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=0' },
+      { id: 'o2-ch1', name: '드림1', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=1&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=1' },
+      { id: 'o2-ch2', name: '버금마루', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=2&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=2' },
+      { id: 'o2-ch3', name: '으뜸마루', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=3&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=3' },
+      { id: 'o2-ch4', name: '글로리1', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=4&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=4' },
+      { id: 'o2-ch5', name: '해피', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=5&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=5' },
+      { id: 'o2-ch6', name: '드림2', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=6&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=6' },
+      { id: 'o2-ch7', name: '글로리3', type: 'hls', status: 'active', url: `${O2_RELAY}?ch=7&f=playlist.m3u8`, playLimitSec: RELAY_PLAY_LIMIT_SEC, previewOnly: true, popupUrl: 'http://118.46.149.144:8080/streaming/streamhls2.jsp?ch=7' },
     ],
   },
 
