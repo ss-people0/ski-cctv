@@ -7,6 +7,7 @@ import unittest
 import datetime as dt
 
 from collect_slopes import (
+    apply_yongpyong_lifts,
     keep_uncollected,
     konjiam_slope_name,
     muju_slope_name,
@@ -19,6 +20,7 @@ from collect_slopes import (
     parse_oakvalley,
     parse_vivaldi_rows,
     parse_yongpyong_hours,
+    parse_yongpyong_lifts,
     parse_yongpyong_rows,
     stick_open,
 )
@@ -80,6 +82,81 @@ class ParseYongpyongRowsTest(unittest.TestCase):
             {"name": "골드파라다이스", "level": "중급", "day": "CLOSE", "night": "OPEN"},
             {"name": "드래곤파크", "level": "익스트림", "day": "CLOSE", "night": "CLOSE"},
         ])
+
+
+# 용평 「리프트 운행 현황」 표 구조(2026-11-28) 축약: 이름 칸에 탑승인원이 붙고, 이름 칸 class에 conLeft가 있다.
+YONGPYONG_LIFT_TABLE = """
+<tbody id="liftStatus">
+<tr>
+  <th scope="row" rowspan="3" class="brln conLeft"> 골드존</th>
+  <td class="conLeft"> <em class="ico gold"></em> 골드(6인승)</td>
+  <td><em class="ico close">CLOSE</em> </td><td><em class="ico close">CLOSE</em> </td><td class="conLeft"></td>
+</tr>
+<tr>
+  <td class="conLeft"> <em class="ico gold"></em> 뉴골드(4인승)</td>
+  <td><em class="ico close">CLOSE</em> </td><td><em class="ico close">CLOSE</em> </td><td class="conLeft"></td>
+</tr>
+<tr>
+  <td class="conLeft"> <em class="ico gold"></em> 브릿지(2인승)</td>
+  <td><em class="ico close">CLOSE</em> </td><td><em class="ico close">CLOSE</em> </td><td class="conLeft"></td>
+</tr>
+<tr>
+  <th scope="row" rowspan="2" class="brln conLeft"> 레드존</th>
+  <td class="conLeft"> <em class="ico red"></em> 레드(4인승)</td>
+  <td><em class="ico open">OPEN</em> </td><td><em class="ico close">CLOSE</em> </td><td class="conLeft"></td>
+</tr>
+<tr>
+  <td class="conLeft"> <em class="ico yellow"></em> 뉴옐로우(4인승)</td>
+  <td><em class="ico open">OPEN</em> </td><td><em class="ico close">CLOSE</em> </td><td class="conLeft"></td>
+</tr>
+</tbody>
+"""
+
+
+class ParseYongpyongLiftsTest(unittest.TestCase):
+    """리프트 표는 이름에서 탑승인원 표기를 떼어 슬로프 이름과 맞춘다."""
+
+    def test_drops_the_capacity_suffix_and_reads_day_and_night(self):
+        lifts = parse_yongpyong_lifts(YONGPYONG_LIFT_TABLE)
+        self.assertEqual([l["name"] for l in lifts], ["골드", "뉴골드", "브릿지", "레드", "뉴옐로우"])
+        self.assertEqual(lifts[4], {"name": "뉴옐로우", "day": "OPEN", "night": "CLOSE"})
+        self.assertEqual(lifts[0], {"name": "골드", "day": "CLOSE", "night": "CLOSE"})
+
+    def test_empty_body_is_no_lifts(self):
+        self.assertEqual(parse_yongpyong_lifts(""), [])
+
+
+class ApplyYongpyongLiftsTest(unittest.TestCase):
+    """슬로프 표가 CLOSE여도 그 슬로프를 오르는 리프트가 OPEN이면 개방으로 올린다(2026-11-28 뉴옐로우)."""
+
+    def test_closed_slope_goes_open_when_its_own_lift_runs(self):
+        slopes = [
+            {"name": "옐로우", "level": "초급", "day": "OPEN", "night": "CLOSE"},
+            {"name": "뉴옐로우", "level": "초급", "day": "CLOSE", "night": "CLOSE"},
+        ]
+        lifts = [{"name": "뉴옐로우", "day": "OPEN", "night": "CLOSE"}]
+        self.assertEqual(apply_yongpyong_lifts(slopes, lifts), [
+            {"name": "옐로우", "level": "초급", "day": "OPEN", "night": "CLOSE"},
+            {"name": "뉴옐로우", "level": "초급", "day": "OPEN", "night": "CLOSE", "byLift": True},
+        ])
+
+    def test_stays_closed_when_the_lift_is_closed_and_follows_each_slot(self):
+        slopes = [{"name": "뉴옐로우", "level": "초급", "day": "CLOSE", "night": "CLOSE"}]
+        self.assertEqual(
+            apply_yongpyong_lifts(slopes, [{"name": "뉴옐로우", "day": "CLOSE", "night": "CLOSE"}]),
+            slopes,
+        )
+        # 주간은 닫혀 있고 야간만 리프트가 돌면 야간만 연다.
+        self.assertEqual(
+            apply_yongpyong_lifts(slopes, [{"name": "뉴옐로우", "day": "CLOSE", "night": "OPEN"}]),
+            [{"name": "뉴옐로우", "level": "초급", "day": "CLOSE", "night": "OPEN", "byLift": True}],
+        )
+
+    def test_only_the_confirmed_pair_is_lifted_not_every_same_named_lift(self):
+        # 레드(4인승) 리프트가 열려 있어도 이름이 같은 레드 슬로프는 표 값을 그대로 둔다.
+        slopes = [{"name": "레드", "level": "최상급", "day": "CLOSE", "night": "CLOSE"}]
+        lifts = [{"name": "레드", "day": "OPEN", "night": "CLOSE"}]
+        self.assertEqual(apply_yongpyong_lifts(slopes, lifts), slopes)
 
 
 class ParseYongpyongHoursTest(unittest.TestCase):

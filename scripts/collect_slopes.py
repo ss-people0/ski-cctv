@@ -129,6 +129,57 @@ def parse_yongpyong_rows(body: str) -> list[dict[str, Any]]:
     return rows
 
 
+# 슬로프 표가 CLOSE여도 그 슬로프를 직접 오르는 리프트가 돌면 실제로는 탈 수 있다 → 슬로프도 OPEN으로 본다.
+# 2026-11-28 현장 확인(성민 님): 공홈 슬로프 표는 `뉴옐로우` CLOSE인데 `뉴옐로우(4인승)` 리프트는 주간 OPEN이었고
+# 실제로 그 리프트를 타고 내려왔다. 다만 리프트 이름만 보고 자동으로 이어 붙이면 안 되는 짝이 있다 —
+# `레드(4인승)` 리프트는 뉴레드 쪽을 오르는 리프트라서, 이름이 같은 `레드` 슬로프(상급·미개방)까지 열려 버린다.
+# 그래서 "이 리프트가 이 슬로프를 직접 오른다"가 확인된 짝만 여기에 적는다. 새로 확인되면 한 줄 추가하면 된다.
+# (왼쪽: 슬로프 이름, 오른쪽: 그 슬로프를 오르는 리프트 이름 — 리프트 이름은 탑승인원 표기를 뗀 이름)
+YONGPYONG_LIFT_OPENS_SLOPE: dict[str, str] = {"뉴옐로우": "뉴옐로우"}
+
+
+def parse_yongpyong_lifts(body: str) -> list[dict[str, Any]]:
+    """용평 「리프트 운행 현황」 표 행 → [{name, day, night}].
+
+    이름 칸은 `<em class="ico red"></em>\t레드(4인승)</td>`처럼 탑승인원이 붙어 있다. 슬로프 이름과
+    맞춰야 하므로 `(4인승)` 표기는 떼고 쓴다. 상태는 슬로프 표와 같은 `<em class="ico open|close">`.
+    """
+    rows: list[dict[str, Any]] = []
+    for row in re.split(r"<tr[^>]*>", body)[1:]:
+        cell = re.search(r'<td class="[^"]*conLeft[^"]*">(.*?)</td>', row, re.S)
+        states = re.findall(r'<em class="ico (open|close)">(OPEN|CLOSE)</em>', row)
+        if not cell or not states:
+            continue
+        name = re.sub(r"\s*\(\d+인승\)$", "", strip_tags(cell.group(1))).strip()
+        if not name:
+            continue
+        rows.append({
+            "name": name,
+            "day": states[0][1],
+            "night": states[1][1] if len(states) > 1 else None,
+        })
+    return rows
+
+
+def apply_yongpyong_lifts(slopes: list[dict[str, Any]], lifts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """`YONGPYONG_LIFT_OPENS_SLOPE`의 짝에서, 리프트가 OPEN인 칸(주간/야간 각각)만 슬로프를 OPEN으로 올린다.
+
+    리프트가 CLOSE면 표 값을 그대로 둔다. 올린 행에는 `byLift: True`를 남겨, 왜 표와 다른지 파일에서 바로 보이게 한다.
+    """
+    by_name = {lift.get("name"): lift for lift in lifts}
+    rows: list[dict[str, Any]] = []
+    for slope in slopes:
+        row = dict(slope)
+        lift = by_name.get(YONGPYONG_LIFT_OPENS_SLOPE.get(row.get("name") or ""))
+        if lift:
+            for slot in ("day", "night"):
+                if row.get(slot) == "CLOSE" and lift.get(slot) == "OPEN":
+                    row[slot] = "OPEN"
+                    row["byLift"] = True
+        rows.append(row)
+    return rows
+
+
 def parse_yongpyong_hours(html: str) -> list[dict[str, str]]:
     """슬로프 표 머리글의 오늘 운영시간 → [{label, value}].
 
@@ -171,6 +222,13 @@ def yongpyong() -> dict[str, Any]:
     body = html[start : html.find("</tbody>", start)] if start >= 0 else ""
 
     out["slopes"] = parse_yongpyong_rows(body)
+
+    # 같은 페이지의 「리프트 운행 현황」 표도 읽어, 슬로프 표가 늦게 여는 코스를 리프트 운행으로 보정한다.
+    lift_start = html.find('id="liftStatus"')
+    lift_body = html[lift_start : html.find("</tbody>", lift_start)] if lift_start >= 0 else ""
+    out["lifts"] = parse_yongpyong_lifts(lift_body)
+    if out["lifts"]:
+        out["slopes"] = apply_yongpyong_lifts(out["slopes"], out["lifts"])
 
     # 주간·야간은 사이트 표 머리글의 오늘 값을 쓴다(비수기·성수기에 따라 바뀜). 정설은 공식 요금안내 고정값.
     out["hours"] = parse_yongpyong_hours(html)

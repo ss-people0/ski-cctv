@@ -1,12 +1,12 @@
 {
- "generatedAt": "2026-11-28T10:51:31+09:00",
+ "generatedAt": "2026-11-28T12:06:46+09:00",
  "timezone": "Asia/Seoul",
  "resorts": [
   {
    "id": "yongpyong",
    "name": "모나용평",
    "sourceUrl": "https://yongpyong.co.kr/kor/skiNboard/slope/openStatusBoard.do",
-   "fetchedAt": "2026-11-28T10:51:31+09:00",
+   "fetchedAt": "2026-11-28T12:06:46+09:00",
    "sourceDate": "2026-11-28",
    "status": "ok",
    "hours": [
@@ -33,8 +33,9 @@
     {
      "name": "뉴옐로우",
      "level": "초급",
-     "day": "CLOSE",
-     "night": "CLOSE"
+     "day": "OPEN",
+     "night": "CLOSE",
+     "byLift": true
     },
     {
      "name": "메가그린",
@@ -151,7 +152,78 @@
      "night": "CLOSE"
     }
    ],
-   "lifts": [],
+   "lifts": [
+    {
+     "name": "골드",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴골드",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "브릿지",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레드",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴레드",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "핑크",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "옐로우",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴옐로우",
+     "day": "OPEN",
+     "night": "CLOSE"
+    },
+    {
+     "name": "그린",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "뉴그린",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "블루",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "실버",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "레인보우",
+     "day": "CLOSE",
+     "night": "CLOSE"
+    },
+    {
+     "name": "발왕산케이블카",
+     "day": "OPEN",
+     "night": "CLOSE"
+    }
+   ],
    "note": null,
    "error": null,
    "httpStatus": 200,
